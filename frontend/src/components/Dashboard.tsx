@@ -1,5 +1,6 @@
 import MetricCard from './MetricCard';
 import QuickActions from "@/components/QuickActions";
+import RecentActivities from "@/components/RecentActivities";
 
 
 export default function Dashboard() {
@@ -51,7 +52,7 @@ export default function Dashboard() {
         {/* Quick Actions and Recent Activities */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <QuickActions />
-
+            <RecentActivities />
         </div>
       </div>
   );
