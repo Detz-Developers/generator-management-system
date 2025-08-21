@@ -1,4 +1,5 @@
 import MetricCard from './MetricCard';
+import QuickActions from "@/components/QuickActions";
 
 
 export default function Dashboard() {
@@ -46,6 +47,11 @@ export default function Dashboard() {
               subtitle="Need replacement"
               icon="🔋"
           />
+        </div>
+        {/* Quick Actions and Recent Activities */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <QuickActions />
+
         </div>
       </div>
   );
