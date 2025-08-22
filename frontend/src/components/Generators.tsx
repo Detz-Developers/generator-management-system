@@ -1,4 +1,4 @@
-'use client';
+/*'use client';
 
 import { useState } from 'react';
 
@@ -108,7 +108,7 @@ export default function GeneratorsPage() {
 
   return (
       <div className="flex-1 p-8">
-        {/* Header */}
+        {/* Header 
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
@@ -121,7 +121,7 @@ export default function GeneratorsPage() {
           </div>
         </div>
 
-        {/* Metrics Cards */}
+        {/* Metrics Cards 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
             <div className="flex items-center space-x-3">
@@ -164,7 +164,7 @@ export default function GeneratorsPage() {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters *
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -221,7 +221,7 @@ export default function GeneratorsPage() {
           </div>
         </div>
 
-        {/* Generator List Table */}
+        {/* Generator List Table 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Generator List</h2>
@@ -279,3 +279,319 @@ export default function GeneratorsPage() {
       </div>
   );
 }
+*/
+
+"use client";
+
+import React , {useState} from "react";
+ import Link from "next/link";
+ import { useRouter } from "next/navigation";
+
+import {
+ 
+  MdAdd,
+  MdBrightness1,
+  MdOutlineRemoveRedEye,
+  MdEditSquare,
+  MdSearch,
+} from "react-icons/md";
+
+const statusColors: Record<string, string> = {
+  green: "bg-green-100 text-green-700",
+  yellow: "bg-yellow-100 text-yellow-700",
+  red: "bg-red-100 text-red-700",
+};
+
+interface Generators {
+  onNavigate: (page: string) => void;
+}
+export default function Generators({ onNavigate }: Generators) {
+   const router = useRouter();
+
+
+  const [showForm, setShowForm] = useState(false);
+  const generators = [
+    { id: "G001", brand: "Caterpillar", size: "50kW", sn: "CAT123456", date: "20/12/2024", status: "Active", statusColor: "green", location: "down", shop: "Colombo" },
+    { id: "G002", brand: "Honda", size: "15kW", sn: "HON123456", date: "30/12/2024", status: "Under Repair", statusColor: "yellow", location: "Up", shop: "Gampaha" },
+    { id: "G003", brand: "Kohler", size: "25kW", sn: "KOH123456", date: "10/12/2024", status: "Unusable", statusColor: "red", location: "Down", shop: "Gampaha" },
+    { id: "G004", brand: "Caterpillar", size: "50kW", sn: "CAT223456", date: "15/12/2024", status: "Active", statusColor: "green", location: "Up", shop: "Ratmalana" },
+  ];
+
+  return (
+    <div className="bg-white flex font-inter min-h-screen">
+      {/* Sidebar 
+      <aside className="w-56 bg-white shadow-lg flex flex-col my-4 mx-2 shadow-2xl rounded-2xl">
+        <nav className="flex-grow px-4 pt-16">
+          <ul>
+            {[
+              { icon: <MdDashboard />, label: "Dashboard" },
+              { icon: <MdBatteryChargingFull />, label: "Batteries" },
+              { icon: <MdBuild />, label: "Tasks" },
+              { icon: <MdMiscellaneousServices />, label: "Services" },
+              { icon: <MdDescription />, label: "Invoices" },
+              { icon: <MdAssessment />, label: "Reports" },
+              { icon: <MdNotifications />, label: "Notifications" },
+            ].map((item, idx) => (
+              <li key={idx} className="mb-2">
+                <a className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-200" href="#">
+                  {item.icon}
+                  <span className="ml-4">{item.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="p-6 border-t">
+          <a className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-200" href="#">
+            <MdLogout />
+            <span className="ml-4">Logout</span>
+          </a>
+        </div>
+      </aside>
+       */}
+      {/* Main content */}
+      <main className="flex-1 p-8">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800">Generators</h2>
+            <p className="text-gray-500">Manage all your generators across your centers</p>
+          </div>
+          <button className="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold flex items-center shadow-md hover:bg-blue-600"  onClick={() => setShowForm(true)}>
+           
+            <MdAdd className="mr-2" />
+            Add Generator
+          </button>
+        </header>
+
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
+          <div className="bg-white px-6 py-4 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
+            <div className="bg-blue-100 p-1 rounded-md mr-4">
+              <MdBrightness1 className="text-blue-500" />
+            </div>
+            <div>
+              <p className="text-gray-500">Total Generators</p>
+              <p className="text-xl font-bold">178</p>
+            </div>
+          </div>
+          <div className="bg-white px-6 py-4 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
+            <div className="bg-green-100 p-1 rounded-md mr-4">
+              <MdBrightness1 className="text-green-500" />
+            </div>
+            <div>
+              <p className="text-gray-500">Active</p>
+              <p className="text-xl font-bold">140</p>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
+            <div className="bg-yellow-100 p-1 rounded-md mr-4">
+              <MdBrightness1 className="text-yellow-500" />
+            </div>
+            <div>
+              <p className="text-gray-500">Under Repair</p>
+              <p className="text-xl font-bold">30</p>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
+            <div className="bg-red-100 p-1 rounded-md mr-4">
+              <MdBrightness1 className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-gray-500">Unusable</p>
+              <p className="text-xl font-bold">8</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white py-4 px-6 rounded-lg shadow-md mb-4 border border-blue-300">
+          <p className="text-gray-500 mb-2">Filters</p>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="relative">
+              <MdSearch className="absolute left-3 top-3 text-gray-400" />
+              <input type="text" placeholder="Search generators..." className="pl-10 pr-4 py-2 bg-gray-100 border border-blue-100 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            </div>
+            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option>All Status</option>
+            </select>
+            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option>All Brands</option>
+            </select>
+            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option>All Locations</option>
+            </select>
+            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option>Assigned Shop</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white px-4 py-4 rounded-lg shadow-md border border-blue-300">
+          <h3 className="text-md font-semibold mb-4">Generator List</h3>
+          <div className="max-h-48 overflow-auto">
+            <table className="w-full text-left overflow-auto max-h-32">
+              <thead className="sticky top-0 bg-gray-50 border-b border-blue-100">
+                <tr>
+                  {["Generator ID","Brand","Size","Serial Number","Installed Date","Status","Location","Shop","Actions"].map((col, idx)=>(
+                    <th key={idx} className="px-4 py-2 text-sm/7 font-semibold text-gray-600">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {generators.map((gen, idx)=>(
+                  <tr key={idx} className="border-b border-blue-100 hover:bg-gray-50 py-2">
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.id}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.brand}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.size}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.sn}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.date}</td>
+                    <td className="px-1">
+                      <span className={`${statusColors[gen.statusColor]} px-2 py-1 rounded-md text-sm/9 font-medium w-16`}>{gen.status}</span>
+                    </td>
+                    <td className="px-4 py-2 text-sm/9 text-gray-800">{gen.location}</td>
+                    <td className="px-4 py-2 text-sm/9 text-gray-800">{gen.shop}</td>
+                    <td className="px-4 py-2 text-sm/9 text-gray-500">
+                      <div className="flex items-center">
+                       
+                        <button  onClick={() => onNavigate('GeneratorDetails')} className="bg-blue-100 p-2 rounded-md mr-4 hover:bg-blue-200"><MdOutlineRemoveRedEye className="text-blue-500"/></button>
+                        
+                        <button className="bg-blue-100 p-2 rounded-md mr-4 hover:bg-blue-200"><MdEditSquare className="text-blue-500"/></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+                  {showForm && (
+                   <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
+                       <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
+                        {/* Title */}
+                          <h2 className="text-lg font-semibold mb-4 text-gray-800">
+                            Add Generator
+                           </h2>
+
+                       {/* Form Grid */}
+                        <form className="grid grid-cols-2 gap-4 text-sm">
+                              {/* Generator Brand */}
+                           <div className="flex flex-col">
+                                <label className="mb-1 font-medium text-gray-700">
+                                  Generator Brand
+                                </label>
+                                <select className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200">
+                                   <option>Select brand</option>
+                                 </select>
+                             </div>
+
+                           {/* Size */}
+                            <div className="flex flex-col">
+                                <label className="mb-1 font-medium text-gray-700">Size</label>
+                                    <select className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200">
+                                      <option>Select size</option>
+                                     </select>
+                             </div>
+
+                           {/* Serial Number */}
+                             <div className="flex flex-col">
+                                <label className="mb-1 font-medium text-gray-700">
+                                  Serial Number
+                                </label>
+                             <input
+                               type="text"
+                              placeholder="Enter serial number"
+                              className="border rounded-md px-3 py-2 focus:ring bg-gray-100 border border-blue-100 focus:ring-blue-200"
+                               />
+                             </div>
+
+          {/* Warranty Period */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-medium text-gray-700">
+              Warranty Period (months)
+            </label>
+            <input
+              type="number"
+              placeholder="24"
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            />
+          </div>
+
+          {/* Installed Date */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-medium text-gray-700">
+              Installed Date
+            </label>
+            <input
+              type="date"
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            />
+          </div>
+
+          {/* Issued Date */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-medium text-gray-700">Issued Date</label>
+            <input
+              type="date"
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            />
+          </div>
+
+          {/* Assigned Shop */}
+          <div className="flex flex-col col-span-2">
+            <label className="mb-1 font-medium text-gray-700">
+              Assigned Shop
+            </label>
+            <select className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100">
+              <option>Select shop</option>
+            </select>
+          </div>
+
+          {/* Location */}
+          <div className="col-span-2">
+            <label className="mb-1 font-medium text-gray-700">Location</label>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2">
+                <input type="radio" name="location" value="Up" />
+                Up
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" name="location" value="Down" />
+                Down
+              </label>
+            </div>
+          </div>
+
+          {/* Auto Start */}
+          <div className="col-span-2 flex items-center justify-between">
+            <span className="text-gray-700">Auto Start</span>
+            <input type="checkbox" className="w-5 h-5" />
+          </div>
+
+          {/* Battery Charger Installed */}
+          <div className="col-span-2 flex items-center justify-between">
+            <span className="text-gray-700">Battery Charger Installed?</span>
+            <input type="checkbox" className="w-5 h-5" />
+          </div>
+        </form>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3 mt-6">
+          <button className="px-4 py-2 rounded-md bg-gray-200 text-gray-700" onClick={() => setShowForm(false)} >
+            Cancel
+          </button>
+          <button className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700" onClick={() => setShowForm(false)} >
+            Add Generator
+          </button>
+        </div>
+      </div>
+    </div>
+                  )}
+
+      </main>
+    </div>
+  );
+}
+
+

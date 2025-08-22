@@ -117,6 +117,16 @@ export default function Sidebar({ onNavigate, currentPage, onLogout }: SidebarPr
     setShowLogoutConfirm(false);
   };
 
+   // Map detail pages to their parent menu
+  const getActivePage = (page: string) => {
+    const detailMapping: Record<string, string> = {
+      GeneratorDetails: 'Generators', // Individual page highlights Generators
+      // add other mappings here
+    };
+    return detailMapping[page] || page;
+  };
+
+
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col flex-shrink-0 overflow-hidden">
       {/* Header/Logo Section */}
@@ -141,10 +151,11 @@ export default function Sidebar({ onNavigate, currentPage, onLogout }: SidebarPr
             <li key={item.label}>
               <button
                 onClick={() => handleItemClick(item.label)}
-                className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${currentPage === item.label
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  getActivePage(currentPage) === item.label
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`}
               >
                 <span className="mr-3 flex-shrink-0">{item.icon}</span>
                 <span className="truncate">{item.label}</span>

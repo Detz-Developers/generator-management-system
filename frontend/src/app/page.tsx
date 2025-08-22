@@ -13,6 +13,7 @@ import Invoices from '@/components/Invoices';
 import Reports from '@/components/Reports';
 import Users from '@/components/Users';
 import Login from '@/components/Login';
+import GeneratorDetails from '@/components/GeneratorDetails';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -32,7 +33,7 @@ export default function Home() {
       case 'Dashboard':
         return <Dashboard />;
       case 'Generators':
-        return <Generators />;
+        return <Generators onNavigate={setCurrentPage}/>;
       case 'Batteries':
         return <Batteries />;
       case 'Tasks':
@@ -49,6 +50,8 @@ export default function Home() {
         return <Users />;
       case 'Notifications':
         return <NotificationCenter />;
+      case 'GeneratorDetails':
+        return <GeneratorDetails onNavigate={setCurrentPage} />;
       default:
         return (
           <div className="flex-1 p-6 md:p-8">
