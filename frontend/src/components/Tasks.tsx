@@ -1,208 +1,260 @@
 'use client';
 
 import { useState } from 'react';
+import { Clock, CheckCircle, CalendarX, Calendar } from 'lucide-react';
 
 interface Task {
   id: string;
-  title: string;
+  taskId: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
-  assignee: string;
+  assignedTo: string;
+  generatorId: string;
   dueDate: string;
-  generatorId?: string;
+  status: 'pending' | 'completed' | 'overdue';
 }
 
-const mockTasks: Task[] = [
+const tasks: Task[] = [
   {
-    id: 'TASK001',
-    title: 'Generator A Maintenance',
-    description: 'Perform routine maintenance on main generator A',
-    priority: 'high',
-    status: 'in-progress',
-    assignee: 'John Smith',
-    dueDate: '2024-02-15',
-    generatorId: 'GEN001'
-  },
-  {
-    id: 'TASK002',
-    title: 'Battery Bank Inspection',
-    description: 'Inspect battery bank B for any issues',
-    priority: 'medium',
-    status: 'pending',
-    assignee: 'Sarah Johnson',
-    dueDate: '2024-02-20',
-  },
-  {
-    id: 'TASK003',
-    title: 'Fuel Level Check',
-    description: 'Check fuel levels across all generators',
-    priority: 'urgent',
+    id: '1',
+    taskId: 'T001',
+    description: 'Routine maintenance and oil change',
+    assignedTo: 'Sahan P.',
+    generatorId: 'G001',
+    dueDate: '4/8/2025',
     status: 'completed',
-    assignee: 'Mike Davis',
-    dueDate: '2024-02-10',
   },
   {
-    id: 'TASK004',
-    title: 'System Backup',
-    description: 'Perform system backup and data verification',
-    priority: 'low',
+    id: '2',
+    taskId: 'T002',
+    description: 'Battery replacement and system check',
+    assignedTo: 'Nihal K.',
+    generatorId: 'G002',
+    dueDate: '22/7/2025',
     status: 'pending',
-    assignee: 'Lisa Wilson',
-    dueDate: '2024-02-25',
-  }
+  },
+  {
+    id: '3',
+    taskId: 'T003',
+    description: 'Fuel system inspection',
+    assignedTo: 'Jayantha R.',
+    generatorId: 'G003',
+    dueDate: '12/8/2025',
+    status: 'pending',
+  },
+  {
+    id: '4',
+    taskId: 'T004',
+    description: 'Emergency repair - cooling system',
+    assignedTo: 'Dinal W.',
+    generatorId: 'G004',
+    dueDate: '5/8/2025',
+    status: 'completed',
+  },
 ];
 
-export default function Tasks() {
-  const [tasks] = useState<Task[]>(mockTasks);
-  const [filter, setFilter] = useState<string>('all');
+const getStatusColor = (status: Task['status']) => {
+  switch (status) {
+    case 'completed':
+      return 'bg-green-100 text-green-800';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'overdue':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-100 text-red-800';
-      case 'high':
-        return 'bg-orange-100 text-orange-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+const getStatusText = (status: Task['status']) => {
+  switch (status) {
+    case 'completed':
+      return 'Completed';
+    case 'pending':
+      return 'Pending';
+    case 'overdue':
+      return 'Overdue';
+    default:
+      return 'Unknown';
+  }
+};
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-gray-100 text-gray-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+export default function TasksPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
 
-  const filteredTasks = filter === 'all' ? tasks : tasks.filter(task => task.status === filter);
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch =
+        task.taskId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.assignedTo.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+    const matchesAssignee =
+        assigneeFilter === 'all' || task.assignedTo === assigneeFilter;
+
+    return matchesSearch && matchesStatus && matchesAssignee;
+  });
+
+  const pendingTasks = tasks.filter((t) => t.status === 'pending').length;
+  const completedTasks = tasks.filter((t) => t.status === 'completed').length;
+  const overdueTasks = tasks.filter((t) => t.status === 'overdue').length;
+  const dueTodayTasks = 0;
 
   return (
-    <div className="flex-1 p-6 md:p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="flex-1 p-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Tasks
-          </h1>
-          <p className="text-gray-600 text-base md:text-lg">
-            Manage task assignments and track progress
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-blue-600 mb-2">Tasks</h1>
+              <p className="text-gray-600 text-lg">
+                Manage task assignments and track progress
+              </p>
+            </div>
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+              + Assign Task
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Task Management</h2>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Create Task
-              </button>
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="border rounded-lg p-4 text-center border-blue-200">
+            <Clock className="mx-auto text-yellow-500 mb-2" />
+            <h3 className="text-sm text-gray-500">Pending Tasks</h3>
+            <p className="text-xl font-bold">{pendingTasks}</p>
+          </div>
+          <div className="border rounded-lg p-4 text-center border-blue-200">
+            <CheckCircle className="mx-auto text-green-600 mb-2" />
+            <h3 className="text-sm text-gray-500">Completed</h3>
+            <p className="text-xl font-bold">{completedTasks}</p>
+          </div>
+          <div className="border rounded-lg p-4 text-center border-blue-200">
+            <CalendarX className="mx-auto text-red-500 mb-2" />
+            <h3 className="text-sm text-gray-500">Overdue</h3>
+            <p className="text-xl font-bold">{overdueTasks}</p>
+          </div>
+          <div className="border rounded-lg p-4 text-center border-blue-200">
+            <Calendar className="mx-auto text-blue-500 mb-2" />
+            <h3 className="text-sm text-gray-500">Due Today</h3>
+            <p className="text-xl font-bold">{dueTodayTasks}</p>
+          </div>
+        </div>
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <input
+                  type="text"
+                  placeholder="Search tasks..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
             </div>
-            
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  filter === 'all' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                All Tasks
-              </button>
-              <button
-                onClick={() => setFilter('pending')}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  filter === 'pending' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Pending
-              </button>
-              <button
-                onClick={() => setFilter('in-progress')}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  filter === 'in-progress' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                In Progress
-              </button>
-              <button
-                onClick={() => setFilter('completed')}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  filter === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Completed
-              </button>
-            </div>
+            <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <select
+                value={assigneeFilter}
+                onChange={(e) => setAssigneeFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Assignees</option>
+              <option value="Sahan P.">Sahan P.</option>
+              <option value="Nihal K.">Nihal K.</option>
+              <option value="Jayantha R.">Jayantha R.</option>
+              <option value="Dinal W.">Dinal W.</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Task Assignment Table */}
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Task Assignment Table
+            </h2>
+            <p className="text-gray-600">{filteredTasks.length} tasks found</p>
           </div>
 
-          <div className="p-6">
-            <div className="space-y-4">
-              {filteredTasks.map((task) => (
-                <div key={task.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-medium text-gray-900">{task.title}</h3>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(task.priority)}`}>
-                          {task.priority}
-                        </span>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(task.status)}`}>
-                          {task.status}
-                        </span>
-                      </div>
-                      
-                      <p className="text-gray-600 mb-3">{task.description}</p>
-                      
-                      <div className="flex items-center space-x-6 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
-                          {task.assignee}
-                        </div>
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                          </svg>
-                          Due: {task.dueDate}
-                        </div>
-                        {task.generatorId && (
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                            </svg>
-                            {task.generatorId}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex space-x-2 ml-4">
-                      <button className="text-blue-600 hover:text-blue-900 text-sm font-medium">
-                        Edit
-                      </button>
-                      <button className="text-green-600 hover:text-green-900 text-sm font-medium">
-                        Complete
-                      </button>
-                    </div>
-                  </div>
-                </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border border-blue-200 rounded-lg overflow-hidden">
+              <thead>
+              <tr className="border-b border-blue-200 bg-blue-50">
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Task ID
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Description
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Assigned To
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Generator ID
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Due Date
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Status
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-blue-700">
+                  Actions
+                </th>
+              </tr>
+              </thead>
+              <tbody>
+              {filteredTasks.map((task, index) => (
+                  <tr
+                      key={task.id}
+                      className={`border-b border-blue-100 hover:bg-blue-50 ${
+                          index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'
+                      }`}
+                  >
+                    <td className="py-3 px-4 font-medium text-gray-900">
+                      {task.taskId}
+                    </td>
+                    <td className="py-3 px-4 text-gray-700">{task.description}</td>
+                    <td className="py-3 px-4 text-gray-700">{task.assignedTo}</td>
+                    <td className="py-3 px-4 text-gray-700">{task.generatorId}</td>
+                    <td className="py-3 px-4 text-gray-700">{task.dueDate}</td>
+                    <td className="py-3 px-4">
+                    <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            task.status
+                        )}`}
+                    >
+                      {getStatusText(task.status)}
+                    </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {task.status === 'completed' ? (
+                          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            Reopen
+                          </button>
+                      ) : (
+                          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            Complete
+                          </button>
+                      )}
+                    </td>
+                  </tr>
               ))}
-            </div>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-    </div>
   );
 }
