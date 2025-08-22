@@ -4,156 +4,179 @@ import { useState } from 'react';
 
 interface Battery {
   id: string;
-  name: string;
-  type: string;
-  capacity: number;
-  currentCharge: number;
-  status: 'charging' | 'discharging' | 'full' | 'maintenance';
-  location: string;
-  temperature: number;
+  batteryId: string;
+  brand: string;
+  size: string;
+  serialNumber: string;
+  type: 'permanent' | 'temporary';
+  installDate: string;
+  generatorId: string;
+  gatePass: string | null;
+  isReturnOverdue: boolean;
 }
 
-const mockBatteries: Battery[] = [
+const batteries: Battery[] = [
   {
-    id: 'BAT001',
-    name: 'Main Battery Bank A',
-    type: 'Lithium-Ion',
-    capacity: 500,
-    currentCharge: 85,
-    status: 'charging',
-    location: 'Building A',
-    temperature: 25
+    id: '1',
+    batteryId: 'B001',
+    brand: 'Exide',
+    size: 'NS 40',
+    serialNumber: 'EXI123456789',
+    type: 'permanent',
+    installDate: '8/12/2024',
+    generatorId: 'G001',
+    gatePass: null,
+    isReturnOverdue: false
   },
   {
-    id: 'BAT002',
-    name: 'Backup Battery Bank B',
-    type: 'Lead-Acid',
-    capacity: 300,
-    currentCharge: 92,
-    status: 'full',
-    location: 'Building B',
-    temperature: 28
+    id: '2',
+    batteryId: 'B002',
+    brand: 'Amaron',
+    size: '100Ah',
+    serialNumber: 'AMA987654321',
+    type: 'temporary',
+    installDate: '9/12/2024',
+    generatorId: 'G002',
+    gatePass: 'GP20250501',
+    isReturnOverdue: true
   },
   {
-    id: 'BAT003',
-    name: 'Emergency Battery C',
-    type: 'Lithium-Ion',
-    capacity: 200,
-    currentCharge: 45,
-    status: 'discharging',
-    location: 'Building C',
-    temperature: 30
+    id: '3',
+    batteryId: 'B003',
+    brand: 'Luminous',
+    size: '150Ah',
+    serialNumber: 'LUM555444333',
+    type: 'permanent',
+    installDate: '5/12/2024',
+    generatorId: 'G003',
+    gatePass: null,
+    isReturnOverdue: false
+  },
+  {
+    id: '4',
+    batteryId: 'B004',
+    brand: 'Okaya',
+    size: '120Ah',
+    serialNumber: 'OKAY777888999',
+    type: 'temporary',
+    installDate: '4/12/2024',
+    generatorId: 'G004',
+    gatePass: 'GP20250101',
+    isReturnOverdue: true
   }
 ];
 
-export default function Batteries() {
-  const [batteries] = useState<Battery[]>(mockBatteries);
+export default function BatteriesPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [brandFilter, setBrandFilter] = useState('all');
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'charging':
-        return 'bg-blue-100 text-blue-800';
-      case 'discharging':
-        return 'bg-orange-100 text-orange-800';
-      case 'full':
-        return 'bg-green-100 text-green-800';
-      case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const filteredBatteries = batteries.filter(battery => {
+    const matchesSearch = battery.batteryId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        battery.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        battery.serialNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = typeFilter === 'all' || battery.type === typeFilter;
+    const matchesBrand = brandFilter === 'all' || battery.brand === brandFilter;
 
-  const getChargeColor = (charge: number) => {
-    if (charge >= 80) return 'bg-green-500';
-    if (charge >= 50) return 'bg-yellow-500';
-    if (charge >= 20) return 'bg-orange-500';
-    return 'bg-red-500';
-  };
+    return matchesSearch && matchesType && matchesBrand;
+  });
+
+  const totalBatteries = batteries.length;
+  const temporaryBatteries = batteries.filter(b => b.type === 'temporary').length;
+  const permanentBatteries = batteries.filter(b => b.type === 'permanent').length;
+  const returnOverdueBatteries = batteries.filter(b => b.isReturnOverdue).length;
 
   return (
-    <div className="flex-1 p-6 md:p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="flex-1 p-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Batteries
-          </h1>
-          <p className="text-gray-600 text-base md:text-lg">
-            Manage battery inventory and assignments
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {batteries.map((battery) => (
-            <div key={battery.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">{battery.name}</h3>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(battery.status)}`}>
-                  {battery.status}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">ID:</span>
-                  <span className="font-medium">{battery.id}</span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Type:</span>
-                  <span className="font-medium">{battery.type}</span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Capacity:</span>
-                  <span className="font-medium">{battery.capacity} kWh</span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Location:</span>
-                  <span className="font-medium">{battery.location}</span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Temperature:</span>
-                  <span className="font-medium">{battery.temperature}°C</span>
-                </div>
-
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-500">Charge Level</span>
-                    <span className="font-medium">{battery.currentCharge}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${getChargeColor(battery.currentCharge)}`}
-                      style={{ width: `${battery.currentCharge}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                  View Details
-                </button>
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-blue-600 mb-2">Batteries</h1>
+              <p className="text-gray-600 text-lg">Manage battery inventory and assignments</p>
             </div>
-          ))}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Battery Management</h2>
-          <div className="flex space-x-4">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              Add Battery
-            </button>
-            <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-              Export Report
+            <button className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+              + Add Battery
             </button>
           </div>
         </div>
+
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">🔋</span>
+              </div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Total Batteries</h3>
+              <p className="text-3xl font-bold text-gray-900">{totalBatteries}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">🔋</span>
+              </div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Temporary</h3>
+              <p className="text-3xl font-bold text-gray-900">{temporaryBatteries}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">🔋</span>
+              </div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Permanent</h3>
+              <p className="text-3xl font-bold text-gray-900">{permanentBatteries}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-xl text-white">⚠️</span>
+              </div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Return Overdue</h3>
+              <p className="text-3xl font-bold text-gray-900">{returnOverdueBatteries}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <input
+                  type="text"
+                  placeholder="Search batteries..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            </div>
+            <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Types</option>
+              <option value="permanent">Permanent</option>
+              <option value="temporary">Temporary</option>
+            </select>
+            <select
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Brands</option>
+              <option value="Exide">Exide</option>
+              <option value="Amaron">Amaron</option>
+              <option value="Luminous">Luminous</option>
+              <option value="Okaya">Okaya</option>
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
   );
 }
