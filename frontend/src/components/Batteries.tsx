@@ -106,22 +106,22 @@ export default function BatteriesPage() {
 
         {/* Metrics Cards (Batteries) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="border rounded-lg p-4 text-center border-blue-500">
+          <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
             <Battery className="mx-auto text-3xl text-gray-700 mb-2" />
             <h3 className="text-sm text-gray-500">Total Batteries</h3>
             <p className="text-xl font-bold">{totalBatteries}</p>
           </div>
-          <div className="border rounded-lg p-4 text-center border-blue-500">
+          <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
             <Battery className="mx-auto text-3xl text-yellow-500 mb-2" />
             <h3 className="text-sm text-gray-500">Temporary</h3>
             <p className="text-xl font-bold">{temporaryBatteries}</p>
           </div>
-          <div className="border rounded-lg p-4 text-center border-blue-500">
+          <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
             <Battery className="mx-auto text-3xl text-blue-500 mb-2" />
             <h3 className="text-sm text-gray-500">Permanent</h3>
             <p className="text-xl font-bold">{permanentBatteries}</p>
           </div>
-          <div className="border rounded-lg p-4 text-center border-blue-500">
+          <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
             <Clock className="mx-auto text-red-500 mb-2" />
             <h3 className="text-sm text-gray-500">Return Overdue</h3>
             <p className="text-xl font-bold">{returnOverdueBatteries}</p>
@@ -130,7 +130,7 @@ export default function BatteriesPage() {
 
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-500">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
