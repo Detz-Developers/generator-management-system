@@ -51,32 +51,6 @@ const invoices: Invoice[] = [
   }
 ];
 
-const getStatusColor = (status: Invoice['status']) => {
-  switch (status) {
-    case 'paid':
-      return 'bg-green-100 text-green-800';
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'overdue':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getStatusText = (status: Invoice['status']) => {
-  switch (status) {
-    case 'paid':
-      return 'PAID';
-    case 'pending':
-      return 'PENDING';
-    case 'overdue':
-      return 'OVERDUE';
-    default:
-      return 'UNKNOWN';
-  }
-};
-
 const formatCurrency = (amount: number) => {
   return `LKR ${amount.toLocaleString()}`;
 };
@@ -218,62 +192,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Invoice List Table */}
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Invoice List</h2>
-            <p className="text-gray-600">{filteredInvoices.length} invoices found</p>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Invoice No.</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Shop</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Due Date</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">{invoice.invoiceNo}</td>
-                    <td className="py-3 px-4 text-gray-700">{invoice.date}</td>
-                    <td className="py-3 px-4 text-gray-700">{invoice.shop}</td>
-                    <td className="py-3 px-4 text-gray-700 font-medium">{formatCurrency(invoice.amount)}</td>
-                    <td className="py-3 px-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
-                      {getStatusText(invoice.status)}
-                    </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-700">{invoice.dueDate}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex space-x-2">
-                        <button className="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors">
-                          👁️
-                        </button>
-                        <button className="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors">
-                          ✏️
-                        </button>
-                        {invoice.status !== 'paid' && (
-                            <button className="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors">
-                              ✓
-                            </button>
-                        )}
-                        <button className="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors">
-                          ⬇️
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
   );
 }

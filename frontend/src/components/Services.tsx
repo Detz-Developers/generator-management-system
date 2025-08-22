@@ -84,9 +84,9 @@ export default function ServicesPage() {
   });
 
   const completedServices = services.filter(s => !s.isOverdue).length;
-  const upcomingServices = 0; // calculate based on current date
+  const upcomingServices = 0;
   const overdueServices = services.filter(s => s.isOverdue).length;
-  const thisMonthServices = 0; // calculate based on current month
+  const thisMonthServices = 0;
 
   return (
       <div className="flex-1 p-8">
@@ -169,73 +169,6 @@ export default function ServicesPage() {
         </div>
 
         {/* Service Log Table */}
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Service Log Table</h2>
-            <p className="text-gray-600">{filteredServices.length} services found</p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-              <tr className="border-b border-gray-200 bg-blue-50">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Service ID</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">ID</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Generator ID</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Service Type</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Technician</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Service Date</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Next Due Date</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Notes</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              {filteredServices.map((service, index) => (
-                  <tr
-                      key={service.id}
-                      className={`border-b border-gray-100 hover:bg-gray-50 ${
-                          index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                      }`}
-                  >
-                    <td className="py-3 px-4 font-medium text-gray-900">{service.serviceId}</td>
-                    <td className="py-3 px-4 text-gray-700">{service.serviceId}</td>
-                    <td className="py-3 px-4">
-                    <span className="text-blue-600 font-medium cursor-pointer hover:underline">
-                      {service.generatorId}
-                    </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-700">{service.serviceType}</td>
-                    <td className="py-3 px-4 text-gray-700">{service.technician}</td>
-                    <td className="py-3 px-4 text-gray-700">{service.serviceDate}</td>
-                    <td className={`py-3 px-4 font-medium ${
-                        service.isOverdue ? 'text-red-600' : 'text-gray-700'
-                    }`}>
-                      {service.nextDueDate}
-                    </td>
-                    <td className="py-3 px-4">
-                      {service.notes ? (
-                          <span className="text-red-600 text-sm">{service.notes}</span>
-                      ) : (
-                          <span className="text-gray-400 text-sm">-</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex space-x-2">
-                        <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">
-                          View
-                        </button>
-                        <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">
-                          Edit
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
       </div>
   );
