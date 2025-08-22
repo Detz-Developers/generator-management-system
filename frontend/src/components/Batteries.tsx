@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Battery, Clock, CheckCircle, CalendarX, Calendar } from 'lucide-react';
 
 interface Battery {
   id: string;
@@ -102,47 +103,34 @@ export default function BatteriesPage() {
         </div>
 
         {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-2xl">🔋</span>
-              </div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Total Batteries</h3>
-              <p className="text-3xl font-bold text-gray-900">{totalBatteries}</p>
-            </div>
+
+        {/* Metrics Cards (Batteries) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="border rounded-lg p-4 text-center border-blue-500">
+            <Battery className="mx-auto text-3xl text-gray-700 mb-2" />
+            <h3 className="text-sm text-gray-500">Total Batteries</h3>
+            <p className="text-xl font-bold">{totalBatteries}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-2xl">🔋</span>
-              </div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Temporary</h3>
-              <p className="text-3xl font-bold text-gray-900">{temporaryBatteries}</p>
-            </div>
+          <div className="border rounded-lg p-4 text-center border-blue-500">
+            <Battery className="mx-auto text-3xl text-yellow-500 mb-2" />
+            <h3 className="text-sm text-gray-500">Temporary</h3>
+            <p className="text-xl font-bold">{temporaryBatteries}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-2xl">🔋</span>
-              </div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Permanent</h3>
-              <p className="text-3xl font-bold text-gray-900">{permanentBatteries}</p>
-            </div>
+          <div className="border rounded-lg p-4 text-center border-blue-500">
+            <Battery className="mx-auto text-3xl text-blue-500 mb-2" />
+            <h3 className="text-sm text-gray-500">Permanent</h3>
+            <p className="text-xl font-bold">{permanentBatteries}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-xl text-white">⚠️</span>
-              </div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Return Overdue</h3>
-              <p className="text-3xl font-bold text-gray-900">{returnOverdueBatteries}</p>
-            </div>
+          <div className="border rounded-lg p-4 text-center border-blue-500">
+            <Clock className="mx-auto text-red-500 mb-2" />
+            <h3 className="text-sm text-gray-500">Return Overdue</h3>
+            <p className="text-xl font-bold">{returnOverdueBatteries}</p>
           </div>
         </div>
 
+
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-500">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">

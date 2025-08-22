@@ -119,29 +119,29 @@ export default function TasksPage() {
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="border rounded-lg p-4 text-center border-blue-200">
+          <div className="border rounded-lg p-4 text-center border-blue-500">
             <Clock className="mx-auto text-yellow-500 mb-2" />
             <h3 className="text-sm text-gray-500">Pending Tasks</h3>
             <p className="text-xl font-bold">{pendingTasks}</p>
           </div>
-          <div className="border rounded-lg p-4 text-center border-blue-200">
+          <div className="border rounded-lg p-4 text-center border-blue-500">
             <CheckCircle className="mx-auto text-green-600 mb-2" />
             <h3 className="text-sm text-gray-500">Completed</h3>
             <p className="text-xl font-bold">{completedTasks}</p>
           </div>
-          <div className="border rounded-lg p-4 text-center border-blue-200">
+          <div className="border rounded-lg p-4 text-center border-blue-500">
             <CalendarX className="mx-auto text-red-500 mb-2" />
             <h3 className="text-sm text-gray-500">Overdue</h3>
             <p className="text-xl font-bold">{overdueTasks}</p>
           </div>
-          <div className="border rounded-lg p-4 text-center border-blue-200">
+          <div className="border rounded-lg p-4 text-center border-blue-500">
             <Calendar className="mx-auto text-blue-500 mb-2" />
             <h3 className="text-sm text-gray-500">Due Today</h3>
             <p className="text-xl font-bold">{dueTodayTasks}</p>
           </div>
         </div>
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-500">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -179,7 +179,7 @@ export default function TasksPage() {
         </div>
 
         {/* Task Assignment Table */}
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-500">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-2">
               Task Assignment Table

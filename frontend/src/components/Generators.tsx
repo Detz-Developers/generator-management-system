@@ -123,7 +123,7 @@ export default function GeneratorsPage() {
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-500">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <div>
@@ -132,7 +132,8 @@ export default function GeneratorsPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-500">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <div>
@@ -141,7 +142,8 @@ export default function GeneratorsPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-500">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
               <div>
@@ -150,7 +152,8 @@ export default function GeneratorsPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-500">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <div>
@@ -162,7 +165,7 @@ export default function GeneratorsPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-500">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="relative">
@@ -219,7 +222,7 @@ export default function GeneratorsPage() {
         </div>
 
         {/* Generator List Table */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-500">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Generator List</h2>
             <p className="text-gray-600">{filteredGenerators.length} generators found</p>
