@@ -310,6 +310,14 @@ export default function Generators({ onNavigate }: Generators) {
 
 
   const [showForm, setShowForm] = useState(false);
+  //filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [shopFilter, setShopFilter] = useState("all");
+  
+
   const generators = [
     { id: "G001", brand: "Caterpillar", size: "50kW", sn: "CAT123456", date: "20/12/2024", status: "Active", statusColor: "green", location: "down", shop: "Colombo" },
     { id: "G002", brand: "Honda", size: "15kW", sn: "HON123456", date: "30/12/2024", status: "Under Repair", statusColor: "yellow", location: "Up", shop: "Gampaha" },
@@ -317,38 +325,25 @@ export default function Generators({ onNavigate }: Generators) {
     { id: "G004", brand: "Caterpillar", size: "50kW", sn: "CAT223456", date: "15/12/2024", status: "Active", statusColor: "green", location: "Up", shop: "Ratmalana" },
   ];
 
+   // 🔎 Filter Logic
+  const filteredGenerators = generators.filter((gen) => {
+    const matchesSearch =
+      gen.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gen.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gen.sn.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === "all" || gen.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesBrand = brandFilter === "all" || gen.brand === brandFilter;
+    const matchesLocation = locationFilter === "all" || gen.location === locationFilter;
+    const matchesShop = shopFilter === "all" || gen.shop === shopFilter;
+
+    return matchesSearch && matchesStatus && matchesBrand && matchesLocation && matchesShop;
+  });
+
+
   return (
     <div className="bg-white flex font-inter min-h-screen">
-      {/* Sidebar 
-      <aside className="w-56 bg-white shadow-lg flex flex-col my-4 mx-2 shadow-2xl rounded-2xl">
-        <nav className="flex-grow px-4 pt-16">
-          <ul>
-            {[
-              { icon: <MdDashboard />, label: "Dashboard" },
-              { icon: <MdBatteryChargingFull />, label: "Batteries" },
-              { icon: <MdBuild />, label: "Tasks" },
-              { icon: <MdMiscellaneousServices />, label: "Services" },
-              { icon: <MdDescription />, label: "Invoices" },
-              { icon: <MdAssessment />, label: "Reports" },
-              { icon: <MdNotifications />, label: "Notifications" },
-            ].map((item, idx) => (
-              <li key={idx} className="mb-2">
-                <a className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-200" href="#">
-                  {item.icon}
-                  <span className="ml-4">{item.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="p-6 border-t">
-          <a className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-200" href="#">
-            <MdLogout />
-            <span className="ml-4">Logout</span>
-          </a>
-        </div>
-      </aside>
-       */}
+      
       {/* Main content */}
       <main className="flex-1 p-8">
         {/* Header */}
@@ -410,27 +405,50 @@ export default function Generators({ onNavigate }: Generators) {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="relative">
               <MdSearch className="absolute left-3 top-3 text-gray-400" />
-              <input type="text" placeholder="Search generators..." className="pl-10 pr-4 py-2 bg-gray-100 border border-blue-100 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+              <input type="text"
+                placeholder="Search generators..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 bg-gray-100 border border-blue-100 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
             </div>
-            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
-              <option>All Status</option>
+
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="under-repair">Under Repair</option>
+              <option value="unusable">Unusable</option>
             </select>
-            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
-              <option>All Brands</option>
+
+            <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              
+              <option value="all">All Brands</option>
+              <option value="Caterpillar">Caterpillar</option>
+              <option value="Honda">Honda</option>
+              <option value="Kohler">Kohler</option>
             </select>
-            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
-              <option>All Locations</option>
+
+            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}  className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option value="all">All Locations</option>
+               <option value="Up">Up</option>
+              <option value="Down">Down</option>
             </select>
-            <select className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
-              <option>Assigned Shop</option>
+            <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
+              <option value="all">All Shops</option>
+               <option value="Colombo">Colombo</option>
+              <option value="Gampaha">Gampaha</option>
+              <option value="Kandy">Kandy</option>
+              <option value="Ratmalana">Ratmalana</option>
             </select>
           </div>
         </div>
-
+       
+        {/*<div className="max-h-48 overflow-auto">*/}
         {/* Table */}
-        <div className="bg-white px-4 py-4 rounded-lg shadow-md border border-blue-300">
-          <h3 className="text-md font-semibold mb-4">Generator List</h3>
-          <div className="max-h-48 overflow-auto">
+        <div className="bg-white px-4 py-4 rounded-lg shadow-md border border-blue-300 mb-4">
+          <h3 className="text-md font-semibold mb-1">Generator List</h3>
+            <p className="text-sm/9">{filteredGenerators.length} Generators Found</p>
+         
+          <div className="mt-4">{/*}
             <table className="w-full text-left overflow-auto max-h-32">
               <thead className="sticky top-0 bg-gray-50 border-b border-blue-100">
                 <tr>
@@ -464,6 +482,55 @@ export default function Generators({ onNavigate }: Generators) {
                 ))}
               </tbody>
             </table>
+            */}
+
+               <table className="w-full text-left">
+              <thead className="sticky top-0 bg-gray-50 border-b border-blue-100">
+                <tr>
+                  {["Generator ID", "Brand", "Size", "Serial Number", "Installed Date", "Status", "Location", "Shop", "Actions"].map(
+                    (col, idx) => (
+                      <th key={idx} className="px-4 py-2 text-sm font-semibold text-gray-600">
+                        {col}
+                      </th>
+                    )
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredGenerators.map((gen, idx) => (
+                  <tr key={idx} className="border-b border-blue-100 hover:bg-gray-50 py-2">
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.id}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.brand}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.size}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.sn}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.date}</td>
+                    <td className="px-1">
+                      <span
+                        className={`${statusColors[gen.statusColor]} px-2 py-1 rounded-md text-sm font-medium w-16`}
+                      >
+                        {gen.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.location}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.shop}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => onNavigate("GeneratorDetails")}
+                          className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200"
+                        >
+                          <MdOutlineRemoveRedEye className="text-blue-500" />
+                        </button>
+                        <button className="bg-blue-100 p-2 rounded-md hover:bg-blue-200">
+                          <MdEditSquare className="text-blue-500" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
           </div>
         </div>
                   {showForm && (
