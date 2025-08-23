@@ -227,7 +227,9 @@ return(
           </div>
            
             {activeTab === "1" &&(
-            <div className="overflow-auto max-h-48" id="1">
+              <div  id="1">
+            {/*<div className="overflow-auto max-h-48" id="1">*/}
+             
               <table className="w-full text-left ">
                 <thead className="bg-gray-200 sticky top-0">
                   <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">
@@ -288,7 +290,7 @@ return(
            
 
             {activeTab === "2" && (
-             <div id="2" className="overflow-auto max-h-48">
+             <div id="2">
                <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white mb-2">
                {/* Header */}
                     <div className="flex items-center mb-2">
@@ -370,7 +372,7 @@ return(
              {activeTab === "3" && (
             
                
-            <div className="overflow-auto max-h-48"  id="3">
+            <div  id="3">
               <table className="w-full text-left ">
                 <thead className="bg-gray-200 sticky top-0">
                   <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">
