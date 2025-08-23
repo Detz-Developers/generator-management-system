@@ -1,382 +1,870 @@
 'use client';
 
 import { useState } from 'react';
+import { Building2, Eye, Edit, Settings, MapPin, Phone, X } from 'lucide-react';
+import { MdSearch } from "react-icons/md";
+import ShopDetails from './ShopDetails';
 
 interface Shop {
   id: string;
-  name: string;
-  type: 'parts' | 'service' | 'equipment' | 'fuel';
+  shopId: string;
+  centerName: string;
   location: string;
-  contact: string;
-  phone: string;
-  email: string;
-  rating: number;
-  status: 'active' | 'inactive' | 'preferred';
-  lastOrder: string;
-  totalOrders: number;
-  specialties: string[];
+  assignedOperator: string;
+  operatorPhone: string;
+  totalGenerators: number;
+  activeGenerators: number;
+  status: 'active' | 'issues' | 'missing items';
 }
 
-const mockShops: Shop[] = [
+const shops: Shop[] = [
   {
-    id: 'SHP001',
-    name: 'PowerParts Supply Co.',
-    type: 'parts',
-    location: 'Downtown Industrial District',
-    contact: 'Mike Johnson',
-    phone: '+1 (555) 123-4567',
-    email: 'mike@powerparts.com',
-    rating: 4.8,
-    status: 'preferred',
-    lastOrder: '2024-02-15',
-    totalOrders: 45,
-    specialties: ['Generator Parts', 'Filters', 'Belts', 'Electrical Components']
+    id: '1',
+    shopId: 'SH001',
+    centerName: 'Downtown Generator Center',
+    location: 'Colombo',
+    assignedOperator: 'Rajesh Kumar',
+    operatorPhone: '+94-701-234567',
+    totalGenerators: 15,
+    activeGenerators: 12,
+    status: 'active'
   },
   {
-    id: 'SHP002',
-    name: 'Industrial Equipment Services',
-    type: 'service',
-    location: 'North Business Park',
-    contact: 'Sarah Williams',
-    phone: '+1 (555) 234-5678',
-    email: 'sarah@ieservices.com',
-    rating: 4.6,
-    status: 'active',
-    lastOrder: '2024-02-10',
-    totalOrders: 28,
-    specialties: ['Generator Repair', 'Maintenance', 'Emergency Service', 'Diagnostics']
+    id: '2',
+    shopId: 'SH002',
+    centerName: 'Industrial Zone Hub',
+    location: 'Gampaha',
+    assignedOperator: 'Priya Sharma',
+    operatorPhone: '+94-702-345678',
+    totalGenerators: 22,
+    activeGenerators: 18,
+    status: 'issues'
   },
   {
-    id: 'SHP003',
-    name: 'Heavy Machinery Depot',
-    type: 'equipment',
-    location: 'West Industrial Zone',
-    contact: 'Robert Chen',
-    phone: '+1 (555) 345-6789',
-    email: 'robert@heavymachinery.com',
-    rating: 4.5,
-    status: 'active',
-    lastOrder: '2024-01-28',
-    totalOrders: 12,
-    specialties: ['New Generators', 'Battery Banks', 'Control Systems', 'Installation']
+    id: '3',
+    shopId: 'SH003',
+    centerName: 'Suburban Service Point',
+    location: 'Kandy',
+    assignedOperator: 'Amit Patel',
+    operatorPhone: '+94-703-456789',
+    totalGenerators: 8,
+    activeGenerators: 5,
+    status: 'missing items'
   },
   {
-    id: 'SHP004',
-    name: 'FuelMax Distribution',
-    type: 'fuel',
-    location: 'East Port Area',
-    contact: 'Lisa Rodriguez',
-    phone: '+1 (555) 456-7890',
-    email: 'lisa@fuelmax.com',
-    rating: 4.7,
-    status: 'preferred',
-    lastOrder: '2024-02-18',
-    totalOrders: 67,
-    specialties: ['Diesel Fuel', 'Emergency Delivery', 'Bulk Orders', 'Quality Testing']
+    id: '4',
+    shopId: 'SH004',
+    centerName: 'Tech Park Center',
+    location: 'Negombo',
+    assignedOperator: 'Sunita Reddy',
+    operatorPhone: '+94-704-567890',
+    totalGenerators: 18,
+    activeGenerators: 17,
+    status: 'active'
   },
   {
-    id: 'SHP005',
-    name: 'TechParts Solutions',
-    type: 'parts',
-    location: 'Central Tech Hub',
-    contact: 'David Kim',
-    phone: '+1 (555) 567-8901',
-    email: 'david@techparts.com',
-    rating: 4.3,
-    status: 'inactive',
-    lastOrder: '2023-12-15',
-    totalOrders: 8,
-    specialties: ['Electronic Parts', 'Sensors', 'Control Modules', 'Software']
+    id: '5',
+    shopId: 'SH005',
+    centerName: 'Harbor City Service',
+    location: 'Galle',
+    assignedOperator: 'Nuwan Fernando',
+    operatorPhone: '+94-705-678901',
+    totalGenerators: 12,
+    activeGenerators: 10,
+    status: 'issues'
+  },
+  {
+    id: '6',
+    shopId: 'SH006',
+    centerName: 'Hill Country Center',
+    location: 'Nuwara Eliya',
+    assignedOperator: 'Chaminda Silva',
+    operatorPhone: '+94-706-789012',
+    totalGenerators: 6,
+    activeGenerators: 4,
+    status: 'missing items'
+  },
+  {
+    id: '7',
+    shopId: 'SH007',
+    centerName: 'Eastern Province Hub',
+    location: 'Batticaloa',
+    assignedOperator: 'Lakshmi Perera',
+    operatorPhone: '+94-707-890123',
+    totalGenerators: 14,
+    activeGenerators: 14,
+    status: 'active'
+  },
+  {
+    id: '8',
+    shopId: 'SH008',
+    centerName: 'Northern Service Point',
+    location: 'Jaffna',
+    assignedOperator: 'Ravi Wickramasinghe',
+    operatorPhone: '+94-708-901234',
+    totalGenerators: 9,
+    activeGenerators: 7,
+    status: 'issues'
   }
 ];
 
-export default function Shops() {
-  const [shops] = useState<Shop[]>(mockShops);
-  const [filter, setFilter] = useState<string>('all');
-  const [selectedType, setSelectedType] = useState<string>('all');
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'parts':
-        return 'bg-blue-100 text-blue-800';
-      case 'service':
-        return 'bg-green-100 text-green-800';
-      case 'equipment':
-        return 'bg-purple-100 text-purple-800';
-      case 'fuel':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'preferred':
-        return 'bg-green-100 text-green-800';
-      case 'active':
-        return 'bg-blue-100 text-blue-800';
-      case 'inactive':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'parts':
-        return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-          </svg>
-        );
-      case 'service':
-        return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-          </svg>
-        );
-      case 'equipment':
-        return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-          </svg>
-        );
-      case 'fuel':
-        return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 6.707 6.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-        );
-      default:
-        return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-          </svg>
-        );
-    }
-  };
-
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <svg
-            key={star}
-            className={`w-4 h-4 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        ))}
-        <span className="ml-1 text-sm text-gray-600">({rating})</span>
-      </div>
-    );
-  };
-
-  const filteredShops = shops.filter(shop => {
-    const statusMatch = filter === 'all' || shop.status === filter;
-    const typeMatch = selectedType === 'all' || shop.type === selectedType;
-    return statusMatch && typeMatch;
+export default function ShopsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [operatorFilter, setOperatorFilter] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingShop, setEditingShop] = useState<Shop | null>(null);
+  const [viewingShop, setViewingShop] = useState<Shop | null>(null);
+  const [formData, setFormData] = useState({
+    centerName: '',
+    centerCode: '',
+    address: '',
+    city: '',
+    district: '',
+    contactNumber: '',
+    assignedOperator: '',
+    operatingStatus: 'active',
+    notes: ''
   });
 
-  const preferredShops = shops.filter(shop => shop.status === 'preferred').length;
-  const activeShops = shops.filter(shop => shop.status === 'active').length;
+  const filteredShops = shops.filter(shop => {
+    const matchesSearch = shop.centerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      shop.shopId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      shop.assignedOperator.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLocation = locationFilter === 'all' || shop.location === locationFilter;
+    const matchesStatus = statusFilter === 'all' || shop.status === statusFilter;
+    const matchesOperator = operatorFilter === 'all' || shop.assignedOperator === operatorFilter;
+
+    return matchesSearch && matchesLocation && matchesStatus && matchesOperator;
+  });
+
+  const totalShops = shops.length;
+  const activeShops = shops.filter(s => s.status === 'active').length;
+  const shopsWithIssues = shops.filter(s => s.status === 'issues').length;
+  const shopsWithMissingItems = shops.filter(s => s.status === 'missing items').length;
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>;
+      case 'issues':
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Issues</span>;
+      case 'missing items':
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Missing Items</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getMaintenanceBadge = (status: string) => {
+    if (status === 'missing items') {
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Maintenance</span>;
+    }
+    return null;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
+    console.log('Form submitted:', formData);
+    setIsModalOpen(false);
+    // Reset form
+    setFormData({
+      centerName: '',
+      centerCode: '',
+      address: '',
+      city: '',
+      district: '',
+      contactNumber: '',
+      assignedOperator: '',
+      operatingStatus: 'active',
+      notes: ''
+    });
+  };
+
+  const handleViewShop = (shop: Shop) => {
+    setViewingShop(shop);
+  };
+
+  const handleBackToList = () => {
+    setViewingShop(null);
+  };
+
+  const handleEditShop = (shop: Shop) => {
+    setEditingShop(shop);
+    setFormData({
+      centerName: shop.centerName,
+      centerCode: shop.shopId,
+      address: '123 Main Street, Business District', // Default address since not in shop data
+      city: shop.location,
+      district: shop.location + ' Central',
+      contactNumber: shop.operatorPhone,
+      assignedOperator: shop.assignedOperator,
+      operatingStatus: shop.status === 'active' ? 'active' : shop.status === 'issues' ? 'suspended' : 'maintenance',
+      notes: 'Primary center with full inventory' // Default notes
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle edit form submission here
+    console.log('Edit form submitted:', formData, 'for shop:', editingShop);
+    setIsEditModalOpen(false);
+    setEditingShop(null);
+    // Reset form
+    setFormData({
+      centerName: '',
+      centerCode: '',
+      address: '',
+      city: '',
+      district: '',
+      contactNumber: '',
+      assignedOperator: '',
+      operatingStatus: 'active',
+      notes: ''
+    });
+  };
+
+  const sriLankanCities = [
+    'Colombo', 'Gampaha', 'Kandy', 'Negombo', 'Galle', 'Nuwara Eliya',
+    'Batticaloa', 'Jaffna', 'Anuradhapura', 'Polonnaruwa', 'Matara', 'Ratnapura'
+  ];
+
+  const getProvinceForCity = (city: string) => {
+    const cityToProvince: { [key: string]: string } = {
+      'Colombo': 'Western Province',
+      'Gampaha': 'Western Province',
+      'Negombo': 'Western Province',
+      'Kandy': 'Central Province',
+      'Nuwara Eliya': 'Central Province',
+      'Matara': 'Southern Province',
+      'Galle': 'Southern Province',
+      'Jaffna': 'Northern Province',
+      'Batticaloa': 'Eastern Province',
+      'Anuradhapura': 'North Central Province',
+      'Polonnaruwa': 'North Central Province',
+      'Ratnapura': 'Sabaragamuwa Province'
+    };
+    return cityToProvince[city] || 'Unknown Province';
+  };
+
+  const operators = [
+    'Rajesh Kumar', 'Priya Sharma', 'Nuwan Fernando', 'Chaminda Silva',
+    'Lakshmi Perera', 'Ravi Wickramasinghe', 'Amit Patel', 'Sunita Reddy'
+  ];
+
+  // If viewing a shop, show the details page
+  if (viewingShop) {
+    return <ShopDetails shop={viewingShop} onBack={handleBackToList} />;
+  }
 
   return (
-    <div className="flex-1 p-6 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Shops
-          </h1>
-          <p className="text-gray-600 text-base md:text-lg">
-            Manage all generator centers across your network
-          </p>
+    <div className="flex-1 p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">Shops & Centers</h1>
+            <p className="text-gray-600 text-lg">Manage all generator centers across your network</p>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            + Add New Shop
+          </button>
         </div>
+      </div>
 
-        {/* Shop Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Shops</p>
-                <p className="text-2xl font-semibold text-gray-900">{shops.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Preferred</p>
-                <p className="text-2xl font-semibold text-gray-900">{preferredShops}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active</p>
-                <p className="text-2xl font-semibold text-gray-900">{activeShops}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Orders</p>
-                <p className="text-2xl font-semibold text-gray-900">{shops.reduce((sum, shop) => sum + shop.totalOrders, 0)}</p>
-              </div>
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="border border-blue-200 bg-white rounded-lg shadow-lg p-6">
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+            <div>
+              <p className="text-sm text-gray-500">Total Shops</p>
+              <p className="text-xl font-bold">{totalShops}</p>
             </div>
           </div>
         </div>
-
-        {/* Shops Management */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Shop Directory</h2>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Add Shop
-              </button>
-            </div>
-            
-            <div className="flex space-x-4">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="preferred">Preferred</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="all">All Types</option>
-                <option value="parts">Parts</option>
-                <option value="service">Service</option>
-                <option value="equipment">Equipment</option>
-                <option value="fuel">Fuel</option>
-              </select>
+        <div className="border border-blue-200 bg-white rounded-lg shadow-lg p-6">
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+            <div>
+              <p className="text-sm text-gray-500">Active</p>
+              <p className="text-xl font-bold">{activeShops}</p>
             </div>
           </div>
-
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredShops.map((shop) => (
-                <div key={shop.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-lg ${getTypeColor(shop.type)}`}>
-                        {getTypeIcon(shop.type)}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{shop.name}</h3>
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(shop.type)}`}>
-                            {shop.type}
-                          </span>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(shop.status)}`}>
-                            {shop.status}
-                          </span>
-                        </div>
-                        {renderStars(shop.rating)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
-                      {shop.location}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                      </svg>
-                      {shop.phone}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                      {shop.email}
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Specialties:</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {shop.specialties.map((specialty, index) => (
-                        <span key={index} className="inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
-                          {specialty}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                    <span>Contact: {shop.contact}</span>
-                    <span>Orders: {shop.totalOrders}</span>
-                  </div>
-
-                  <div className="flex space-x-3">
-                    <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                      Contact Shop
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
+        </div>
+        <div className="border border-blue-200 bg-white rounded-lg shadow-lg p-6">
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+            <div>
+              <p className="text-sm text-gray-500">With Issues</p>
+              <p className="text-xl font-bold">{shopsWithIssues}</p>
+            </div>
+          </div>
+        </div>
+        <div className="border border-blue-200 bg-white rounded-lg shadow-lg p-6">
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+            <div>
+              <p className="text-sm text-gray-500">Missing Items</p>
+              <p className="text-xl font-bold">{shopsWithMissingItems}</p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search shops..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <MdSearch className="absolute left-3 top-3 text-gray-400" />
+          </div>
+          <select
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Locations</option>
+            <option value="Colombo">Colombo</option>
+            <option value="Gampaha">Gampaha</option>
+            <option value="Kandy">Kandy</option>
+            <option value="Negombo">Negombo</option>
+            <option value="Galle">Galle</option>
+            <option value="Nuwara Eliya">Nuwara Eliya</option>
+            <option value="Batticaloa">Batticaloa</option>
+            <option value="Jaffna">Jaffna</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="issues">Issues</option>
+            <option value="missing items">Missing Items</option>
+          </select>
+          <select
+            value={operatorFilter}
+            onChange={(e) => setOperatorFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Operators</option>
+            {Array.from(new Set(shops.map(shop => shop.assignedOperator))).map(operator => (
+              <option key={operator} value={operator}>{operator}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Shops List */}
+      <div className="bg-white rounded-lg shadow-lg border border-blue-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-800">Shops List</h2>
+          <p className="text-sm text-gray-500">{filteredShops.length} shops found</p>
+        </div>
+
+        {/* Table Header */}
+        <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="grid grid-cols-7 gap-4 text-sm font-medium text-gray-500">
+            <div>Shop ID</div>
+            <div>Center Name</div>
+            <div>Location</div>
+            <div>Assigned Operator</div>
+            <div>Total Generators</div>
+            <div>Status</div>
+            <div>Actions</div>
+          </div>
+        </div>
+
+        {/* Table Body */}
+        <div className="divide-y divide-gray-200">
+          {filteredShops.map((shop) => (
+            <div key={shop.id} className="px-6 py-4 hover:bg-gray-50">
+              <div className="grid grid-cols-7 gap-4 items-center">
+                <div className="font-medium text-gray-900">{shop.shopId}</div>
+                <div>
+                  <div className="font-medium text-gray-900">{shop.centerName}</div>
+                  <div className="text-sm text-gray-500">{shop.shopId}</div>
+                </div>
+                <div>
+                  <div className="flex items-center text-gray-900">
+                    <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                    {shop.location}
+                  </div>
+                  <div className="text-sm text-gray-500">{getProvinceForCity(shop.location)}</div>
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">{shop.assignedOperator}</div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Phone className="w-3 h-3 mr-1" />
+                    {shop.operatorPhone}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">{shop.totalGenerators} Total</div>
+                  <div className="text-sm text-gray-500">{shop.activeGenerators} Active</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  {getStatusBadge(shop.status)}
+                  {getMaintenanceBadge(shop.status)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleViewShop(shop)}
+                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleEditShop(shop)}
+                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                    <Settings className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Add New Shop Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Add New Shop</h2>
+                <p className="text-sm text-gray-500 mt-1">Fill in the shop/center information</p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Center Name
+                  </label>
+                  <input
+                    type="text"
+                    name="centerName"
+                    value={formData.centerName}
+                    onChange={handleInputChange}
+                    placeholder="Enter center name"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Center Code (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="centerCode"
+                    value={formData.centerCode}
+                    onChange={handleInputChange}
+                    placeholder="Enter center code"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  placeholder="Enter complete address"
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City
+                  </label>
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select city</option>
+                    {sriLankanCities.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    District
+                  </label>
+                  <input
+                    type="text"
+                    name="district"
+                    value={formData.district}
+                    onChange={handleInputChange}
+                    placeholder="Enter district"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Contact Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="contactNumber"
+                    value={formData.contactNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter contact number"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Assigned Operator
+                  </label>
+                  <select
+                    name="assignedOperator"
+                    value={formData.assignedOperator}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select operator</option>
+                    {operators.map(operator => (
+                      <option key={operator} value={operator}>{operator}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Operating Status
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="operatingStatus"
+                      value="active"
+                      checked={formData.operatingStatus === 'active'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Active</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="operatingStatus"
+                      value="suspended"
+                      checked={formData.operatingStatus === 'suspended'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Suspended</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="operatingStatus"
+                      value="maintenance"
+                      checked={formData.operatingStatus === 'maintenance'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Under Maintenance</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Enter any additional notes..."
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-black text-white py-2.5 px-4 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Save Shop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 bg-white text-gray-700 py-2.5 px-4 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Shop Modal */}
+      {isEditModalOpen && editingShop && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Edit Shop</h2>
+                <p className="text-sm text-gray-500 mt-1">Fill in the shop/center information</p>
+              </div>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Center Name
+                  </label>
+                  <input
+                    type="text"
+                    name="centerName"
+                    value={formData.centerName}
+                    onChange={handleInputChange}
+                    placeholder="Enter center name"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Center Code (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="centerCode"
+                    value={formData.centerCode}
+                    onChange={handleInputChange}
+                    placeholder="Enter center code"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  placeholder="Enter complete address"
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City
+                  </label>
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select city</option>
+                    {sriLankanCities.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    District
+                  </label>
+                  <input
+                    type="text"
+                    name="district"
+                    value={formData.district}
+                    onChange={handleInputChange}
+                    placeholder="Enter district"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Contact Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="contactNumber"
+                    value={formData.contactNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter contact number"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Assigned Operator
+                  </label>
+                  <select
+                    name="assignedOperator"
+                    value={formData.assignedOperator}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select operator</option>
+                    {operators.map(operator => (
+                      <option key={operator} value={operator}>{operator}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Operating Status
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="operatingStatus"
+                      value="active"
+                      checked={formData.operatingStatus === 'active'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Active</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="operatingStatus"
+                      value="suspended"
+                      checked={formData.operatingStatus === 'suspended'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Suspended</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="operatingStatus"
+                      value="maintenance"
+                      checked={formData.operatingStatus === 'maintenance'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Under Maintenance</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Enter any additional notes..."
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-black text-white py-2.5 px-4 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Update Shop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="flex-1 bg-white text-gray-700 py-2.5 px-4 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
