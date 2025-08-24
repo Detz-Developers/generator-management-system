@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { CheckCircle, Clock, AlertCircle, Calendar, X, Plus } from 'lucide-react';
+import { MdSearch } from 'react-icons/md';
 
 interface Service {
   id: string;
@@ -248,7 +249,7 @@ export default function ServicesPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <MdSearch className="absolute left-3 top-3 text-gray-400" />
           </div>
           <select
             value={statusFilter}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Battery, Clock, CheckCircle, CalendarX, Calendar, Eye, Pencil } from 'lucide-react';
+import { MdSearch } from 'react-icons/md';
 
 interface Battery {
   id: string;
@@ -163,10 +164,10 @@ export default function BatteriesPage() {
         batteryList.map(b =>
           b.id === editBattery.id
             ? {
-                ...editBattery,
-                ...form,
-                type: form.type as Battery["type"]
-              }
+              ...editBattery,
+              ...form,
+              type: form.type as Battery["type"]
+            }
             : b
         )
       );
@@ -234,7 +235,7 @@ export default function BatteriesPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <MdSearch className="absolute left-3 top-3 text-gray-400" />
           </div>
           <select
             value={typeFilter}

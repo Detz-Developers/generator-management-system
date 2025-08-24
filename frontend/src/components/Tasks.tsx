@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, AlertOctagon, CalendarCheck } from "lucide-react";
+import { AlertCircle, CheckCircle2, AlertOctagon, CalendarCheck, X } from "lucide-react";
+import { MdSearch } from "react-icons/md";
 
 interface Task {
   id: string;
@@ -179,7 +180,7 @@ export default function TasksPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <MdSearch className="absolute left-3 top-3 text-gray-400" />
           </div>
           <select
             value={statusFilter}
