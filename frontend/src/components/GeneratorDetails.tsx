@@ -14,6 +14,30 @@ export default function Dashboard({ onNavigate }: IndividualProps){
     // active tab state eka (default 1)
   const [activeTab, setActiveTab] = useState("1");
 
+  //service togle form
+  const [showModal, setShowModal] = useState(false);
+
+
+   const [formData, setFormData] = useState({
+    generatorId: "",
+    serviceType: "",
+    description: "",
+    serviceDate: "",
+    nextServiceDate: "",
+    cost: "",
+    notes: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  setFormData({ ...formData, [e.target.name]: e.target.value });
+};
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  console.log("Form submitted:", formData);
+  setShowModal(false);
+};
+
+
 return(
     <div className="flex bg-white min-h-screen font-roboto">
       {/* Sidebar 
@@ -184,7 +208,7 @@ return(
                   <p className="font-medium text-gray-800">10/8/2025</p>
                 </div>
               </div>
-              <button className="w-full bg-blue-900 text-white py-2 rounded-md hover:bg-blue-950">Log Service</button>
+              <button onClick={() => setShowModal(true)} className="w-full bg-blue-900 text-white py-2 rounded-md hover:bg-blue-950">Log Service</button>
             </div>
           </div>
 
@@ -434,6 +458,151 @@ return(
              </div>
             
         </div>
+        
+
+
+         {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
+      <h2 className="text-xl font-semibold mb-4">Service Details</h2>
+      <p className="text-gray-500 mb-6">
+        Record service information and maintenance activities
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Generator & Service Type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Generator ID
+            </label>
+            <select
+              name="generatorId"
+              value={formData.generatorId}
+              onChange={handleChange}
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            >
+              <option value="">Select generator</option>
+              <option value="gen1">Generator 1</option>
+              <option value="gen2">Generator 2</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Service Type
+            </label>
+            <select
+              name="serviceType"
+              value={formData.serviceType}
+              onChange={handleChange}
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            >
+              <option value="">Select service type</option>
+              <option value="repair">Repair</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Service Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Service Description
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Enter detailed service description..."
+            className="mt-1 block w-full pl-2 py-2 bg-gray-100 rounded-md border border-blue-100"
+            rows={3}
+          />
+        </div>
+
+        {/* Dates */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Service Date
+            </label>
+            <input
+              type="date"
+              name="serviceDate"
+              value={formData.serviceDate}
+              onChange={handleChange}
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Next Service Date
+            </label>
+            <input
+              type="date"
+              name="nextServiceDate"
+              value={formData.nextServiceDate}
+              onChange={handleChange}
+              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+            />
+          </div>
+        </div>
+
+        {/* Service Cost */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Service Cost
+          </label>
+          <input
+            type="number"
+            name="cost"
+            value={formData.cost}
+            onChange={handleChange}
+            placeholder="Enter service cost"
+            className="mt-1 pl-2 py-2 block w-full rounded-md bg-gray-100 border border-blue-100"
+          />
+        </div>
+
+        {/* Technician Notes */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Technician Notes
+          </label>
+          <textarea
+            name="notes"
+            value={formData.notes}
+            onChange={handleChange}
+            placeholder="Enter technician notes and observations..."
+            className="mt-1 block pl-2 py-3 w-full rounded-lg bg-gray-100 border border-blue-100"
+            rows={3}
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => setShowModal(false)}
+            type="button"
+            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => setShowModal(false)}
+            type="submit"
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Log Service
+          </button>
+        </div>
+      </form>
+    </div>
+    </div>
+       )}
+
+
+
       </main>
     </div>
 );

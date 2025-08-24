@@ -325,7 +325,7 @@ export default function Generators({ onNavigate }: Generators) {
     { id: "G004", brand: "Caterpillar", size: "50kW", sn: "CAT223456", date: "15/12/2024", status: "Active", statusColor: "green", location: "Up", shop: "Ratmalana" },
   ];
 
-   // 🔎 Filter Logic
+   // Filter Logic
   const filteredGenerators = generators.filter((gen) => {
     const matchesSearch =
       gen.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
