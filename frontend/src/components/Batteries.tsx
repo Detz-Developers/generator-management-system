@@ -317,7 +317,7 @@ export default function BatteriesPage() {
 
       {/* Add/Edit Modal */}
       {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-40">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
             {/* Header */}
             <div className={`px-8 py-4 flex items-center justify-between ${showAddModal ? 'bg-blue-600' : 'bg-blue-500'}`}>
