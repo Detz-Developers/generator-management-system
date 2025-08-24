@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Battery, Clock, CheckCircle, CalendarX, Calendar } from 'lucide-react';
+import { Battery, Clock, CheckCircle, CalendarX, Calendar, Eye, Pencil } from 'lucide-react';
 
 interface Battery {
   id: string;
@@ -73,7 +73,9 @@ export default function BatteriesPage() {
   const [brandFilter, setBrandFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [editBattery, setEditBattery] = useState<Battery | null>(null);
+  const [viewBattery, setViewBattery] = useState<Battery | null>(null);
   const [batteryList, setBatteryList] = useState<Battery[]>(batteries);
   const [form, setForm] = useState({
     batteryId: '',
@@ -86,6 +88,11 @@ export default function BatteriesPage() {
     gatePass: '',
     isReturnOverdue: false
   });
+  // View Battery
+  const handleViewBattery = (battery: Battery) => {
+    setViewBattery(battery);
+    setShowViewModal(true);
+  };
 
   const filteredBatteries = batteryList.filter(battery => {
     const matchesSearch = battery.batteryId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -171,7 +178,9 @@ export default function BatteriesPage() {
   const closeModal = () => {
     setShowAddModal(false);
     setShowEditModal(false);
+    setShowViewModal(false);
     setEditBattery(null);
+    setViewBattery(null);
   };
 
   return (
@@ -289,7 +298,14 @@ export default function BatteriesPage() {
                     <td className="px-4 py-2 text-sm">{battery.gatePass || '-'}</td>
                     <td className="px-4 py-2 text-sm">{battery.isReturnOverdue ? <span className="text-red-500">Yes</span> : <span className="text-green-500">No</span>}</td>
                     <td className="px-4 py-2 text-sm">
-                      <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2" onClick={() => handleEditBattery(battery)}>Edit</button>
+                      <div className="flex flex-row gap-2">
+                        <button title="Edit" className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center justify-center" onClick={() => handleEditBattery(battery)}>
+                          <Pencil size={18} />
+                        </button>
+                        <button title="View" className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded flex items-center justify-center" onClick={() => handleViewBattery(battery)}>
+                          <Eye size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -327,6 +343,29 @@ export default function BatteriesPage() {
                 <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">{showAddModal ? 'Add' : 'Save'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && viewBattery && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Battery Details</h2>
+            <div className="space-y-2">
+              <div><span className="font-semibold">Battery ID:</span> {viewBattery.batteryId}</div>
+              <div><span className="font-semibold">Brand:</span> {viewBattery.brand}</div>
+              <div><span className="font-semibold">Size:</span> {viewBattery.size}</div>
+              <div><span className="font-semibold">Serial Number:</span> {viewBattery.serialNumber}</div>
+              <div><span className="font-semibold">Type:</span> {viewBattery.type}</div>
+              <div><span className="font-semibold">Install Date:</span> {viewBattery.installDate}</div>
+              <div><span className="font-semibold">Generator ID:</span> {viewBattery.generatorId}</div>
+              <div><span className="font-semibold">Gate Pass:</span> {viewBattery.gatePass || '-'}</div>
+              <div><span className="font-semibold">Return Overdue:</span> {viewBattery.isReturnOverdue ? 'Yes' : 'No'}</div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button type="button" className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={closeModal}>Close</button>
+            </div>
           </div>
         </div>
       )}
