@@ -192,7 +192,7 @@ export default function BatteriesPage() {
             <h1 className="text-4xl font-bold text-blue-600 mb-2">Batteries</h1>
             <p className="text-gray-600 text-lg">Manage battery inventory and assignments</p>
           </div>
-          <button className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-medium transition-colors" onClick={handleAddBattery}>
+          <button className="bg-blue-600 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-medium transition-colors" onClick={handleAddBattery}>
             + Add Battery
           </button>
         </div>
