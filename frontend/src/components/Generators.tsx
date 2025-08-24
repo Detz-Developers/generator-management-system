@@ -349,7 +349,7 @@ export default function Generators({ onNavigate }: Generators) {
         {/* Header */}
         <header className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800">Generators</h2>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">Generators</h1>
             <p className="text-gray-500">Manage all your generators across your centers</p>
           </div>
           <button className="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold flex items-center shadow-md hover:bg-blue-600"  onClick={() => setShowForm(true)}>
@@ -359,42 +359,45 @@ export default function Generators({ onNavigate }: Generators) {
           </button>
         </header>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
-          <div className="bg-white px-6 py-4 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
-            <div className="bg-blue-100 p-1 rounded-md mr-4">
-              <MdBrightness1 className="text-blue-500" />
-            </div>
-            <div>
-              <p className="text-gray-500">Total Generators</p>
-              <p className="text-xl font-bold">178</p>
-            </div>
-          </div>
-          <div className="bg-white px-6 py-4 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
-            <div className="bg-green-100 p-1 rounded-md mr-4">
-              <MdBrightness1 className="text-green-500" />
-            </div>
-            <div>
-              <p className="text-gray-500">Active</p>
-              <p className="text-xl font-bold">140</p>
+         {/*Metrics Cards*/}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Total Generators</h3>
+                <p className="text-3xl font-bold text-gray-900">178</p>
+              </div>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
-            <div className="bg-yellow-100 p-1 rounded-md mr-4">
-              <MdBrightness1 className="text-yellow-500" />
-            </div>
-            <div>
-              <p className="text-gray-500">Under Repair</p>
-              <p className="text-xl font-bold">30</p>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Active</h3>
+                <p className="text-3xl font-bold text-gray-900">140</p>
+              </div>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md flex items-center border border-blue-300 h-24">
-            <div className="bg-red-100 p-1 rounded-md mr-4">
-              <MdBrightness1 className="text-red-500" />
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Under Repair</h3>
+                <p className="text-3xl font-bold text-gray-900">30</p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500">Unusable</p>
-              <p className="text-xl font-bold">8</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Unusable</h3>
+                <p className="text-3xl font-bold text-gray-900">8</p>
+              </div>
             </div>
           </div>
         </div>
