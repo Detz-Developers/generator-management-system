@@ -318,29 +318,67 @@ export default function BatteriesPage() {
       {/* Add/Edit Modal */}
       {(showAddModal || showEditModal) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
-            <h2 className="text-xl font-bold mb-4">{showAddModal ? 'Add Battery' : 'Edit Battery'}</h2>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <input name="batteryId" value={form.batteryId} onChange={handleFormChange} required placeholder="Battery ID" className="border px-3 py-2 rounded" />
-                <input name="brand" value={form.brand} onChange={handleFormChange} required placeholder="Brand" className="border px-3 py-2 rounded" />
-                <input name="size" value={form.size} onChange={handleFormChange} required placeholder="Size" className="border px-3 py-2 rounded" />
-                <input name="serialNumber" value={form.serialNumber} onChange={handleFormChange} required placeholder="Serial Number" className="border px-3 py-2 rounded" />
-                <select name="type" value={form.type} onChange={handleFormChange} className="border px-3 py-2 rounded">
-                  <option value="permanent">Permanent</option>
-                  <option value="temporary">Temporary</option>
-                </select>
-                <input name="installDate" value={form.installDate} onChange={handleFormChange} required placeholder="Install Date" className="border px-3 py-2 rounded" />
-                <input name="generatorId" value={form.generatorId} onChange={handleFormChange} required placeholder="Generator ID" className="border px-3 py-2 rounded" />
-                <input name="gatePass" value={form.gatePass} onChange={handleFormChange} placeholder="Gate Pass" className="border px-3 py-2 rounded" />
-                <label className="flex items-center col-span-2">
-                  <input type="checkbox" name="isReturnOverdue" checked={form.isReturnOverdue} onChange={handleFormChange} className="mr-2" />
-                  Return Overdue
-                </label>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
+            {/* Header */}
+            <div className={`px-8 py-4 flex items-center justify-between ${showAddModal ? 'bg-blue-600' : 'bg-blue-500'}`}>
+              <h2 className="text-xl font-bold text-white">{showAddModal ? 'Add Battery' : 'Edit Battery'}</h2>
+              <button type="button" className="text-white hover:text-gray-200 text-2xl font-bold" onClick={closeModal}>&times;</button>
+            </div>
+            {/* Details Section */}
+            <form onSubmit={handleFormSubmit} className="px-8 py-6">
+              <div className="flex items-center gap-4 mb-6">
+                <Battery className={showAddModal ? "text-blue-600" : "text-blue-500"} size={40} />
+                <div>
+                  <div className="text-lg font-semibold text-gray-800">{form.brand} {form.size}</div>
+                  <div className="text-sm text-gray-500">Serial: {form.serialNumber}</div>
+                </div>
               </div>
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="font-semibold text-gray-700">Battery ID:</label>
+                  <input name="batteryId" value={form.batteryId} onChange={handleFormChange} required placeholder="Battery ID" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Brand:</label>
+                  <input name="brand" value={form.brand} onChange={handleFormChange} required placeholder="Brand" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Size:</label>
+                  <input name="size" value={form.size} onChange={handleFormChange} required placeholder="Size" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Serial Number:</label>
+                  <input name="serialNumber" value={form.serialNumber} onChange={handleFormChange} required placeholder="Serial Number" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Type:</label>
+                  <select name="type" value={form.type} onChange={handleFormChange} className="border px-3 py-2 rounded w-full mt-1">
+                    <option value="permanent">Permanent</option>
+                    <option value="temporary">Temporary</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Install Date:</label>
+                  <input name="installDate" value={form.installDate} onChange={handleFormChange} required placeholder="Install Date" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Generator ID:</label>
+                  <input name="generatorId" value={form.generatorId} onChange={handleFormChange} required placeholder="Generator ID" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div>
+                  <label className="font-semibold text-gray-700">Gate Pass:</label>
+                  <input name="gatePass" value={form.gatePass} onChange={handleFormChange} placeholder="Gate Pass" className="border px-3 py-2 rounded w-full mt-1" />
+                </div>
+                <div className="col-span-2">
+                  <label className="font-semibold text-gray-700 flex items-center">
+                    <input type="checkbox" name="isReturnOverdue" checked={form.isReturnOverdue} onChange={handleFormChange} className="mr-2" />
+                    Return Overdue
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
                 <button type="button" className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={closeModal}>Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">{showAddModal ? 'Add' : 'Save'}</button>
+                <button type="submit" className={`px-4 py-2 rounded text-white ${showAddModal ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}`}>{showAddModal ? 'Add' : 'Save'}</button>
               </div>
             </form>
           </div>
@@ -350,21 +388,50 @@ export default function BatteriesPage() {
       {/* View Modal */}
       {showViewModal && viewBattery && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Battery Details</h2>
-            <div className="space-y-2">
-              <div><span className="font-semibold">Battery ID:</span> {viewBattery.batteryId}</div>
-              <div><span className="font-semibold">Brand:</span> {viewBattery.brand}</div>
-              <div><span className="font-semibold">Size:</span> {viewBattery.size}</div>
-              <div><span className="font-semibold">Serial Number:</span> {viewBattery.serialNumber}</div>
-              <div><span className="font-semibold">Type:</span> {viewBattery.type}</div>
-              <div><span className="font-semibold">Install Date:</span> {viewBattery.installDate}</div>
-              <div><span className="font-semibold">Generator ID:</span> {viewBattery.generatorId}</div>
-              <div><span className="font-semibold">Gate Pass:</span> {viewBattery.gatePass || '-'}</div>
-              <div><span className="font-semibold">Return Overdue:</span> {viewBattery.isReturnOverdue ? 'Yes' : 'No'}</div>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
+            {/* Header */}
+            <div className="bg-blue-600 px-8 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">Battery Details</h2>
+              <button type="button" className="text-white hover:text-gray-200 text-2xl font-bold" onClick={closeModal}>&times;</button>
             </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button type="button" className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={closeModal}>Close</button>
+            {/* Details Section */}
+            <div className="px-8 py-6">
+              <div className="flex items-center gap-4 mb-6">
+                <Battery className="text-blue-600" size={40} />
+                <div>
+                  <div className="text-lg font-semibold text-gray-800">{viewBattery.brand} {viewBattery.size}</div>
+                  <div className="text-sm text-gray-500">Serial: {viewBattery.serialNumber}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <span className="font-semibold text-gray-700">Battery ID:</span>
+                  <div className="text-gray-800">{viewBattery.batteryId}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Type:</span>
+                  <div className="text-gray-800 capitalize">{viewBattery.type}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Install Date:</span>
+                  <div className="text-gray-800">{viewBattery.installDate}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Generator ID:</span>
+                  <div className="text-gray-800">{viewBattery.generatorId}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Gate Pass:</span>
+                  <div className="text-gray-800">{viewBattery.gatePass || '-'}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Return Overdue:</span>
+                  <div className={viewBattery.isReturnOverdue ? "text-red-600" : "text-green-600"}>{viewBattery.isReturnOverdue ? 'Yes' : 'No'}</div>
+                </div>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button type="button" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={closeModal}>Close</button>
+              </div>
             </div>
           </div>
         </div>
