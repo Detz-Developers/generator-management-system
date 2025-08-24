@@ -169,7 +169,7 @@ export default function NotificationCenter() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Notification Center</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-blue-600 mb-1">Notification Center</h1>
               <p className="text-gray-600 text-base md:text-lg">Manage your system notifications and alerts</p>
             </div>
           </div>
@@ -189,9 +189,9 @@ export default function NotificationCenter() {
 
         <div className="flex gap-6">
           {/* Left Sidebar */}
-          <div className="w-64 bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-fit">
+          <div className="w-64 bg-white rounded-lg shadow-sm border border-blue-200 p-6 h-fit">
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+              <h3 className="text-sm font-medium text-blue-700 mb-3 flex items-center">
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
                 </svg>
@@ -201,7 +201,7 @@ export default function NotificationCenter() {
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 cursor-pointer appearance-none pr-10"
+                  className="w-full p-3 border border-blue-300 rounded-lg text-sm bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 cursor-pointer appearance-none pr-10"
                 >
                   <option value="all">All Notifications</option>
                   <option value="unread">Unread Only</option>
@@ -221,11 +221,11 @@ export default function NotificationCenter() {
 
           {/* Main Content */}
           <div className="flex-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
+            <div className="bg-white rounded-lg shadow-sm border border-blue-200">
+              <div className="p-6 border-b border-blue-200">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+                    <h2 className="text-lg font-semibold text-blue-900">Notifications</h2>
                     <p className="text-sm text-gray-500">{notifications.length} notifications</p>
                   </div>
                 </div>
@@ -238,8 +238,8 @@ export default function NotificationCenter() {
                     <div
                       key={notification.id}
                       className={`p-4 rounded-lg border transition-colors ${notification.isRead
-                        ? 'bg-white border-gray-200'
-                        : 'bg-blue-50 border-blue-200'
+                        ? 'bg-white border-blue-200'
+                        : 'bg-blue-50 border-blue-300'
                         }`}
                     >
                       <div className="flex items-start justify-between">
@@ -249,7 +249,7 @@ export default function NotificationCenter() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-sm font-medium text-gray-900">{notification.title}</h3>
+                              <h3 className="text-sm font-medium text-blue-900">{notification.title}</h3>
                               <span className={`text-xs px-2 py-1 rounded-full ${notification.priority === 'high' ? 'bg-red-100 text-red-800' :
                                 notification.priority === 'medium' ? 'bg-orange-100 text-orange-800' :
                                   'bg-green-100 text-green-800'
@@ -299,7 +299,7 @@ export default function NotificationCenter() {
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
+                    <h3 className="text-lg font-medium text-blue-900 mb-2">No notifications</h3>
                     <p className="text-gray-500">You&apos;re all caught up! No new notifications at this time.</p>
                   </div>
                 )}
