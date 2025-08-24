@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, CheckCircle, CalendarX, Calendar, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, AlertOctagon, CalendarCheck } from "lucide-react";
 
 interface Task {
   id: string;
@@ -12,7 +12,6 @@ interface Task {
   dueDate: string;
   status: "pending" | "completed" | "overdue";
 }
-
 const initialTasks: Task[] = [
   {
     id: "1",
@@ -146,26 +145,27 @@ export default function TasksPage() {
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <Clock className="mx-auto text-yellow-500 mb-2" />
+          <AlertCircle className="mx-auto text-yellow-500 mb-2" />
           <h3 className="text-sm text-gray-500">Pending Tasks</h3>
           <p className="text-xl font-bold">{pendingTasks}</p>
         </div>
         <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <CheckCircle className="mx-auto text-green-600 mb-2" />
+          <CheckCircle2 className="mx-auto text-green-600 mb-2" />
           <h3 className="text-sm text-gray-500">Completed</h3>
           <p className="text-xl font-bold">{completedTasks}</p>
         </div>
         <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <CalendarX className="mx-auto text-red-500 mb-2" />
+          <AlertOctagon className="mx-auto text-red-500 mb-2" />
           <h3 className="text-sm text-gray-500">Overdue</h3>
           <p className="text-xl font-bold">{overdueTasks}</p>
         </div>
         <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <Calendar className="mx-auto text-blue-500 mb-2" />
+          <CalendarCheck className="mx-auto text-blue-500 mb-2" />
           <h3 className="text-sm text-gray-500">Due Today</h3>
           <p className="text-xl font-bold">{dueTodayTasks}</p>
         </div>
       </div>
+
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
