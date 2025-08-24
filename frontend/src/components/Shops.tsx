@@ -23,7 +23,7 @@ const shops: Shop[] = [
     shopId: 'SH001',
     centerName: 'Downtown Generator Center',
     location: 'Colombo',
-    assignedOperator: 'Rajesh Kumar',
+    assignedOperator: 'Kasun Perera',
     operatorPhone: '+94-701-234567',
     totalGenerators: 15,
     activeGenerators: 12,
@@ -34,7 +34,7 @@ const shops: Shop[] = [
     shopId: 'SH002',
     centerName: 'Industrial Zone Hub',
     location: 'Gampaha',
-    assignedOperator: 'Priya Sharma',
+    assignedOperator: 'Sanduni Jayawardena',
     operatorPhone: '+94-702-345678',
     totalGenerators: 22,
     activeGenerators: 18,
@@ -45,7 +45,7 @@ const shops: Shop[] = [
     shopId: 'SH003',
     centerName: 'Suburban Service Point',
     location: 'Kandy',
-    assignedOperator: 'Amit Patel',
+    assignedOperator: 'Thilina Rathnayake',
     operatorPhone: '+94-703-456789',
     totalGenerators: 8,
     activeGenerators: 5,
@@ -56,7 +56,7 @@ const shops: Shop[] = [
     shopId: 'SH004',
     centerName: 'Tech Park Center',
     location: 'Negombo',
-    assignedOperator: 'Sunita Reddy',
+    assignedOperator: 'Dilani Wijesinghe',
     operatorPhone: '+94-704-567890',
     totalGenerators: 18,
     activeGenerators: 17,
@@ -260,8 +260,8 @@ export default function ShopsPage() {
   };
 
   const operators = [
-    'Rajesh Kumar', 'Priya Sharma', 'Nuwan Fernando', 'Chaminda Silva',
-    'Lakshmi Perera', 'Ravi Wickramasinghe', 'Amit Patel', 'Sunita Reddy'
+    'Kasun Perera', 'Sanduni Jayawardena', 'Nuwan Fernando', 'Chaminda Silva',
+    'Lakshmi Perera', 'Ravi Wickramasinghe', 'Thilina Rathnayake', 'Dilani Wijesinghe'
   ];
 
   // If viewing a shop, show the details page
