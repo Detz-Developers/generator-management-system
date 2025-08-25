@@ -388,55 +388,71 @@ export default function BatteriesPage() {
 
       {/* View Modal */}
       {showViewModal && viewBattery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-brightness-75">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
             {/* Header */}
             <div className="bg-blue-600 px-8 py-4 flex items-center justify-between">
               <h2 className="text-xl font-bold text-white">Battery Details</h2>
-              <button type="button" className="text-white hover:text-gray-200 text-2xl font-bold" onClick={closeModal}>&times;</button>
+              <button
+                type="button"
+                className="text-white hover:text-gray-200 text-2xl font-bold"
+                onClick={closeModal}
+              >
+                &times;
+              </button>
             </div>
-            {/* Details Section */}
-            <div className="px-8 py-6">
-              <div className="flex items-center gap-4 mb-6">
-                <Battery className="text-blue-600" size={40} />
-                <div>
-                  <div className="text-lg font-semibold text-gray-800">{viewBattery.brand} {viewBattery.size}</div>
-                  <div className="text-sm text-gray-500">Serial: {viewBattery.serialNumber}</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <span className="font-semibold text-gray-700">Battery ID:</span>
-                  <div className="text-gray-800">{viewBattery.batteryId}</div>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-700">Type:</span>
-                  <div className="text-gray-800 capitalize">{viewBattery.type}</div>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-700">Install Date:</span>
-                  <div className="text-gray-800">{viewBattery.installDate}</div>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-700">Generator ID:</span>
-                  <div className="text-gray-800">{viewBattery.generatorId}</div>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-700">Gate Pass:</span>
-                  <div className="text-gray-800">{viewBattery.gatePass || '-'}</div>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-700">Return Overdue:</span>
-                  <div className={viewBattery.isReturnOverdue ? "text-red-600" : "text-green-600"}>{viewBattery.isReturnOverdue ? 'Yes' : 'No'}</div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <button type="button" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={closeModal}>Close</button>
-              </div>
+      {/* Details Section */}
+      <div className="px-8 py-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Battery className="text-blue-600" size={40} />
+          <div>
+            <div className="text-lg font-semibold text-gray-800">
+              {viewBattery.brand} {viewBattery.size}
+            </div>
+            <div className="text-sm text-gray-500">Serial: {viewBattery.serialNumber}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <span className="font-semibold text-gray-700">Battery ID:</span>
+            <div className="text-gray-800">{viewBattery.batteryId}</div>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Type:</span>
+            <div className="text-gray-800 capitalize">{viewBattery.type}</div>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Install Date:</span>
+            <div className="text-gray-800">{viewBattery.installDate}</div>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Generator ID:</span>
+            <div className="text-gray-800">{viewBattery.generatorId}</div>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Gate Pass:</span>
+            <div className="text-gray-800">{viewBattery.gatePass || '-'}</div>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Return Overdue:</span>
+            <div className={viewBattery.isReturnOverdue ? "text-red-600" : "text-green-600"}>
+              {viewBattery.isReturnOverdue ? 'Yes' : 'No'}
             </div>
           </div>
         </div>
-      )}
+        <div className="flex justify-end mt-6">
+          <button
+            type="button"
+            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+            onClick={closeModal}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  )}
     </div>
   );
 }
