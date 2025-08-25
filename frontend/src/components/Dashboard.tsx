@@ -1,9 +1,12 @@
 import MetricCard from './MetricCard';
 import QuickActions from "@/components/QuickActions";
 import RecentActivities from "@/components/RecentActivities";
+import AISummaryPopup from "@/components/AISummaryPopup";
+import {useState} from "react";
 
 
 export default function Dashboard() {
+    const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
   return (
       <div className="flex-1 p-8">
         {/* Header */}
@@ -13,11 +16,18 @@ export default function Dashboard() {
               <h1 className="text-4xl font-bold text-blue-600 mb-2">Dashboard</h1>
               <p className="text-gray-600 text-lg">Welcome back!</p>
             </div>
-            <div className="relative">
-              <button className="p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                <span className="text-xl">🔔</span>
-              </button>
-            </div>
+              <div className="flex items-center space-x-3">
+                  <button
+                      onClick={() => setIsAISummaryOpen(true)}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                  >
+                      <span className="text-lg">🤖</span>
+                      <span className="font-medium">Generate AI Summary</span>
+                  </button>
+                  <button className="p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <span className="text-xl">🔔</span>
+                  </button>
+              </div>
           </div>
         </div>
 
@@ -54,6 +64,11 @@ export default function Dashboard() {
           <QuickActions />
             <RecentActivities />
         </div>
+          {/* AI Summary Popup */}
+          <AISummaryPopup
+              isOpen={isAISummaryOpen}
+              onClose={() => setIsAISummaryOpen(false)}
+          />
       </div>
   );
 }
