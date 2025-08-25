@@ -342,11 +342,34 @@ export default function Generators({ onNavigate }: Generators) {
 
 
   return (
-    <div className="bg-white flex font-inter min-h-screen">
+    <div className="flex font-inter min-h-screen">
       
       {/* Main content */}
       <main className="flex-1 p-8">
-        {/* Header */}
+
+       <header className="flex flex-nowrap items-center mb-4 sm:mb-6 justify-start sm:justify-between gap-2">
+           <div className="min-w-0 sm:flex-1">
+              <h1 className="text-2xl sm:text-4xl font-bold text-blue-600 truncate mb-1 sm:mb-2">
+                Generators
+              </h1>
+              <p className="text-gray-500 text-sm sm:text-base truncate">
+               Manage all your generators across your centers
+              </p>
+           </div>
+           <button
+             className="bg-blue-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold flex items-center shadow-md hover:bg-blue-600 flex-shrink-0 ml-2 sm:ml-0"
+             onClick={() => setShowForm(true)}
+            >
+           <MdAdd className="mr-1 sm:mr-2" />
+             Add Generator
+           </button>
+        </header>
+
+
+
+
+
+        {/* Header 
         <header className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-4xl font-bold text-blue-600 mb-2">Generators</h1>
@@ -358,10 +381,11 @@ export default function Generators({ onNavigate }: Generators) {
             Add Generator
           </button>
         </header>
+          */}
 
          {/*Metrics Cards*/}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <div>
@@ -371,7 +395,7 @@ export default function Generators({ onNavigate }: Generators) {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <div>
@@ -381,7 +405,7 @@ export default function Generators({ onNavigate }: Generators) {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
               <div>
@@ -391,7 +415,7 @@ export default function Generators({ onNavigate }: Generators) {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <div>
@@ -524,7 +548,7 @@ export default function Generators({ onNavigate }: Generators) {
                         >
                           <MdOutlineRemoveRedEye className="text-blue-500" />
                         </button>
-                        <button className="bg-blue-100 p-2 rounded-md hover:bg-blue-200">
+                        <button   onClick={() => setShowForm(true)} className="bg-blue-100 p-2 rounded-md hover:bg-blue-200">
                           <MdEditSquare className="text-blue-500" />
                         </button>
                       </div>
