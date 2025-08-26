@@ -1,22 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 
-export default function Login() {
+interface LoginProps {
+  onLogin: () => void;
+}
+
+export default function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard'); // Redirect after successful login
+      onLogin(); // Call the onLogin prop to update the parent state
     } catch (err: any) {
       setError('Invalid email or password.');
     }
