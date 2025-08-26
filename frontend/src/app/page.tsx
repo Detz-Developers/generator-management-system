@@ -10,6 +10,7 @@ import Tasks from '@/components/Tasks';
 import Services from '@/components/Services';
 import Shops from '@/components/Shops';
 import Invoices from '@/components/Invoices';
+import CreateInvoice from '@/components/CreateInvoice';
 import Reports from '@/components/Reports';
 import Users from '@/components/Users';
 import Login from '@/components/Login';
@@ -43,7 +44,9 @@ export default function Home() {
       case 'Shops':
         return <Shops />;
       case 'Invoices':
-        return <Invoices />;
+        return <Invoices onNavigate={setCurrentPage} />;
+      case 'CreateInvoice':
+        return <CreateInvoice onBack={() => setCurrentPage('Invoices')} />;
       case 'Reports':
         return <Reports />;
       case 'Users':

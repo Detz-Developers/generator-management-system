@@ -66,12 +66,22 @@ const formatCurrency = (amount: number) => {
     return `LKR ${amount.toLocaleString()}`;
 };
 
-export default function InvoiceManagement() {
+interface InvoiceManagementProps {
+    onNavigate?: (page: string) => void;
+}
+
+export default function InvoiceManagement({ onNavigate }: InvoiceManagementProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+
+    const handleCreateInvoice = () => {
+        if (onNavigate) {
+            onNavigate('CreateInvoice');
+        }
+    };
 
     const filteredInvoices = invoices.filter(invoice => {
         const matchesSearch = invoice.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -120,7 +130,10 @@ export default function InvoiceManagement() {
                         <h1 className="text-4xl font-bold text-blue-600 mb-1">Invoice Management</h1>
                         <p className="text-gray-600 text-base">Manage all B2B and B2C invoices</p>
                     </div>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <button 
+                        onClick={handleCreateInvoice}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
                         + Create New Invoice
                     </button>
                 </div>
