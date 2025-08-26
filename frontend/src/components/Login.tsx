@@ -1,20 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
-interface LoginProps {
-  onLogin: () => void;
-}
-
-export default function Login({ onLogin }: LoginProps) {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple validation - in real app, you'd validate credentials
-    if (email && password) {
-      onLogin();
+    setError(null);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/dashboard'); // Redirect after successful login
+    } catch (err: any) {
+      setError('Invalid email or password.');
     }
   };
 
@@ -22,20 +26,23 @@ export default function Login({ onLogin }: LoginProps) {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="bg-white rounded-lg shadow-md p-8">
-          {/* Logo and Title */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                 <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">GenMS</h2>
-            <p className="text-sm text-gray-500">Generator Management System</p>
+            <h1 className="font-bold text-2xl text-blue-800">
+              Generator Management System
+            </h1>
           </div>
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -43,7 +50,6 @@ export default function Login({ onLogin }: LoginProps) {
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
                 required
                 value={email}
@@ -59,7 +65,6 @@ export default function Login({ onLogin }: LoginProps) {
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
                 required
                 value={password}
@@ -69,17 +74,18 @@ export default function Login({ onLogin }: LoginProps) {
               />
             </div>
 
+            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                className="w-full flex justify-center py-3 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 Login
               </button>
             </div>
           </form>
 
-          {/* Additional Links */}
           <div className="mt-6 text-center">
             <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
               Forgot your password?
@@ -87,7 +93,6 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center text-xs text-gray-500">
           © 2025 Generator Management System. All rights reserved.
         </div>
