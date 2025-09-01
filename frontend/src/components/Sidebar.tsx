@@ -6,6 +6,7 @@ interface SidebarProps {
   onNavigate: (page: string) => void;
   currentPage: string;
   onLogout: () => void;
+  userRole?: string;
 }
 
 interface SidebarItem {
@@ -97,7 +98,7 @@ const sidebarItems: SidebarItem[] = [
   },
 ];
 
-export default function Sidebar({ onNavigate, currentPage, onLogout }: SidebarProps) {
+export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 'admin' }: SidebarProps) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleItemClick = (itemLabel: string) => {
@@ -138,7 +139,7 @@ export default function Sidebar({ onNavigate, currentPage, onLogout }: SidebarPr
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">GenMS</h1>
+            <h1 className="text-lg font-bold text-blue-600">Admin Panel</h1>
             <p className="text-xs text-gray-500">Generator Management</p>
           </div>
         </div>

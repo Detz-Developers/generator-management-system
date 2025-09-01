@@ -2,8 +2,14 @@
 
 import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
+import OperatorSidebar from '@/components/OperatorSidebar';
+import TechnicianSidebar from '@/components/TechnicianSidebar';
+import InventorySidebar from '@/components/InventorySidebar';
 import NotificationCenter from '@/components/NotificationCenter';
 import Dashboard from '@/components/Dashboard';
+import OperatorDashboard from '@/components/OperatorDashboard';
+import TechnicianDashboard from '@/components/TechnicianDashboard';
+import InventoryDashboard from '@/components/InventoryDashboard';
 import Generators from '@/components/Generators';
 import Batteries from '@/components/Batteries';
 import Tasks from '@/components/Tasks';
@@ -18,21 +24,27 @@ import GeneratorDetails from '@/components/GeneratorDetails';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string>('admin');
+  const [userEmail, setUserEmail] = useState<string>('');
   const [currentPage, setCurrentPage] = useState('Dashboard');
 
-  const handleLogin = () => {
+  const handleLogin = (role: string, email: string) => {
     setIsLoggedIn(true);
+    setUserRole(role);
+    setUserEmail(email);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserRole('admin');
+    setUserEmail('');
     setCurrentPage('Dashboard'); // Reset to dashboard when logging back in
   };
 
   const renderContent = () => {
     switch (currentPage) {
       case 'Dashboard':
-        return <Dashboard />;
+        return <Dashboard onNavigate={setCurrentPage} />;
       case 'Generators':
         return <Generators onNavigate={setCurrentPage}/>;
       case 'Batteries':
@@ -85,19 +97,117 @@ export default function Home() {
     }
   };
 
+  const renderRoleBasedPanel = () => {
+    switch (userRole) {
+      case 'admin':
+        return (
+          <div className="flex h-screen bg-gray-50">
+            <div className="flex-shrink-0">
+              <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} userRole="admin" />
+            </div>
+            <main className="flex-1 overflow-auto">
+              {renderContent()}
+            </main>
+          </div>
+        );
+      case 'operate':
+        return (
+          <div className="flex h-screen bg-gray-50">
+            <div className="flex-shrink-0">
+              <OperatorSidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} />
+            </div>
+            <main className="flex-1 overflow-auto">
+              {renderOperatorContent()}
+            </main>
+          </div>
+        );
+      case 'tech':
+        return (
+          <div className="flex h-screen bg-gray-50">
+            <div className="flex-shrink-0">
+              <TechnicianSidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} />
+            </div>
+            <main className="flex-1 overflow-auto">
+              {renderTechnicianContent()}
+            </main>
+          </div>
+        );
+      case 'invent':
+        return (
+          <div className="flex h-screen bg-gray-50">
+            <div className="flex-shrink-0">
+              <InventorySidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} />
+            </div>
+            <main className="flex-1 overflow-auto">
+              {renderInventoryContent()}
+            </main>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex h-screen bg-gray-50">
+            <div className="flex-shrink-0">
+              <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} userRole="admin" />
+            </div>
+            <main className="flex-1 overflow-auto">
+              {renderContent()}
+            </main>
+          </div>
+        );
+    }
+  };
+
+  const renderOperatorContent = () => {
+    switch (currentPage) {
+      case 'Dashboard':
+        return <OperatorDashboard onNavigate={setCurrentPage} />;
+      case 'Generators':
+        return <Generators onNavigate={setCurrentPage}/>;
+      case 'Tasks':
+        return <Tasks />;
+      case 'Services':
+        return <Services />;
+      case 'Notifications':
+        return <NotificationCenter />;
+      default:
+        return <OperatorDashboard onNavigate={setCurrentPage} />;
+    }
+  };
+
+  const renderTechnicianContent = () => {
+    switch (currentPage) {
+      case 'Dashboard':
+        return <TechnicianDashboard onNavigate={setCurrentPage} />;
+      case 'Tasks':
+        return <Tasks />;
+      case 'Services':
+        return <Services />;
+      case 'Notifications':
+        return <NotificationCenter />;
+      default:
+        return <TechnicianDashboard onNavigate={setCurrentPage} />;
+    }
+  };
+
+  const renderInventoryContent = () => {
+    switch (currentPage) {
+      case 'Dashboard':
+        return <InventoryDashboard onNavigate={setCurrentPage} />;
+      case 'Batteries':
+        return <Batteries />;
+      case 'Generators':
+        return <Generators onNavigate={setCurrentPage}/>;
+      case 'Notifications':
+        return <NotificationCenter />;
+      default:
+        return <InventoryDashboard onNavigate={setCurrentPage} />;
+    }
+  };
+
   // Show login page if not logged in
   if (!isLoggedIn) {
     return <Login onLogin={handleLogin} />;
   }
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="flex-shrink-0">
-        <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} />
-      </div>
-      <main className="flex-1 overflow-auto">
-        {renderContent()}
-      </main>
-    </div>
-  );
+  return renderRoleBasedPanel();
 }

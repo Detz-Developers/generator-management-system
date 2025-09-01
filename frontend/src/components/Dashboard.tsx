@@ -4,8 +4,11 @@ import RecentActivities from "@/components/RecentActivities";
 import AISummaryPopup from "@/components/AISummaryPopup";
 import {useState} from "react";
 
+interface DashboardProps {
+  onNavigate?: (page: string) => void;
+}
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }: DashboardProps) {
     const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
   return (
       <div className="flex-1 p-8">
@@ -24,7 +27,11 @@ export default function Dashboard() {
                       <span className="text-lg">🤖</span>
                       <span className="font-medium">Generate AI Summary</span>
                   </button>
-                  <button className="p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <button 
+                      onClick={() => onNavigate?.('Notifications')}
+                      className="p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="View Notifications"
+                  >
                       <span className="text-xl">🔔</span>
                   </button>
               </div>
