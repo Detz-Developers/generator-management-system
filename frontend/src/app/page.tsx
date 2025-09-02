@@ -1,26 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import Sidebar from '@/components/Sidebar';
-import OperatorSidebar from '@/components/OperatorSidebar';
-import TechnicianSidebar from '@/components/TechnicianSidebar';
-import InventorySidebar from '@/components/InventorySidebar';
-import NotificationCenter from '@/components/NotificationCenter';
-import Dashboard from '@/components/Dashboard';
-import OperatorDashboard from '@/components/OperatorDashboard';
-import TechnicianDashboard from '@/components/TechnicianDashboard';
-import InventoryDashboard from '@/components/InventoryDashboard';
-import Generators from '@/components/Generators';
-import Batteries from '@/components/Batteries';
-import Tasks from '@/components/Tasks';
-import Services from '@/components/Services';
-import Shops from '@/components/Shops';
+import Sidebar from '@/components/admin/Sidebar';
+import OperatorSidebar from '@/components/operator/OperatorSidebar';
+import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
+import InventorySidebar from '@/components/inventory/InventorySidebar';
+import NotificationCenter from '@/components/admin/NotificationCenter';
+import Dashboard from '@/components/admin/Dashboard';
+import OperatorDashboard from '@/components/operator/OperatorIssueReporting.tsx';
+import TechnicianDashboard from '@/components/technician/TechnicianTasks';
+import InventoryDashboard from '@/components/inventory/InventoryDashboard';
+import Generators from '@/components/admin/Generators';
+import Batteries from '@/components/admin/Batteries';
+import Tasks from '@/components/admin/Tasks';
+import Services from '@/components/admin/Services';
+import Shops from '@/components/admin/Shops';
 import Invoices from '@/components/Invoices';
-import CreateInvoice from '@/components/CreateInvoice';
-import Reports from '@/components/Reports';
-import Users from '@/components/Users';
+import CreateInvoice from '@/components/admin/CreateInvoice';
+import Reports from '@/components/admin/Reports';
+import Users from '@/components/admin/Users';
 import Login from '@/components/Login';
-import GeneratorDetails from '@/components/GeneratorDetails';
+import GeneratorDetails from '@/components/admin/GeneratorDetails';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
