@@ -442,7 +442,7 @@ export default function Generators({ onNavigate }: Generators) {
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500">
               <option value="all">All Status</option>
               <option value="active">Active</option>
-              <option value="under-repair">Under Repair</option>
+              <option value="under repair">Under Repair</option>
               <option value="unusable">Unusable</option>
             </select>
 
