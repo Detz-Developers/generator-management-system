@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
-import TechnicianDashboard from '@/components/technician/TechnicianDashboard';
 import TechnicianTasks from '@/components/technician/TechnicianTasks';
 import TechnicianServicesLogging from '@/components/technician/TechnicianSevicesLogging';
 import TechnicianAssignedGenerators from '@/components/technician/TechnicianAssignedGenerators';
@@ -17,8 +16,6 @@ export default function TechnicianPanel({ onLogout }: TechnicianPanelProps) {
 
   const renderContent = () => {
     switch (currentPage) {
-      case 'Dashboard':
-        return <TechnicianDashboard onNavigate={setCurrentPage} />;
       case 'Tasks':
         return <TechnicianTasks onNavigate={setCurrentPage} />;
       case 'Services':

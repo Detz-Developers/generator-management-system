@@ -67,7 +67,7 @@ export default function CreateInvoice({ onBack }: CreateInvoiceProps) {
         }
     };
 
-    const updateLineItem = (id: string, field: keyof LineItem, value: any) => {
+    const updateLineItem = (id: string, field: keyof LineItem, value: string | number) => {
         setLineItems(lineItems.map(item => {
             if (item.id === id) {
                 const updatedItem = { ...item, [field]: value };

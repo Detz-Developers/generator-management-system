@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import OperatorSidebar from '@/components/operator/OperatorSidebar';
-import OperatorDashboard from '@/components/operator/OperatorDashboard';
 import OperatorGenerators from '@/components/operator/OperatorGenerators';
 import OperatorBatteries from '@/components/operator/OperatorBatteries';
 import OperatorReports from '@/components/operator/OperatorReports';
@@ -17,10 +16,8 @@ export default function OperatorPanel({ onLogout }: OperatorPanelProps) {
 
   const renderContent = () => {
     switch (currentPage) {
-      case 'Dashboard':
-        return <OperatorDashboard onNavigate={setCurrentPage} />;
       case 'Generators':
-        return <OperatorGenerators onNavigate={setCurrentPage}/>;
+        return <OperatorGenerators onNavigate={setCurrentPage} />;
       case 'Batteries':
         return <OperatorBatteries onNavigate={setCurrentPage} />;
       case 'Reports':

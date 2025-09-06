@@ -30,7 +30,7 @@ export default function Login({ onLogin }: LoginProps) {
       await signInWithEmailAndPassword(auth, email, password);
       const userRole = getUserRole(email);
       onLogin(userRole, email); // Pass role and email to parent
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Invalid email or password.');
     }
   };

@@ -12,7 +12,16 @@ const centers = [
   'Mumbai Central',
 ];
 
-export default function AddUserForm({ onCancel, onCreate }: { onCancel: () => void; onCreate?: (user: any) => void }) {
+interface User {
+  fullName: string;
+  email: string;
+  password: string;
+  role: string;
+  center: string;
+  active: boolean;
+}
+
+export default function AddUserForm({ onCancel, onCreate }: { onCancel: () => void; onCreate?: (user: User) => void }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,7 +46,7 @@ export default function AddUserForm({ onCancel, onCreate }: { onCancel: () => vo
       <button className="mb-4 text-gray-500 hover:text-blue-600" onClick={onCancel}>
         <span className="w-9 h- rounded-lg border border-gray-200 flex items-center justify-center bg-gray-50">
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 20 20">
-            <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
       </button>
