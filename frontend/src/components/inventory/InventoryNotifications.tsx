@@ -1,7 +1,3 @@
-import MetricCard from '../MetricCard';
-import QuickActions from "@/components/QuickActions";
-import RecentActivities from "@/components/RecentActivities";
-import AISummaryPopup from "@/components/AISummaryPopup";
 import { useState } from "react";
 
 interface NotificationsProps {
