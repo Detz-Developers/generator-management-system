@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import OperatorSidebar from '@/components/operator/OperatorSidebar';
-import OperatorDashboard from '@/components/operator/OperatorIssueReporting.tsx';
-import Generators from '@/components/admin/Generators';
-import Tasks from '@/components/admin/Tasks';
-import Services from '@/components/admin/Services';
-import NotificationCenter from '@/components/admin/NotificationCenter';
+import OperatorDashboard from '@/components/operator/OperatorDashboard';
+import OperatorGenerators from '@/components/operator/OperatorGenerators';
+import OperatorBatteries from '@/components/operator/OperatorBatteries';
+import OperatorReports from '@/components/operator/OperatorReports';
+import OperatorNotifications from '@/components/operator/OperatorNotifications';
 
 interface OperatorPanelProps {
   onLogout: () => void;
@@ -20,13 +20,13 @@ export default function OperatorPanel({ onLogout }: OperatorPanelProps) {
       case 'Dashboard':
         return <OperatorDashboard onNavigate={setCurrentPage} />;
       case 'Generators':
-        return <Generators onNavigate={setCurrentPage}/>;
-      case 'Tasks':
-        return <Tasks />;
-      case 'Services':
-        return <Services />;
+        return <OperatorGenerators onNavigate={setCurrentPage}/>;
+      case 'Batteries':
+        return <OperatorBatteries onNavigate={setCurrentPage} />;
+      case 'Reports':
+        return <OperatorReports onNavigate={setCurrentPage} />;
       case 'Notifications':
-        return <NotificationCenter />;
+        return <OperatorNotifications onNavigate={setCurrentPage} />;
       default:
         return (
           <div className="flex-1 p-6 md:p-8">

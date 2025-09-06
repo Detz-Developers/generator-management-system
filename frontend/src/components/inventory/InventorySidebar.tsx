@@ -1,19 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-
-interface SidebarProps {
-  onNavigate: (page: string) => void;
-  currentPage: string;
-  onLogout: () => void;
-  userRole?: string;
-}
-
-interface SidebarItem {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}
+import LogoutModal from '@/components/shared/Sidebar/LogoutModal';
+import { SidebarProps, SidebarItem } from '@/components/shared/Sidebar/types';
 
 const sidebarItems: SidebarItem[] = [
   {
@@ -22,7 +11,7 @@ const sidebarItems: SidebarItem[] = [
         <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
       </svg>
     ),
-    label: 'Dashboard Overview'
+    label: 'Dashboard'
   },
   {
     icon: (
@@ -94,11 +83,10 @@ export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 
     setShowLogoutConfirm(false);
   };
 
-   // Map detail pages to their parent menu
+  // Map detail pages to their parent menu
   const getActivePage = (page: string) => {
     const detailMapping: Record<string, string> = {
-      Dashboard: 'Dashboard Overview',
-      // add other mappings here
+      // add other mappings here if needed
     };
     return detailMapping[page] || page;
   };
@@ -128,11 +116,10 @@ export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 
             <li key={item.label}>
               <button
                 onClick={() => handleItemClick(item.label)}
-                className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  getActivePage(currentPage) === item.label
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                }`}
+                className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${getActivePage(currentPage) === item.label
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
               >
                 <span className="mr-3 flex-shrink-0">{item.icon}</span>
                 <span className="truncate">{item.label}</span>
@@ -156,39 +143,11 @@ export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 
       </div>
 
       {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-          <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 max-w-sm mx-4 shadow-2xl border border-white/20 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">Confirm Logout</h3>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to logout? You will need to sign in again to access the system.
-            </p>
-            <div className="flex space-x-3">
-              <button
-                onClick={confirmLogout}
-                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                Yes, Logout
-              </button>
-              <button
-                onClick={cancelLogout}
-                className="flex-1 bg-white/80 backdrop-blur-sm text-gray-800 py-2 px-4 rounded-lg hover:bg-white transition-all duration-200 text-sm font-medium border border-gray-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LogoutModal
+        isOpen={showLogoutConfirm}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
     </div>
   );
 }

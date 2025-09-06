@@ -15,11 +15,11 @@ interface InventoryPanelProps {
 }
 
 export default function InventoryPanel({ onLogout }: InventoryPanelProps) {
-  const [currentPage, setCurrentPage] = useState('Dashboard Overview');
+  const [currentPage, setCurrentPage] = useState('Dashboard');
 
   const renderContent = () => {
     switch (currentPage) {
-      case 'Dashboard Overview':
+      case 'Dashboard':
         return <InventoryDashboard onNavigate={setCurrentPage} />;
       case 'Battery Management':
         return <InventoryBatteryManagement onNavigate={setCurrentPage} />;

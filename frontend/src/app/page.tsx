@@ -5,6 +5,7 @@ import Sidebar from '@/components/admin/Sidebar';
 import OperatorSidebar from '@/components/operator/OperatorSidebar';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
 import InventorySidebar from '@/components/inventory/InventorySidebar';
+import { InventoryMainDashboard } from '@/components/inventory';
 import NotificationCenter from '@/components/admin/NotificationCenter';
 import Dashboard from '@/components/admin/Dashboard';
 import OperatorDashboard from '@/components/operator/OperatorIssueReporting.tsx';
@@ -133,16 +134,7 @@ export default function Home() {
           </div>
         );
       case 'invent':
-        return (
-          <div className="flex h-screen bg-gray-50">
-            <div className="flex-shrink-0">
-              <InventorySidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} />
-            </div>
-            <main className="flex-1 overflow-auto">
-              {renderInventoryContent()}
-            </main>
-          </div>
-        );
+        return <InventoryMainDashboard onLogout={handleLogout} userRole="inventory" />;
       default:
         return (
           <div className="flex h-screen bg-gray-50">

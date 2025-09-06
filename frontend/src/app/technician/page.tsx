@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
-import TechnicianDashboard from '@/components/technician/TechnicianTasks';
-import Tasks from '@/components/admin/Tasks';
-import Services from '@/components/admin/Services';
-import NotificationCenter from '@/components/admin/NotificationCenter';
+import TechnicianDashboard from '@/components/technician/TechnicianDashboard';
+import TechnicianTasks from '@/components/technician/TechnicianTasks';
+import TechnicianServicesLogging from '@/components/technician/TechnicianSevicesLogging';
+import TechnicianAssignedGenerators from '@/components/technician/TechnicianAssignedGenerators';
+import TechnicianIssuesReporting from '@/components/technician/TechnicianIssuesReporting';
 
 interface TechnicianPanelProps {
   onLogout: () => void;
@@ -19,11 +20,13 @@ export default function TechnicianPanel({ onLogout }: TechnicianPanelProps) {
       case 'Dashboard':
         return <TechnicianDashboard onNavigate={setCurrentPage} />;
       case 'Tasks':
-        return <Tasks />;
+        return <TechnicianTasks onNavigate={setCurrentPage} />;
       case 'Services':
-        return <Services />;
-      case 'Notifications':
-        return <NotificationCenter />;
+        return <TechnicianServicesLogging onNavigate={setCurrentPage} />;
+      case 'Generators':
+        return <TechnicianAssignedGenerators onNavigate={setCurrentPage} />;
+      case 'Reports':
+        return <TechnicianIssuesReporting onNavigate={setCurrentPage} />;
       default:
         return (
           <div className="flex-1 p-6 md:p-8">
