@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import { OperatorMainDashboard } from '@/components/operator';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
+import { TechnicianMainDashboard } from '@/components/technician';
 import { InventoryMainDashboard } from '@/components/inventory';
 import NotificationCenter from '@/components/admin/NotificationCenter';
 import Dashboard from '@/components/admin/Dashboard';
@@ -113,16 +114,7 @@ export default function Home() {
       case 'operate':
         return <OperatorMainDashboard onLogout={handleLogout} userRole="operator" />;
       case 'tech':
-        return (
-          <div className="flex h-screen bg-gray-50">
-            <div className="flex-shrink-0">
-              <TechnicianSidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={handleLogout} />
-            </div>
-            <main className="flex-1 overflow-auto">
-              {renderTechnicianContent()}
-            </main>
-          </div>
-        );
+        return <TechnicianMainDashboard onLogout={handleLogout} userRole="technician" />;
       case 'invent':
         return <InventoryMainDashboard onLogout={handleLogout} userRole="inventory" />;
       default:
