@@ -437,6 +437,55 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
         )}
 
         {/* View Modal */}
+        {showViewModal && viewBattery && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
+                <div className="bg-blue-600 px-8 py-4 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-white">Battery Details</h2>
+                  <button type="button" className="text-white hover:text-gray-200 text-2xl font-bold" onClick={closeModal}>&times;</button>
+                </div>
+                <div className="px-8 py-6">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <div className="font-semibold text-gray-700">Battery ID:</div>
+                      <div className="mt-1">{viewBattery.batteryId}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-700">Type:</div>
+                      <div className="mt-1">{viewBattery.type}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-700">Serial Number:</div>
+                      <div className="mt-1">{viewBattery.serialNumber}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-700">Assigned Date:</div>
+                      <div className="mt-1">{viewBattery.assignedDate}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-700">Status:</div>
+                      <div className="mt-1">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(viewBattery.status)}`}>
+                        {viewBattery.status}
+                      </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-700">Location:</div>
+                      <div className="mt-1">{viewBattery.location}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-700">Shop:</div>
+                      <div className="mt-1">{viewBattery.shop}</div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button type="button" className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={closeModal}>Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        )}
 
         {/* New Edit Battery Modal */}
         {showEditModal && editedBattery && (
