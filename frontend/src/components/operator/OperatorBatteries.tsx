@@ -224,15 +224,36 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
             onChange={e => setSearch(e.target.value)}
             className="border rounded px-4 py-2 w-64"
           />
-          <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 rounded-full font-semibold ${withGen ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600"}`}
-              onClick={() => setWithGen(true)}
-            >With Gen</button>
-            <button
-              className={`px-4 py-2 rounded-full font-semibold ${!withGen ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600"}`}
-              onClick={() => setWithGen(false)}
-            >Without Gen</button>
+          <div
+            className="relative w-[360px] h-10 rounded-full bg-blue-500 p-1 shadow"
+            role="tablist"
+            aria-label="Generator filter"
+          >
+            <div
+              className="absolute top-1 bottom-1 rounded-full bg-white shadow transition-all duration-300"
+              style={{ width: 'calc(50% - 0.25rem)', left: withGen ? '0.25rem' : 'calc(50% + 0.25rem)' }}
+              aria-hidden="true"
+            />
+            <div className="relative z-10 flex h-full select-none">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={withGen}
+                className="flex-1 rounded-full font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                onClick={() => setWithGen(true)}
+              >
+                With Gen
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={!withGen}
+                className="flex-1 rounded-full font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                onClick={() => setWithGen(false)}
+              >
+                Without Gen
+              </button>
+            </div>
           </div>
         </div>
 
