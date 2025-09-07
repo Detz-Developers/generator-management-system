@@ -225,7 +225,7 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
             className="border rounded px-4 py-2 w-64"
           />
           <div
-            className="relative w-[360px] h-10 rounded-full bg-blue-500 p-1 shadow"
+            className="relative w-[360px] h-10 rounded-full bg-blue-400 p-1 shadow"
             role="tablist"
             aria-label="Generator filter"
           >
