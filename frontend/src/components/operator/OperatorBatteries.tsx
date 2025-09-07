@@ -170,6 +170,8 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
     const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const datePickerRef = useRef<HTMLDivElement | null>(null);
+  const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d'>('30d');
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
     // Close popover on outside click or ESC key
     useEffect(() => {
@@ -295,22 +297,194 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
           </div>
           {/* Breakdown & Chart */}
           <div className="flex-1">
-            <div className="font-semibold text-blue-600 mb-2">Recently Breakdown</div>
-            <hr className="mb-4" />
-            {/* Chart Placeholder */}
-            <div className="bg-blue-50 rounded-lg h-40 flex items-end">
-              {/* Simple SVG chart as placeholder */}
-              <svg viewBox="0 0 300 100" className="w-full h-full">
-                <polyline
-                  fill="rgba(59,130,246,0.2)"
-                  stroke="#3b82f6"
-                  strokeWidth="4"
-                  points="0,80 40,60 80,70 120,50 160,60 200,40 240,80 280,30 300,90"
-                />
-              </svg>
+            {/* Header with timeframe */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold text-blue-600">Recently Breakdown</div>
+              <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+                {([['7d','7D'],['30d','30D'],['90d','90D']] as const).map(([key,label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setTimeframe(key)}
+                    className={`px-3 py-1 rounded-full text-sm ${timeframe===key ? 'bg-white text-blue-600 shadow' : 'text-gray-600 hover:text-gray-900'}`}
+                    aria-pressed={timeframe===key}
+                  >{label}</button>
+                ))}
+              </div>
             </div>
+
+            {/* Mini summary pills */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                <span className="text-sm text-green-700">Online</span>
+              </div>
+              <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                <span className="text-sm text-blue-700">Extra</span>
+              </div>
+              <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                <span className="text-sm text-red-600">Replace Requests</span>
+              </div>
+            </div>
+
+            {/* Modern area chart (SVG) */}
+            <ChartArea timeframe={timeframe} hoverIndex={hoverIndex} setHoverIndex={setHoverIndex} selectedDate={selectedDate} />
           </div>
         </div>
       </div>
     );
+}
+
+// Lightweight responsive area chart using pure SVG with gradient and tooltip
+function ChartArea({
+  timeframe,
+  hoverIndex,
+  setHoverIndex,
+  selectedDate
+}: {
+  timeframe: '7d' | '30d' | '90d';
+  hoverIndex: number | null;
+  setHoverIndex: (i: number | null) => void;
+  selectedDate: string;
+}) {
+  const width = 720; // viewBox width
+  const height = 220; // viewBox height
+  const pad = { l: 36, r: 12, t: 16, b: 28 };
+
+  const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
+
+  // Build labels from selectedDate backwards
+  const labels = Array.from({ length: days }, (_, i) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() - (days - 1 - i));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  });
+
+  // Generate smoothish demo data
+  const data = Array.from({ length: days }, (_, i) => {
+    const base = 20 + 6 * Math.sin((i / (days - 1 || 1)) * Math.PI * 1.5);
+    const wiggle = ((i % 5) - 2) * 0.8;
+    return Math.max(5, Math.round(base + wiggle));
+  });
+
+  const minY = Math.min(...data);
+  const maxY = Math.max(...data);
+  const innerW = width - pad.l - pad.r;
+  const innerH = height - pad.t - pad.b;
+
+  const xAt = (i: number) => pad.l + (i / (days - 1)) * innerW;
+  const yAt = (v: number) => {
+    const span = Math.max(1, maxY - minY);
+    return pad.t + (1 - (v - minY) / span) * innerH;
+  };
+
+  // Build line path
+  let dLine = '';
+  data.forEach((v, i) => {
+    const x = xAt(i);
+    const y = yAt(v);
+    dLine += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+  });
+
+  // Build area path
+  const dArea = `${dLine} L ${xAt(days - 1)} ${pad.t + innerH} L ${xAt(0)} ${pad.t + innerH} Z`;
+
+  // Grid lines (y)
+  const gridYValues = 4;
+  const gridLines = Array.from({ length: gridYValues + 1 }, (_, i) => pad.t + (i / gridYValues) * innerH);
+
+  const handleMove = (evt: React.MouseEvent<SVGRectElement, MouseEvent>) => {
+    const { left } = (evt.currentTarget as SVGRectElement).getBoundingClientRect();
+    const px = evt.clientX - left;
+    // Find nearest index
+    let nearest = 0;
+    let best = Infinity;
+    for (let i = 0; i < days; i++) {
+      const dx = Math.abs(px - xAt(i));
+      if (dx < best) {
+        best = dx;
+        nearest = i;
+      }
+    }
+    setHoverIndex(nearest);
+  };
+
+  const handleLeave = () => setHoverIndex(null);
+
+  return (
+    <div className="relative bg-white rounded-xl border border-gray-200 p-4">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-56">
+        <defs>
+          <linearGradient id="strokeGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#1d4ed8" />
+          </linearGradient>
+          <linearGradient id="fillGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(59,130,246,0.28)" />
+            <stop offset="100%" stopColor="rgba(59,130,246,0.06)" />
+          </linearGradient>
+        </defs>
+
+        {/* Grid */}
+        {gridLines.map((y, idx) => (
+          <line key={idx} x1={pad.l} y1={y} x2={pad.l + innerW} y2={y} stroke="#e5e7eb" strokeWidth={1} />
+        ))}
+
+        {/* Area */}
+        <path d={dArea} fill="url(#fillGrad)" stroke="none" />
+        {/* Line */}
+        <path d={dLine} fill="none" stroke="url(#strokeGrad)" strokeWidth={3.5} strokeLinecap="round" />
+
+        {/* Points */}
+        {data.map((v, i) => (
+          <circle key={i} cx={xAt(i)} cy={yAt(v)} r={hoverIndex === i ? 4 : 3} fill="#3b82f6" />
+        ))}
+
+        {/* Hover capture */}
+        <rect
+          x={pad.l}
+          y={pad.t}
+          width={innerW}
+          height={innerH}
+          fill="transparent"
+          onMouseMove={handleMove}
+          onMouseLeave={handleLeave}
+        />
+
+        {/* Hover line */}
+        {hoverIndex !== null && (
+          <line
+            x1={xAt(hoverIndex)}
+            x2={xAt(hoverIndex)}
+            y1={pad.t}
+            y2={pad.t + innerH}
+            stroke="#93c5fd"
+            strokeDasharray="4 4"
+          />
+        )}
+      </svg>
+
+      {/* Tooltip */}
+      {hoverIndex !== null && (
+        <div
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-2 rounded-md bg-white shadow px-2 py-1 text-xs border"
+          style={{
+            left: `${((hoverIndex / (days - 1 || 1)) * 100)}%`,
+            top: 6,
+          }}
+        >
+          <div className="text-gray-500">{labels[hoverIndex]}</div>
+          <div className="font-semibold text-gray-800">{data[hoverIndex]}</div>
+        </div>
+      )}
+
+      {/* X labels (sparse) */}
+      <div className="mt-2 flex justify-between text-[11px] text-gray-500">
+        <span>{labels[0]}</span>
+        <span>{labels[Math.floor(labels.length/2)]}</span>
+        <span>{labels[labels.length-1]}</span>
+      </div>
+    </div>
+  );
 }
