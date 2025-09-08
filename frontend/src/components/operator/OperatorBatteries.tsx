@@ -260,15 +260,15 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
         {/* Battery Cards */}
         <div className="space-y-4 mb-10">
           {filteredBatteries.map(b => (
-            <div key={b.id} className={`flex items-center justify-between rounded-lg p-4 shadow ${b.color}`}>
-              <div className="flex items-center gap-4">
+            <div key={b.id} className={`flex items-center justify-between rounded-lg h-15 shadow ${b.color}`}>
+              <div className="flex items-center gap-4 my-4 mx-2">
                 <span className={`w-6 h-6 rounded-full ${b.dot}`}></span>
                 <div>
                   <div className="font-bold text-lg">Battery {b.id}</div>
                   <div className="text-sm text-gray-700">{b.status}</div>
                 </div>
               </div>
-              <div className={`w-16 h-10 rounded-r-lg ${b.dot}`}></div>
+              <div className={`w-20 h-15 rounded-r-lg ${b.dot}`}></div>
             </div>
           ))}
         </div>
