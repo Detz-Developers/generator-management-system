@@ -172,7 +172,7 @@ export default function OperatorIssueReporting({ onNavigate }: OperatorIssueRepo
                 </thead>
                 <tbody>
                   {issues.map((issue) => (
-                    <tr key={issue.id} className="bg-white px-2 border-b border-b-blue-200">
+                    <tr key={issue.id} className="bg-white mx-4 border-b border-b-blue-200">
                       <td className="px-6 py-3 font-medium text-gray-900">{issue.id}</td>
                       <td className="px-6 py-3">{issue.description}</td>
                       <td className="px-6 py-3">{issue.assignedTo}</td>
@@ -190,7 +190,7 @@ export default function OperatorIssueReporting({ onNavigate }: OperatorIssueRepo
                         )}
                       </td>
                       <td className="px-6 py-4 flex items-center space-x-2">
-                        <button className="p-2 rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200">
+                        <button onClick={() => onNavigate?.("Reports")} className="p-2 rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200">
                           <span className="material-icons text-base"> <FaEye /> </span>
                         </button>
                         {issue.status === "Completed" ? (
