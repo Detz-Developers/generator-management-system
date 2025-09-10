@@ -8,7 +8,7 @@ import { TechnicianMainDashboard } from '@/components/technician';
 import { InventoryMainDashboard } from '@/components/inventory';
 import NotificationCenter from '@/components/admin/NotificationCenter';
 import Dashboard from '@/components/admin/Dashboard';
-import OperatorDashboard from '@/components/operator/OperatorIssueReporting.tsx';
+import OperatorDashboard from '@/components/operator/OperatorIssueReporting';
 import TechnicianDashboard from '@/components/technician/TechnicianTasks';
 import InventoryDashboard from '@/components/inventory/InventoryDashboard';
 import Generators from '@/components/admin/Generators';
