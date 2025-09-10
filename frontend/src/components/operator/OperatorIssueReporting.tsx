@@ -57,7 +57,7 @@ export default function OperatorIssueReporting({ onNavigate }: OperatorIssueRepo
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-blue-800">Issue Reporting</h1>
+            <h1 className="text-4xl font-bold text-blue-600">Issue Reporting</h1>
             <p className="text-gray-500">Report Your Breakdown</p>
           </div>
           <button className="relative bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center">
@@ -76,7 +76,7 @@ export default function OperatorIssueReporting({ onNavigate }: OperatorIssueRepo
                   htmlFor="genl-id"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  GenI ID
+                  Gen ID
                 </label>
                 <input
                   id="genl-id"

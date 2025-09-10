@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import OperatorSidebar from './OperatorSidebar';
-import OperatorIssueReporting from './OperatorIssueReporting.tsx';
+import OperatorIssueReporting from './OperatorIssueReporting';
 import OperatorGenerators from './OperatorGenerators';
 import OperatorBatteries from './OperatorBatteries';
 import OperatorReports from './OperatorReports';
