@@ -1,3 +1,5 @@
+
+
 describe("Admin - Generators page", () => {
   const openAdminGenerators = () => {
     cy.visit("/admin");
@@ -14,10 +16,7 @@ describe("Admin - Generators page", () => {
 
   const getContentMain = () => {
     // Scope to the main that contains the Generators header
-    return cy
-      .contains("h1", "Generators")
-      .parents("main")
-      .first();
+    return cy.contains("h1", "Generators").parents("main").first();
   };
 
   beforeEach(() => {
@@ -71,4 +70,26 @@ describe("Admin - Generators page", () => {
       });
     });
   });
+
+it("opens Add Generator modal when clicking Add Generator button", () => {
+  getContentMain().within(() => {
+    // Click the Add Generator button in header
+    cy.contains("button", "Add Generator").click();
+  });
+
+  // Modal should appear
+ cy.get('[data-cy="add-generator-modal"]').within(() => {
+  cy.contains("h2", "Add Generator").should("be.visible");
+  cy.contains("Size").should("be.visible");
+  cy.contains("Serial Number").should("be.visible");
+  cy.contains("Installed Date").should("be.visible");
+  cy.contains("button", "Cancel").click();
+});
+
+
+  // Verify modal is closed
+  cy.contains("h2", "Add Generator").should("not.exist");
+});
+
+
 });
