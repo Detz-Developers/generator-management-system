@@ -1,4 +1,6 @@
-import {useState} from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 
@@ -9,7 +11,7 @@ interface OperatorIssueReportingProps {
 export default function OperatorIssueReporting({ onNavigate }: OperatorIssueReportingProps) {
     const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
     //new
-    const [genId, setGenId] = useState("Serial Number");
+    const [genId, setGenId] = useState("G001");
   const [emergency, setEmergency] = useState(true);
   const [batteryInfo, setBatteryInfo] = useState(true);
   const [issueDetails, setIssueDetails] = useState("");

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["dom", "esnext"],
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Cypress + React + Sinon types
+    "types": ["cypress", "node", "chai", "mocha", "sinon", "react", "react-dom"]
+  },
+  "include": [
+    "cypress",
+    "frontend/src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
