@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { createUserWithEmailAndPassword, deleteUser, signOut as signOutSecondary } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  signOut as signOutSecondary,
+} from 'firebase/auth';
 import { ref, update } from 'firebase/database';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions, getSecondaryAuth } from '../firebaseConfig';
@@ -35,25 +39,12 @@ const centers = [
   'Mumbai Central',
 ];
 
-type RoleLabel = 'Admin' | 'Technician' | 'Operator' | 'Inventory';
-
-interface ManagedUserRow {
-  id: string;
-  name: string;
-  email: string;
-  role: RoleLabel;
-  assignment: string;
-  assignmentDetails: string;
-  status: 'Active' | 'Inactive' | 'Pending Invitation';
-  lastLogin: string;
-}
-
 interface AddUserFormProps {
   onCancel: () => void;
-  onCreate?: (user: ManagedUserRow) => void;
+  onSuccess?: () => void;
 }
 
-export default function AddUserForm({ onCancel, onCreate }: AddUserFormProps) {
+export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -123,11 +114,9 @@ export default function AddUserForm({ onCancel, onCreate }: AddUserFormProps) {
       });
 
       const updates: Record<string, unknown> = {};
-
       if (role === 'operator' && center) {
         updates.center = center;
       }
-
       if (Object.keys(updates).length) {
         await update(ref(db, `users/${uid}`), updates);
       }
@@ -137,24 +126,6 @@ export default function AddUserForm({ onCancel, onCreate }: AddUserFormProps) {
         await setUserStatus({ uid, disabled: true });
       }
 
-      const roleLabel = roles.find((r) => r.value === role)?.label ?? role;
-
-      onCreate?.({
-        id: uid,
-        name: fullName.trim(),
-        email: trimmedEmail,
-        role: roleLabel as RoleLabel,
-        assignment:
-          role === 'operator'
-            ? center || 'Pending assignment'
-            : role === 'inventory'
-            ? 'Inventory team'
-            : '-',
-        assignmentDetails: role === 'operator' ? 'Assigned via admin panel' : '',
-        status: active ? 'Active' : 'Inactive',
-        lastLogin: 'Never',
-      });
-
       setSuccess('User account created successfully.');
       setFullName('');
       setEmail('');
@@ -162,6 +133,7 @@ export default function AddUserForm({ onCancel, onCreate }: AddUserFormProps) {
       setCenter('');
       setRole('operator');
       setActive(true);
+      onSuccess?.();
     } catch (err: unknown) {
       if (createdUserCredential) {
         await deleteUser(createdUserCredential.user).catch(() => undefined);
