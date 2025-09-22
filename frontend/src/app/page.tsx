@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 import Sidebar from '@/components/admin/Sidebar';
 import { OperatorMainDashboard } from '@/components/operator';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
@@ -36,6 +38,9 @@ export default function Home() {
   };
 
   const handleLogout = () => {
+    signOut(auth).catch((err) => {
+      console.error('Logout error', err);
+    });
     setIsLoggedIn(false);
     setUserRole('admin');
     setUserEmail('');
