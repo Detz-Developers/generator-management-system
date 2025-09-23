@@ -5,5 +5,5 @@ export { default as InventoryBatteryManagement } from './InventoryBatteryManagem
 export { default as InventoryChargerManagement } from './InventoryChargerManagement';
 export { default as InventoryGatePassManagement } from './InventoryGatePassMaagement';
 export { default as InventoryIssueTriage } from './InventoryIssueTriage';
-export { default as InventoryInventoryReports } from './InventoryInventoryReports';
+export { default as InventoryReports } from './InventoryReports';
 export { default as InventoryNotifications } from './InventoryNotifications';
