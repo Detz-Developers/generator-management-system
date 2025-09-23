@@ -7,7 +7,7 @@ import InventoryBatteryManagement from './InventoryBatteryManagement';
 import InventoryChargerManagement from './InventoryChargerManagement';
 import InventoryGatePassManagement from './InventoryGatePassMaagement';
 import InventoryIssueTriage from './InventoryIssueTriage';
-import InventoryInventoryReports from './InventoryReports';
+import InventoryInventoryReports from './InventoryInventoryReports';
 import InventoryNotifications from './InventoryNotifications';
 
 interface InventoryMainDashboardProps {
