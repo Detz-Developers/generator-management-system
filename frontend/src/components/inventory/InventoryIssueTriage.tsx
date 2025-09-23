@@ -1,8 +1,5 @@
 import { useState } from "react";
-<<<<<<< Updated upstream
 import { FiClock, FiCheckCircle, FiCalendar, FiAlertCircle, FiChevronDown, FiSearch, FiFilter, FiBattery, FiAlertTriangle } from "react-icons/fi";
-=======
->>>>>>> Stashed changes
 
 interface IssueTriageProps {
     onNavigate?: (page: string) => void;
@@ -22,7 +19,6 @@ interface Issue {
 }
 
 export default function InventoryIssueTriage({ onNavigate }: IssueTriageProps) {
-<<<<<<< Updated upstream
     const [activeTab, setActiveTab] = useState<"pending" | "investigating" | "resolved">("pending");
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -256,140 +252,4 @@ export default function InventoryIssueTriage({ onNavigate }: IssueTriageProps) {
             </div>
         </div>
     );
-=======
-  const [activeTab, setActiveTab] = useState("Pending Review");
-
-  const handleAutoAssign = () => {
-    console.log("Auto-Assign Clicked");
-  };
-
-  const tabData = [
-    {
-      title: "Pending Review",
-      issues: [
-        {
-          iconColor: "green",
-          title: "Battery not charging properly",
-          description: "Battery BAT-2024-001 shows charging issues. Voltage drops rapidly after disconnection.",
-          technician: "Dinal Rashmika",
-          cost: "LKR 900",
-          date: "7/20/2025",
-          battery: "BAT-2024-001",
-          charger: "CHG-2024-005",
-          statusActions: ["Replaced fuel filter, tested system"],
-        },
-        {
-          iconColor: "red",
-          title: "Incorrect battery type assigned",
-          description: "Generator requires Type-C battery but Type-A was installed. Performance issues reported.",
-          technician: "Nimal Perera",
-          cost: "LKR 3000",
-          date: "8/20/2025",
-          battery: "BAT-2024-123",
-          charger: "",
-          statusActions: ["Replaced radiator hose, topped up coolant"],
-        },
-      ],
-    },
-    { title: "Investigating", issues: [] },
-    { title: "Resolved", issues: [] },
-  ];
-
-  return (
-    <div className="flex-1 p-6 bg-white">
-      {/* Header and Auto-Assign Button */}
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-600">Issue Triage</h1>
-          <p className="text-gray-600">Review and manage technician and operator reported issues</p>
-        </div>
-        <button
-          onClick={handleAutoAssign}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md"
-        >
-          Auto-Assign
-        </button>
-      </div>
-
-      {/* Top Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow border border-blue-200">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium text-gray-500">Pending Issues</h3>
-            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-          </div>
-          <p className="text-2xl font-bold text-gray-800">12</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-blue-200">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium text-gray-500">Resolved Today</h3>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-          </div>
-          <p className="text-2xl font-bold text-gray-800">28</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-blue-200">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium text-gray-500">Urgent Priority</h3>
-            <div className="w-3 h-3 rounded-full bg-red-600"></div>
-          </div>
-          <p className="text-2xl font-bold text-gray-800">3</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-blue-200">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium text-gray-500">Investigating</h3>
-            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-          </div>
-          <p className="text-2xl font-bold text-gray-800">0</p>
-        </div>
-      </div>
-
-      {/* Issue Cards Container */}
-      <div className="bg-white border border-blue-200 rounded-xl p-5 space-y-5">
-        {/* Tab Navigation */}
-        <div className="flex mb-5 rounded-xl border border-blue-200 justify-evenly gap-20">
-          {["Pending Review", "Investigating", "Resolved"].map((tab) => (
-            <button
-              key={tab}
-              className={`px-4 py-2 font-semibold ${activeTab === tab ? "bg-blue-500 rounded-xl shadow hover:bg-blue-500 text-white" : "text-black"}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Issue Cards */}
-        {tabData
-          .find((tab) => tab.title === activeTab)
-          ?.issues.length ? (
-          tabData
-            .find((tab) => tab.title === activeTab)
-            ?.issues.map((issue, index) => (
-              <div key={index} className="border border-blue-300 rounded-md p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded-full bg-${issue.iconColor}-500`}></div>
-                  <h3 className="text-lg font-semibold text-black">{issue.title}</h3>
-                </div>
-                <p className="text-sm text-black">{issue.description}</p>
-                {issue.statusActions && issue.statusActions.map((action, i) => (
-                  <p key={i} className="text-sm text-black">{action}</p>
-                ))}
-                <div className="flex flex-wrap text-sm text-black gap-4">
-                  <span>Technician: <span className="text-black font-medium">{issue.technician}</span></span>
-                  <span>Cost: <span className="text-black">{issue.cost}</span></span>
-                  <span>Date: <span className="text-black">{issue.date}</span></span>
-                </div>
-                <div className="flex flex-wrap text-sm text-black gap-4">
-                  <span>Battery: <span className="text-black">{issue.battery}</span></span>
-                  {issue.charger && <span>Charger: <span className="text-black">{issue.charger}</span></span>}
-                </div>
-              </div>
-            ))
-        ) : (
-          <div className="text-center text-black">No issues to display for this tab.</div>
-        )}
-      </div>
-    </div>
-  );
->>>>>>> Stashed changes
 }
