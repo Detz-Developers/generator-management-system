@@ -396,7 +396,6 @@ export default function TechnicianIssueReporting({ onNavigate }: TechnicianIssue
         {/* New Issue Modal */}
         {isFormOpen && (
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 flex items-center justify-center" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-              {console.log("Modal rendering, isFormOpen:", isFormOpen)}
               <div
                   className="bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full sm:p-6 z-60"
                   onClick={(e) => e.stopPropagation()}

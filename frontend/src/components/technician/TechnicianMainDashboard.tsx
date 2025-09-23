@@ -7,6 +7,7 @@ import TechnicianServicesLogging from './TechnicianSevicesLogging';
 import TechnicianIssueReporting from './TechnicianIssuesReporting';
 import TechnicianAssignedGenerators from './TechnicianAssignedGenerators';
 import {TechnicianNotifications} from "@/components/technician/index";
+import TechnicianIssuesReporting from './TechnicianIssuesReporting';
 
 interface TechnicianMainDashboardProps {
   onLogout: () => void;
@@ -14,7 +15,7 @@ interface TechnicianMainDashboardProps {
 }
 
 export default function TechnicianMainDashboard({ onLogout, userRole = 'technician' }: TechnicianMainDashboardProps) {
-  const [currentPage, setCurrentPage] = useState('Tasks');
+  const [currentPage, setCurrentPage] = useState('Reports');
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
@@ -22,18 +23,18 @@ export default function TechnicianMainDashboard({ onLogout, userRole = 'technici
 
   const renderCurrentPage = () => {
     switch (currentPage) {
+      case 'Reports':
+        return <TechnicianIssuesReporting onNavigate={setCurrentPage} />;
       case 'Tasks':
-        return <TechnicianTasks onNavigate={handleNavigate} />;
-      case 'Services Logging':
-        return <TechnicianServicesLogging onNavigate={handleNavigate} />;
-      case 'Issue Reporting':
-        return <TechnicianIssueReporting onNavigate={handleNavigate} />;
-      case 'Assigned Generators':
-        return <TechnicianAssignedGenerators onNavigate={handleNavigate} />;
+        return <TechnicianTasks onNavigate={setCurrentPage} />;
+      case 'Services':
+        return <TechnicianServicesLogging onNavigate={setCurrentPage} />;
+      case 'Generators':
+        return <TechnicianAssignedGenerators onNavigate={setCurrentPage} />;
       case 'Notifications':
-        return <TechnicianNotifications onNavigate={handleNavigate} />;
+        return <TechnicianNotifications onNavigate={setCurrentPage} />;
       default:
-        return <TechnicianTasks onNavigate={handleNavigate} />;
+        return <TechnicianIssuesReporting onNavigate={handleNavigate} />;
     }
   };
 

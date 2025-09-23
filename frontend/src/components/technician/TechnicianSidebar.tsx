@@ -19,6 +19,14 @@ const sidebarItems: SidebarItem[] = [
   {
     icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+      </svg>
+    ),
+    label: 'Breakdowns'
+  },
+  {
+    icon: (
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
       </svg>
     ),
@@ -31,14 +39,6 @@ const sidebarItems: SidebarItem[] = [
       </svg>
     ),
     label: 'Services Logging'
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-      </svg>
-    ),
-    label: 'Issue Reporting'
   },
   {
     icon: (
@@ -62,7 +62,17 @@ export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleItemClick = (itemLabel: string) => {
-    onNavigate(itemLabel);
+    // Map sidebar labels to the correct page names used in the technician page
+    const pageMapping: Record<string, string> = {
+      'Breakdowns': 'Reports',
+      'Tasks': 'Tasks',
+      'Services Logging': 'Services',
+      'Assigned Generators': 'Generators',
+      'Notifications': 'Notifications'
+    };
+    
+    const targetPage = pageMapping[itemLabel] || itemLabel;
+    onNavigate(targetPage);
   };
 
   const handleLogoutClick = () => {
@@ -78,13 +88,17 @@ export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 
     setShowLogoutConfirm(false);
   };
 
-   // Map detail pages to their parent menu
+   // Map current page back to sidebar labels for highlighting
   const getActivePage = (page: string) => {
-    const detailMapping: Record<string, string> = {
-      GeneratorDetails: 'Generators', // Individual page highlights Generators
-      // add other mappings here
+    const reverseMapping: Record<string, string> = {
+      'Reports': 'Breakdowns',
+      'Tasks': 'Tasks',
+      'Services': 'Services Logging',
+      'Generators': 'Assigned Generators',
+      'Notifications': 'Notifications',
+      'GeneratorDetails': 'Assigned Generators', // Detail page highlights parent menu
     };
-    return detailMapping[page] || page;
+    return reverseMapping[page] || page;
   };
 
 

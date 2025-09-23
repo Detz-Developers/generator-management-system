@@ -17,14 +17,14 @@ export default function TechnicianPanel({ onLogout }: TechnicianPanelProps) {
 
   const renderContent = () => {
     switch (currentPage) {
+      case 'Reports':
+        return <TechnicianIssuesReporting onNavigate={setCurrentPage} />;
       case 'Tasks':
         return <TechnicianTasks onNavigate={setCurrentPage} />;
       case 'Services':
         return <TechnicianServicesLogging onNavigate={setCurrentPage} />;
       case 'Generators':
         return <TechnicianAssignedGenerators onNavigate={setCurrentPage} />;
-      case 'Reports':
-        return <TechnicianIssuesReporting onNavigate={setCurrentPage} />;
       case 'Notifications':
         return <TechnicianNotifications onNavigate={setCurrentPage} />;
 
