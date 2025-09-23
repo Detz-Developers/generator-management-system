@@ -6,6 +6,7 @@ import TechnicianTasks from '@/components/technician/TechnicianTasks';
 import TechnicianServicesLogging from '@/components/technician/TechnicianSevicesLogging';
 import TechnicianAssignedGenerators from '@/components/technician/TechnicianAssignedGenerators';
 import TechnicianIssuesReporting from '@/components/technician/TechnicianIssuesReporting';
+import TechnicianNotifications from '@/components/technician/TechnicianNotifications';
 
 interface TechnicianPanelProps {
   onLogout: () => void;
@@ -24,6 +25,9 @@ export default function TechnicianPanel({ onLogout }: TechnicianPanelProps) {
         return <TechnicianAssignedGenerators onNavigate={setCurrentPage} />;
       case 'Reports':
         return <TechnicianIssuesReporting onNavigate={setCurrentPage} />;
+      case 'Notifications':
+        return <TechnicianNotifications onNavigate={setCurrentPage} />;
+
       default:
         return (
           <div className="flex-1 p-6 md:p-8">

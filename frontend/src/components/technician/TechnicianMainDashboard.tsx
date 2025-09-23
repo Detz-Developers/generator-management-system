@@ -6,6 +6,7 @@ import TechnicianTasks from './TechnicianTasks';
 import TechnicianServicesLogging from './TechnicianSevicesLogging';
 import TechnicianIssueReporting from './TechnicianIssuesReporting';
 import TechnicianAssignedGenerators from './TechnicianAssignedGenerators';
+import {TechnicianNotifications} from "@/components/technician/index";
 
 interface TechnicianMainDashboardProps {
   onLogout: () => void;
@@ -29,6 +30,8 @@ export default function TechnicianMainDashboard({ onLogout, userRole = 'technici
         return <TechnicianIssueReporting onNavigate={handleNavigate} />;
       case 'Assigned Generators':
         return <TechnicianAssignedGenerators onNavigate={handleNavigate} />;
+      case 'Notifications':
+        return <TechnicianNotifications onNavigate={handleNavigate} />;
       default:
         return <TechnicianTasks onNavigate={handleNavigate} />;
     }

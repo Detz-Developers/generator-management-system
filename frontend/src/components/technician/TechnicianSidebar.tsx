@@ -48,6 +48,14 @@ const sidebarItems: SidebarItem[] = [
     ),
     label: 'Assigned Generators'
   },
+  {
+    icon: (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.649-.824a1 1 0 01.894 1.79l-1.301.65 1.06 1.415a1 1 0 11-1.615 1.174l-1.06-1.415-1.648.824v1.477a1 1 0 01-2 0v-1.477l-1.648-.824-1.06 1.415a1 1 0 01-1.615-1.174l1.06-1.415-1.301-.65a1 1 0 01.894-1.79l1.649.824L9 4.323V3a1 1 0 011-1zm0 16a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+        </svg>
+    ),
+    label: 'Notifications'
+  },
 ];
 
 export default function Sidebar({ onNavigate, currentPage, onLogout, userRole = 'admin' }: SidebarProps) {
