@@ -33,7 +33,8 @@
     "@types/sinon": "^17.0.4",
     "babel-loader": "^10.0.0",
     "chai": "^6.0.1",
-    "cypress": "^15.2.0",
+    "cypress": "^15.3.0",
+    "json-server": "^1.0.0-beta.3",
     "sinon": "^21.0.0",
     "ts-loader": "^9.5.4"
   },
