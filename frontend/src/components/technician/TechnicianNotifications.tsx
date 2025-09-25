@@ -8,11 +8,11 @@ import { FaTools, FaBatteryFull, FaChartBar, FaBell } from "react-icons/fa";
 interface Notification {
   id: string;
   title: string;
-  description: string; // backend → body
+  description: string;
   type: string;
   icon: React.ReactNode;
-  timestamp: string;   // backend → createdAt
-  read: boolean;       // backend → read
+  timestamp: string;
+  read: boolean;
 }
 
 // 🔹 Icon selector
@@ -36,12 +36,12 @@ const getIcon = (type: string) => {
 export default function TechnicianNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // 🔹 Load from Firebase realtime
+  // 🔹 Load notifications from Firebase realtime
   useEffect(() => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
-    const notifRef = ref(db, `notifications/${uid}`);
+    const notifRef = ref(db, `notifications/technician/${uid}`);
     const unsub = onValue(notifRef, (snap) => {
       const data = snap.val() || {};
       const arr: Notification[] = Object.values(data).map((n: any) => ({
@@ -53,13 +53,19 @@ export default function TechnicianNotifications() {
         timestamp: new Date(n.createdAt).toLocaleString(),
         read: n.read,
       }));
-      setNotifications(arr.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+      setNotifications(
+        arr.sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() -
+            new Date(a.timestamp).getTime()
+        )
+      );
     });
 
     return () => unsub();
   }, []);
 
-  // 🔹 Mark single notification as read
+  // 🔹 Mark notification(s) as read
   const setRead = async (id: string | null) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
@@ -68,10 +74,16 @@ export default function TechnicianNotifications() {
       // Mark all as read
       const updates: Promise<void>[] = notifications
         .filter((n) => !n.read)
-        .map((n) => update(ref(db, `notifications/${uid}/${n.id}`), { read: true }));
+        .map((n) =>
+          update(ref(db, `notifications/technician/${uid}/${n.id}`), {
+            read: true,
+          })
+        );
       await Promise.all(updates);
     } else {
-      await update(ref(db, `notifications/${uid}/${id}`), { read: true });
+      await update(ref(db, `notifications/technician/${uid}/${id}`), {
+        read: true,
+      });
     }
   };
 
@@ -81,8 +93,12 @@ export default function TechnicianNotifications() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">Notifications</h1>
-            <p className="text-gray-600 text-base md:text-lg">View technician alerts and notifications</p>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">
+              Notifications
+            </h1>
+            <p className="text-gray-600 text-base md:text-lg">
+              View technician alerts and notifications
+            </p>
           </div>
           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
             <FaBell className="text-blue-600 text-2xl" />
@@ -106,21 +122,29 @@ export default function TechnicianNotifications() {
         </div>
         <div className="space-y-6">
           {notifications.length === 0 ? (
-            <p className="text-gray-500 text-center">No notifications available.</p>
+            <p className="text-gray-500 text-center">
+              No notifications available.
+            </p>
           ) : (
             notifications.map((notif) => (
               <div
                 key={notif.id}
-                className={`border border-blue-200 rounded-lg p-4 flex items-start gap-4 bg-white ${
+                className={`border border-blue-200 rounded-lg p-4 flex items-start gap-4 ${
                   notif.read ? "bg-gray-50" : "bg-orange-50"
                 }`}
               >
                 <div className="mt-1">{notif.icon}</div>
                 <div className="flex-1">
-                  <h2 className="font-semibold text-lg text-gray-900 mb-1">{notif.title}</h2>
-                  <p className="text-gray-700 text-sm mb-2">{notif.description}</p>
+                  <h2 className="font-semibold text-lg text-gray-900 mb-1">
+                    {notif.title}
+                  </h2>
+                  <p className="text-gray-700 text-sm mb-2">
+                    {notif.description}
+                  </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">{notif.timestamp}</span>
+                    <span className="text-xs text-gray-400">
+                      {notif.timestamp}
+                    </span>
                     {!notif.read && (
                       <button
                         className="text-sm text-orange-600 hover:text-orange-800"

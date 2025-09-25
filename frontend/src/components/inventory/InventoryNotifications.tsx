@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, update } from "firebase/database";
 import { auth, db } from "../../firebaseConfig";
 
 interface InventoryNotification {
@@ -32,7 +32,7 @@ export default function InventoryNotifications() {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
-    const notifRef = ref(db, `notifications/${uid}`);
+    const notifRef = ref(db, `notifications/inventory/${uid}`);
     const unsub = onValue(notifRef, (snap) => {
       const data = snap.val() || {};
       const arr: InventoryNotification[] = Object.values(data).map((n: any) => ({
@@ -49,11 +49,11 @@ export default function InventoryNotifications() {
         createdAt: n.createdAt ?? Date.now(),
       }));
 
-      // sort by latest first
+      // sort latest → oldest
       arr.sort((a, b) => b.createdAt - a.createdAt);
       setNotifications(arr);
 
-      // calculate summary counts
+      // summary counts
       const todayStr = new Date().toLocaleDateString();
       setCounts({
         unread: arr.filter((n) => !n.read).length,
@@ -65,6 +65,14 @@ export default function InventoryNotifications() {
 
     return () => unsub();
   }, []);
+
+  // 🔹 Mark single notification as read
+  const setRead = async (id: string) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !id) return;
+
+    await update(ref(db, `notifications/inventory/${uid}/${id}`), { read: true });
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
@@ -104,7 +112,7 @@ export default function InventoryNotifications() {
       {/* Notifications List */}
       <div className="space-y-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Pending Review</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Latest Notifications</h2>
           <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
             View All
           </button>
@@ -116,7 +124,9 @@ export default function InventoryNotifications() {
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              className={`p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${
+                notification.read ? "bg-white" : "bg-orange-50"
+              }`}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -154,9 +164,14 @@ export default function InventoryNotifications() {
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {notification.status}
                   </span>
-                  <button className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    View Details
-                  </button>
+                  {!notification.read && (
+                    <button
+                      className="mt-2 text-orange-600 hover:text-orange-800 text-sm font-medium"
+                      onClick={() => setRead(notification.id)}
+                    >
+                      Mark as Read
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

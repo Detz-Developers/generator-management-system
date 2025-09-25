@@ -10,7 +10,7 @@ interface Notification {
   title: string;
   message: string;
   priority: 'high' | 'medium' | 'low';
-  timestamp: string;
+  timestamp: number;  // keep as number for sorting
   isRead: boolean;
   hasIndicator?: boolean;
 }
@@ -27,18 +27,18 @@ export default function NotificationCenter() {
     const notifRef = ref(db, `notifications/${uid}`);
     const unsub = onValue(notifRef, (snap) => {
       const data = snap.val() || {};
-      const arr: Notification[] = Object.values(data).map((n: any) => ({
-        id: n.id,
+      const arr: Notification[] = Object.entries<any>(data).map(([id, n]) => ({
+        id,
         type: n.type,
         title: n.title,
-        message: n.body,
+        message: n.message || n.body || "",
         priority: n.priority ?? 'low',
-        timestamp: new Date(n.createdAt).toLocaleString(),
-        isRead: n.read,
+        timestamp: n.createdAt ? new Date(n.createdAt).getTime() : Date.now(),
+        isRead: n.read ?? false,
         hasIndicator: n.hasIndicator ?? false,
       }));
       // Sort by createdAt descending
-      setNotifications(arr.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+      setNotifications(arr.sort((a, b) => b.timestamp - a.timestamp));
     });
 
     return () => unsub();
@@ -86,8 +86,7 @@ export default function NotificationCenter() {
   // 🔹 Icons & priority colors
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'service-due': case 'service-overdue':
-        return <span>⚠️</span>;
+      case 'service-due': case 'service-overdue': return <span>⚠️</span>;
       case 'battery-return': return <span>🔋</span>;
       case 'task-reminder': case 'new-task': return <span>📝</span>;
       case 'repair-completed': return <span>✅</span>;
@@ -179,7 +178,7 @@ export default function NotificationCenter() {
                             {notification.hasIndicator && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
                           </div>
                           <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                          <p className="text-xs text-gray-500">{notification.timestamp}</p>
+                          <p className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 ml-4">
