@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/firebaseConfig';
+import { useEffect, useState } from 'react';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
+import { auth, db } from '@/firebaseConfig';
 import Sidebar from '@/components/admin/Sidebar';
 import { OperatorMainDashboard } from '@/components/operator';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
@@ -31,21 +32,59 @@ export default function Home() {
   const [userEmail, setUserEmail] = useState<string>('');
   const [currentPage, setCurrentPage] = useState('Dashboard');
 
+  // Map server role to client shorthand used in UI
+  const mapRoleToClient = (role?: string): string => {
+    switch ((role || '').toLowerCase()) {
+      case 'operator':
+        return 'operate';
+      case 'technician':
+        return 'tech';
+      case 'inventory':
+        return 'invent';
+      case 'admin':
+      default:
+        return 'admin';
+    }
+  };
+
   const handleLogin = (role: string, email: string) => {
+    // Optimistically update; auth listener will reconcile
     setIsLoggedIn(true);
     setUserRole(role);
     setUserEmail(email);
   };
 
-  const handleLogout = () => {
-    signOut(auth).catch((err) => {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
       console.error('Logout error', err);
-    });
-    setIsLoggedIn(false);
-    setUserRole('admin');
-    setUserEmail('');
-    setCurrentPage('Dashboard'); // Reset to dashboard when logging back in
+    }
+    // Auth listener below will set UI state; also reset view optimistically
+    setCurrentPage('Dashboard');
   };
+
+  // Keep UI in sync with Firebase auth state (fixes logout not reflecting)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && user.uid) {
+        try {
+          const snap = await get(ref(db, `users/${user.uid}`));
+          const role = mapRoleToClient((snap.exists() ? (snap.val()?.role as string | undefined) : undefined));
+          setUserRole(role);
+        } catch {
+          setUserRole('admin');
+        }
+        setUserEmail(user.email ?? '');
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+        setUserRole('admin');
+        setUserEmail('');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const renderContent = () => {
     switch (currentPage) {

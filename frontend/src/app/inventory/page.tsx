@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 import InventorySidebar from '@/components/inventory/InventorySidebar';
 import InventoryDashboard from '@/components/inventory/InventoryDashboard';
 import InventoryBatteryManagement from '@/components/inventory/InventoryBatteryManagement';
@@ -11,11 +14,12 @@ import InventoryInventoryReports from '@/components/inventory/InventoryInventory
 import InventoryNotifications from '@/components/inventory/InventoryNotifications';
 
 interface InventoryPanelProps {
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export default function InventoryPanel({ onLogout }: InventoryPanelProps) {
   const [currentPage, setCurrentPage] = useState('Dashboard');
+  const router = useRouter();
 
   const renderContent = () => {
     switch (currentPage) {
@@ -66,7 +70,11 @@ export default function InventoryPanel({ onLogout }: InventoryPanelProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       <div className="flex-shrink-0">
-        <InventorySidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={onLogout} />
+        <InventorySidebar
+          onNavigate={setCurrentPage}
+          currentPage={currentPage}
+          onLogout={onLogout ?? (async () => { try { await signOut(auth); } catch (e) { console.error('Logout error', e); } router.push('/'); })}
+        />
       </div>
       <main className="flex-1 overflow-auto">
         {renderContent()}

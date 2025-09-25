@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 import OperatorSidebar from '@/components/operator/OperatorSidebar';
 import OperatorGenerators from '@/components/operator/OperatorGenerators';
 import OperatorBatteries from '@/components/operator/OperatorBatteries';
@@ -8,11 +11,12 @@ import OperatorReports from '@/components/operator/OperatorReports';
 import OperatorNotifications from '@/components/operator/OperatorNotifications';
 
 interface OperatorPanelProps {
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export default function OperatorPanel({ onLogout }: OperatorPanelProps) {
   const [currentPage, setCurrentPage] = useState('Dashboard');
+  const router = useRouter();
 
   const renderContent = () => {
     switch (currentPage) {
@@ -57,7 +61,11 @@ export default function OperatorPanel({ onLogout }: OperatorPanelProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       <div className="flex-shrink-0">
-        <OperatorSidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={onLogout} />
+        <OperatorSidebar
+          onNavigate={setCurrentPage}
+          currentPage={currentPage}
+          onLogout={onLogout ?? (async () => { try { await signOut(auth); } catch (e) { console.error('Logout error', e); } router.push('/'); })}
+        />
       </div>
       <main className="flex-1 overflow-auto">
         {renderContent()}

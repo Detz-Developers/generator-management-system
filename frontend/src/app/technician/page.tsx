@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
 import TechnicianTasks from '@/components/technician/TechnicianTasks';
 import TechnicianServicesLogging from '@/components/technician/TechnicianSevicesLogging';
@@ -9,11 +12,12 @@ import TechnicianIssuesReporting from '@/components/technician/TechnicianIssuesR
 import TechnicianNotifications from '@/components/technician/TechnicianNotifications';
 
 interface TechnicianPanelProps {
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export default function TechnicianPanel({ onLogout }: TechnicianPanelProps) {
   const [currentPage, setCurrentPage] = useState('Dashboard');
+  const router = useRouter();
 
   const renderContent = () => {
     switch (currentPage) {
@@ -61,7 +65,11 @@ export default function TechnicianPanel({ onLogout }: TechnicianPanelProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       <div className="flex-shrink-0">
-        <TechnicianSidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={onLogout} />
+        <TechnicianSidebar
+          onNavigate={setCurrentPage}
+          currentPage={currentPage}
+          onLogout={onLogout ?? (async () => { try { await signOut(auth); } catch (e) { console.error('Logout error', e); } router.push('/'); })}
+        />
       </div>
       <main className="flex-1 overflow-auto">
         {renderContent()}

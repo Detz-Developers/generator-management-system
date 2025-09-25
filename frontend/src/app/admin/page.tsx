@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 import Sidebar from '@/components/admin/Sidebar';
 import NotificationCenter from '@/components/admin/NotificationCenter';
 import Dashboard from '@/components/admin/Dashboard';
@@ -17,7 +19,7 @@ import Users from '@/components/admin/Users';
 import GeneratorDetails from '@/components/admin/GeneratorDetails';
 
 interface AdminPanelProps {
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export default function AdminPanel({ onLogout }: AdminPanelProps) {
@@ -93,7 +95,12 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       <div className="flex-shrink-0">
-        <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} onLogout={onLogout} userRole="admin" />
+        <Sidebar
+          onNavigate={setCurrentPage}
+          currentPage={currentPage}
+          onLogout={onLogout ?? (async () => { try { await signOut(auth); } catch (e) { console.error('Logout error', e); } router.push('/'); })}
+          userRole="admin"
+        />
       </div>
       <main className="flex-1 overflow-auto">
         {renderContent()}

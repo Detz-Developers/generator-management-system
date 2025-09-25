@@ -8,7 +8,7 @@ import { db } from "../../firebaseConfig";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../../firebaseConfig";
 
-import { MdAdd, MdBrightness1, MdOutlineRemoveRedEye, MdEditSquare, MdSearch } from "react-icons/md";
+import { MdAdd, MdBrightness1, MdOutlineRemoveRedEye, MdEditSquare, MdSearch, MdDelete } from "react-icons/md";
 
 const statusColors: Record<string, string> = {
   green: "bg-green-100 text-green-700",
@@ -32,6 +32,8 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
   const [shopFilter, setShopFilter] = useState("all");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
 
   // Add Generator form state
   const [formBrand, setFormBrand] = useState("");
@@ -79,6 +81,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
 
   const [generators, setGenerators] = useState<GenRow[]>([]);
   const [shopNameById, setShopNameById] = useState<Record<string, string>>({});
+  const [rawByKey, setRawByKey] = useState<Record<string, RawGeneratorRecord>>({});
 
   const toTitle = (s?: string | null) => {
     const v = String(s ?? "").trim();
@@ -129,6 +132,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
   useEffect(() => {
     const unsub = onValue(ref(db, "generators"), (snap) => {
       const value = (snap.val() ?? {}) as Record<string, RawGeneratorRecord>;
+      setRawByKey(value);
       const items: GenRow[] = Object.entries(value).map(([key, data]) => {
         const id = String(data.id ?? key);
         const brand = String(data.brand ?? "");
@@ -176,12 +180,12 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     }
     try {
       setSubmitting(true);
-      const call = httpsCallable(functions, "createGenerator");
+      const call = httpsCallable(functions, isEditing ? "updateGenerator" : "createGenerator");
       const warrantyMonths = formInstalledDate && formWarrantyExpire
         ? monthsBetween(formInstalledDate, formWarrantyExpire)
         : null;
 
-      await call({
+      const payload: any = {
         brand: formBrand,
         size: formSize || null,
         serial_no: formSerial,
@@ -194,7 +198,11 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         hasBatteryCharger: formBatteryCharger,
         warranty: warrantyMonths,
         extracted_parts: [],
-      });
+      };
+      if (isEditing && editId) {
+        payload.id = editId;
+      }
+      await call(payload);
       // Close and reset
       setShowForm(false);
       setFormBrand("");
@@ -207,10 +215,66 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
       setFormAutoStart(false);
       setFormBatteryCharger(false);
       setFormWarrantyExpire("");
+      setIsEditing(false);
+      setEditId(null);
     } catch (e: any) {
       setFormError(String(e?.message || "Failed to create generator"));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const toInputDate = (d?: number | string | null): string => {
+    if (!d && d !== 0) return "";
+    const dt = typeof d === 'number' ? new Date(d) : new Date(String(d));
+    if (isNaN(dt.getTime())) return "";
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const computeWarrantyExpireFromMonths = (installed?: number | string | null, months?: number | string | null): string => {
+    if (!installed || months == null) return "";
+    const base = typeof installed === 'number' ? new Date(installed) : new Date(String(installed));
+    const m = Number(months);
+    if (isNaN(base.getTime()) || !m) return "";
+    const dt = new Date(base);
+    dt.setMonth(dt.getMonth() + m);
+    const y = dt.getFullYear();
+    const mo = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${day}`;
+  };
+
+  const handleOpenEdit = (gen: GenRow) => {
+    const raw = rawByKey[gen.dbKey] || ({} as RawGeneratorRecord);
+    setIsEditing(true);
+    setEditId(String(raw.id ?? gen.id));
+    setFormBrand(String(raw.brand ?? gen.brand ?? ""));
+    setFormSize(String(raw.size ?? gen.size ?? ""));
+    setFormSerial(String((raw as any).serialNumber ?? raw.serial_no ?? gen.sn ?? ""));
+    setFormInstalledDate(toInputDate(raw.installed_date ?? null));
+    setFormIssuedDate(toInputDate(raw.issued_date ?? null));
+    setFormShopId(String(raw.shop_id ?? ""));
+    setFormLocation((String(raw.location ?? gen.location ?? "Up").toLowerCase() === 'down' ? 'Down' : 'Up') as 'Up' | 'Down');
+    setFormAutoStart(Boolean(raw.hasAutoStart));
+    setFormBatteryCharger(Boolean(raw.hasBatteryCharger));
+    setFormWarrantyExpire(computeWarrantyExpireFromMonths(raw.installed_date ?? null, raw.warranty ?? null));
+    setShowForm(true);
+  };
+
+  const handleDelete = async (gen: GenRow) => {
+    const raw = rawByKey[gen.dbKey] || ({} as RawGeneratorRecord);
+    const id = String(raw.id ?? gen.id);
+    const ok = window.confirm(`Delete generator ${id}? This action cannot be undone.`);
+    if (!ok) return;
+    try {
+      const del = httpsCallable(functions, "deleteGenerator");
+      await del({ id });
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete generator");
     }
   };
 
@@ -390,11 +454,14 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                     <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.shop}</td>
                     <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">
                       <div className="flex items-center">
-                        <button onClick={() => { onSelectGenerator?.(gen.dbKey || gen.id); router.push(`/generators/${encodeURIComponent(gen.id)}`); onNavigate("GeneratorDetails"); }} className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200">
+                        <button onClick={() => { onSelectGenerator?.(gen.dbKey || gen.id); router.push(`/generators/${encodeURIComponent(gen.id)}`); onNavigate("GeneratorDetails"); }} className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200" title="View">
                           <MdOutlineRemoveRedEye className="text-blue-500" />
                         </button>
-                        <button onClick={() => setShowForm(true)} className="bg-blue-100 p-2 rounded-md hover:bg-blue-200">
+                        <button onClick={() => handleOpenEdit(gen)} className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200" title="Edit">
                           <MdEditSquare className="text-blue-500" />
+                        </button>
+                        <button onClick={() => handleDelete(gen)} className="bg-red-100 p-2 rounded-md hover:bg-red-200" title="Delete">
+                          <MdDelete className="text-red-600" />
                         </button>
                       </div>
                     </td>
