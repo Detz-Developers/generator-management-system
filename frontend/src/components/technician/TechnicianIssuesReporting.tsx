@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FiAlertTriangle, FiClock, FiCheckCircle, FiPlus, FiSearch, FiFilter, FiAlertCircle, FiDownload } from "react-icons/fi";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { utils, writeFile } from "xlsx";
+import ExcelJS from "exceljs";
 
 interface Issue {
   id: string;
@@ -206,23 +206,55 @@ export default function TechnicianIssueReporting({ onNavigate }: TechnicianIssue
   const exportToExcel = () => {
     setIsExporting(true);
     const excelData = filteredIssues.map((issue) => ({
-      "ID": issue.id,
-      "Title": issue.title,
-      "Description": issue.description,
-      "Status": issue.status.charAt(0).toUpperCase() + issue.status.slice(1),
-      "Priority": issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1),
-      "Category": issue.category.charAt(0).toUpperCase() + issue.category.slice(1),
-      "Location": issue.location,
+      ID: issue.id,
+      Title: issue.title,
+      Description: issue.description,
+      Status: issue.status.charAt(0).toUpperCase() + issue.status.slice(1),
+      Priority: issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1),
+      Category: issue.category.charAt(0).toUpperCase() + issue.category.slice(1),
+      Location: issue.location,
       "Reported Date": new Date(issue.reportedDate).toLocaleDateString(),
       "Last Updated": new Date(issue.lastUpdated).toLocaleDateString(),
       "Assigned To": issue.assignedTo || "Unassigned",
     }));
 
-    const ws = utils.json_to_sheet(excelData);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Issues");
-    writeFile(wb, `issues_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    setIsExporting(false);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Issues");
+
+    worksheet.columns = [
+      { header: "ID", key: "ID", width: 16 },
+      { header: "Title", key: "Title", width: 30 },
+      { header: "Description", key: "Description", width: 50 },
+      { header: "Status", key: "Status", width: 14 },
+      { header: "Priority", key: "Priority", width: 14 },
+      { header: "Category", key: "Category", width: 16 },
+      { header: "Location", key: "Location", width: 30 },
+      { header: "Reported Date", key: "Reported Date", width: 16 },
+      { header: "Last Updated", key: "Last Updated", width: 16 },
+      { header: "Assigned To", key: "Assigned To", width: 18 },
+    ];
+
+    worksheet.addRows(excelData);
+
+    // Style header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { vertical: "middle", horizontal: "center" };
+
+    const fileName = `issues_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setIsExporting(false);
+    }).catch(() => setIsExporting(false));
   };
 
   return (
