@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { onValue, ref } from "firebase/database";
 import { db } from "../../firebaseConfig";
-import { httpsCallable } from "firebase/functions";
-import { functions } from "../../firebaseConfig";
+import { httpsCallable, getFunctions } from "firebase/functions";
+import app from "../../firebaseConfig";
 
 import { MdAdd, MdBrightness1, MdOutlineRemoveRedEye, MdEditSquare, MdSearch, MdDelete } from "react-icons/md";
 
@@ -34,6 +34,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
   const [formError, setFormError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [formStatus, setFormStatus] = useState<"Active" | "Under Repair" | "Unusable">("Active");
+  const [formParts, setFormParts] = useState<string[]>([]);
+  const [newPart, setNewPart] = useState("");
 
   // Add Generator form state
   const [formBrand, setFormBrand] = useState("");
@@ -82,6 +85,25 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
   const [generators, setGenerators] = useState<GenRow[]>([]);
   const [shopNameById, setShopNameById] = useState<Record<string, string>>({});
   const [rawByKey, setRawByKey] = useState<Record<string, RawGeneratorRecord>>({});
+
+  const resetForm = () => {
+    setIsEditing(false);
+    setEditId(null);
+    setFormError(null);
+    setFormBrand("");
+    setFormSize("");
+    setFormSerial("");
+    setFormInstalledDate("");
+    setFormIssuedDate("");
+    setFormShopId("");
+    setFormLocation("Up");
+    setFormAutoStart(false);
+    setFormBatteryCharger(false);
+    setFormWarrantyExpire("");
+    setFormStatus("Active");
+    setFormParts([]);
+    setNewPart("");
+  };
 
   const toTitle = (s?: string | null) => {
     const v = String(s ?? "").trim();
@@ -180,7 +202,8 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     }
     try {
       setSubmitting(true);
-      const call = httpsCallable(functions, isEditing ? "updateGenerator" : "createGenerator");
+      const fns = getFunctions(app, "us-central1");
+      const call = httpsCallable(fns, isEditing ? "updateGenerator" : "createGenerator");
       const warrantyMonths = formInstalledDate && formWarrantyExpire
         ? monthsBetween(formInstalledDate, formWarrantyExpire)
         : null;
@@ -191,7 +214,6 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         serial_no: formSerial,
         issued_date: parseDateOrNull(formIssuedDate),
         installed_date: parseDateOrNull(formInstalledDate),
-        status: "Active",
         shop_id: formShopId,
         location: formLocation,
         hasAutoStart: formAutoStart,
@@ -200,9 +222,32 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         extracted_parts: [],
       };
       if (isEditing && editId) {
-        payload.id = editId;
+        // First update status explicitly
+        const setStatus = httpsCallable(fns, "setGeneratorStatus");
+        await setStatus({ id: editId, status: formStatus });
+
+        // Then update extracted parts and other editable fields (excluding status to avoid overriding)
+        const update = httpsCallable(fns, "updateGenerator");
+        const partsPayload = formStatus === "Unusable" ? formParts : [];
+        const updatePayload: any = {
+          id: editId,
+          brand: payload.brand,
+          size: payload.size,
+          serial_no: payload.serial_no,
+          issued_date: payload.issued_date,
+          installed_date: payload.installed_date,
+          shop_id: payload.shop_id,
+          location: payload.location,
+          hasAutoStart: payload.hasAutoStart,
+          hasBatteryCharger: payload.hasBatteryCharger,
+          warranty: payload.warranty,
+          extracted_parts: partsPayload,
+        };
+        await update(updatePayload);
+      } else {
+        // Creating new generator: default initial status Active server-side normalization will handle
+        await call({ status: "Active", ...payload });
       }
-      await call(payload);
       // Close and reset
       setShowForm(false);
       setFormBrand("");
@@ -217,6 +262,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
       setFormWarrantyExpire("");
       setIsEditing(false);
       setEditId(null);
+      setFormStatus("Active");
+      setFormParts([]);
+      setNewPart("");
     } catch (e: any) {
       setFormError(String(e?.message || "Failed to create generator"));
     } finally {
@@ -261,6 +309,8 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     setFormAutoStart(Boolean(raw.hasAutoStart));
     setFormBatteryCharger(Boolean(raw.hasBatteryCharger));
     setFormWarrantyExpire(computeWarrantyExpireFromMonths(raw.installed_date ?? null, raw.warranty ?? null));
+    setFormStatus(normalizeStatus(raw.status) as any);
+    setFormParts(Array.isArray(raw.extracted_parts) ? (raw.extracted_parts as any[]).map(String) : []);
     setShowForm(true);
   };
 
@@ -270,7 +320,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     const ok = window.confirm(`Delete generator ${id}? This action cannot be undone.`);
     if (!ok) return;
     try {
-      const del = httpsCallable(functions, "deleteGenerator");
+      const del = httpsCallable(getFunctions(app, "us-central1"), "deleteGenerator");
       await del({ id });
     } catch (e) {
       console.error(e);
@@ -312,7 +362,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
           </div>
           <button
             className="bg-blue-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold flex items-center shadow-md hover:bg-blue-600 flex-shrink-0 ml-2 sm:ml-0"
-            onClick={() => setShowForm(true)}
+            onClick={() => { resetForm(); setShowForm(true); }}
           >
             <MdAdd className="mr-1 sm:mr-2" />
             Add Generator
@@ -476,7 +526,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
             <div data-cy="add-generator-modal" className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
               {/* Title */}
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Add Generator</h2>
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">{isEditing ? "Edit Generator" : "Add Generator"}</h2>
               {formError && (
                 <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                   {formError}
@@ -485,6 +535,18 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
 
               {/* Form Grid */}
               <form className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex flex-col">
+                  <label className="mb-1 font-medium text-gray-700">Update Status</label>
+                  <select
+                    className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
+                    value={formStatus}
+                    onChange={(e) => setFormStatus(e.target.value as any)}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Under Repair">Under Repair</option>
+                    <option value="Unusable">Unusable</option>
+                  </select>
+                </div>
                 <div className="flex flex-col">
                   <label className="mb-1 font-medium text-gray-700">Generator Brand</label>
                   <select
@@ -617,9 +679,49 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
               </form>
 
+              {formStatus === "Unusable" && (
+                <div className="mt-4">
+                  <label className="mb-1 font-medium text-gray-700">Extracted Parts</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={newPart}
+                      onChange={(e) => setNewPart(e.target.value)}
+                      placeholder="Add part name"
+                      className="flex-1 border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
+                    />
+                    <button
+                      type="button"
+                      className="px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                      onClick={() => { const v = newPart.trim(); if (v) { setFormParts([...formParts, v]); setNewPart(""); } }}
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {formParts.length === 0 ? (
+                    <p className="text-sm text-gray-500">No extracted parts added.</p>
+                  ) : (
+                    <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+                      {formParts.map((p, idx) => (
+                        <li key={`${p}-${idx}`} className="flex items-center justify-between px-3 py-2 text-sm">
+                          <span className="text-gray-800">{p}</span>
+                          <button
+                            type="button"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => setFormParts(formParts.filter((_, i) => i !== idx))}
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
               {/* Buttons */}
               <div className="flex justify-end gap-3 mt-6">
-                <button className="px-4 py-2 rounded-md bg-gray-200 text-gray-700" onClick={() => setShowForm(false)}>
+                <button className="px-4 py-2 rounded-md bg-gray-200 text-gray-700" onClick={() => { resetForm(); setShowForm(false); }}>
                   Cancel
                 </button>
                 <button
@@ -627,7 +729,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                   onClick={handleCreate}
                   disabled={submitting}
                 >
-                  {submitting ? "Adding..." : "Add Generator"}
+                  {isEditing ? (submitting ? "Saving..." : "Save Changes") : (submitting ? "Adding..." : "Add Generator")}
                 </button>
               </div>
             </div>

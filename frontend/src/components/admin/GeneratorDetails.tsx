@@ -505,61 +505,18 @@ return(
              {activeTab === "3" && (
             
                
-            <div  id="3">
-              <table className="w-full text-left ">
-                <thead className="bg-gray-200 sticky top-0">
-                  <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">
-                    <th className="p-3">Part</th>
-                    <th className="p-3">Notes</th>
-                    <th className="p-3">Extrct Date</th>
-                    <th className="p-3">Condition</th>
-                    <th className="p-3">Reason</th>
-                    <th className="p-3">Detition</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-700 text-sm/7">
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">Oil Filter</td>
-                    <td className="p-3">OF-1R076</td>
-                    <td className="p-3">04/03/2025</td>
-                    <td className="p-3">used</td>
-                    <td className="p-3">Routeline Replacement</td>
-                    <td className="p-3">Recycled</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                   <td className="p-3">Oil Filter</td>
-                    <td className="p-3">OF-1R076</td>
-                    <td className="p-3">04/03/2025</td>
-                    <td className="p-3"><span className="px-3 py-1 rounded-lg font-bold bg-gray-300 ...">used</span></td>
-                    <td className="p-3">Routeline Replacement</td>
-                    <td className="p-3">Recycled</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">Oil Filter</td>
-                    <td className="p-3">OF-1R076</td>
-                    <td className="p-3">04/03/2025</td>
-                    <td className="p-3"><span className="px-3 py-1 rounded-lg text-red-900  font-bold bg-red-100 text-red-700 font-sm/8 ...">Damaged</span></td>
-                    <td className="p-3">Routeline Replacement</td>
-                    <td className="p-3">Recycled</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">Oil Filter</td>
-                    <td className="p-3">OF-1R076</td>
-                    <td className="p-3">04/03/2025</td>
-                    <td className="p-3">used</td>
-                    <td className="p-3">Routeline Replacement</td>
-                    <td className="p-3">Recycled</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">Oil Filter</td>
-                    <td className="p-3">OF-1R076</td>
-                    <td className="p-3">04/03/2025</td>
-                    <td className="p-3">used</td>
-                    <td className="p-3">Routeline Replacement</td>
-                    <td className="p-3">Recycled</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div id="3">
+              {Array.isArray(gen?.extracted_parts) && gen!.extracted_parts!.length > 0 ? (
+                <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+                  {gen!.extracted_parts!.map((p:any, idx:number) => (
+                    <li key={idx} className="px-4 py-2 text-sm text-gray-800">
+                      {typeof p === 'string' ? p : (p?.name || JSON.stringify(p))}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="p-3 text-sm text-gray-500">No extracted parts</p>
+              )}
             </div>
           
             
