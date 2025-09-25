@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getServicesFn } from '../firebase';
 
 interface Service {
   id: string;
@@ -14,53 +15,26 @@ interface Service {
   description: string;
 }
 
-const mockServices: Service[] = [
-  {
-    id: 'SRV001',
-    name: 'Annual Generator Maintenance',
-    type: 'maintenance',
-    provider: 'PowerTech Services',
-    cost: 2500,
-    status: 'scheduled',
-    scheduledDate: '2024-03-01',
-    generatorId: 'GEN001',
-    description: 'Complete annual maintenance including oil change, filter replacement, and system diagnostics'
-  },
-  {
-    id: 'SRV002',
-    name: 'Emergency Repair Service',
-    type: 'repair',
-    provider: 'QuickFix Solutions',
-    cost: 1200,
-    status: 'in-progress',
-    scheduledDate: '2024-02-18',
-    generatorId: 'GEN002',
-    description: 'Repair cooling system malfunction and replace damaged components'
-  },
-  {
-    id: 'SRV003',
-    name: 'Battery Bank Installation',
-    type: 'installation',
-    provider: 'Energy Systems Inc',
-    cost: 15000,
-    status: 'completed',
-    scheduledDate: '2024-01-15',
-    description: 'Installation of new lithium-ion battery bank with monitoring system'
-  },
-  {
-    id: 'SRV004',
-    name: 'Safety Inspection',
-    type: 'inspection',
-    provider: 'SafeGuard Inspections',
-    cost: 800,
-    status: 'scheduled',
-    scheduledDate: '2024-02-25',
-    description: 'Comprehensive safety inspection of all generator systems and compliance check'
-  }
-];
-
 export default function Services() {
-  const [services] = useState<Service[]>(mockServices);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchServices() {
+      setLoading(true);
+      setError(null);
+      try {
+        const result: any = await getServicesFn();
+        setServices(result.data.services || []);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch services');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchServices();
+  }, []);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -94,6 +68,34 @@ export default function Services() {
 
   const totalCost = services.reduce((sum, service) => sum + service.cost, 0);
   const completedServices = services.filter(service => service.status === 'completed').length;
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-6 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Services</h1>
+            <p className="text-gray-600 text-base md:text-lg">Track maintenance and service activities</p>
+          </div>
+          <div className="text-center py-8 text-gray-500">Loading services...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-6 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Services</h1>
+            <p className="text-gray-600 text-base md:text-lg">Track maintenance and service activities</p>
+          </div>
+          <div className="text-center py-8 text-red-500">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-6 md:p-8">

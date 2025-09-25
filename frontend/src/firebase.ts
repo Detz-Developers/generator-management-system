@@ -17,4 +17,4 @@ const app = initializeApp(firebaseConfig);
 export const functions = getFunctions(app);
 export const auth = getAuth(app);
 export const getBatteriesFn = httpsCallable(functions, 'getBatteries');
-
+export const getServicesFn = httpsCallable(functions, 'getServices');
