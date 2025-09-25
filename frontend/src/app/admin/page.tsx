@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Sidebar from '@/components/admin/Sidebar';
 import NotificationCenter from '@/components/admin/NotificationCenter';
 import Dashboard from '@/components/admin/Dashboard';
@@ -20,14 +21,25 @@ interface AdminPanelProps {
 }
 
 export default function AdminPanel({ onLogout }: AdminPanelProps) {
-  const [currentPage, setCurrentPage] = useState('Dashboard');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialPage = (searchParams?.get('page') as string) || 'Dashboard';
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [selectedGeneratorId, setSelectedGeneratorId] = useState<string | null>(null);
+
+  // Keep URL in sync when navigating inside admin
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', currentPage);
+    window.history.replaceState({}, '', url.toString());
+  }, [currentPage]);
 
   const renderContent = () => {
     switch (currentPage) {
       case 'Dashboard':
         return <Dashboard onNavigate={setCurrentPage} />;
       case 'Generators':
-        return <Generators onNavigate={setCurrentPage}/>;
+        return <Generators onNavigate={setCurrentPage} onSelectGenerator={setSelectedGeneratorId}/>;
       case 'Batteries':
         return <Batteries />;
       case 'Tasks':
@@ -47,7 +59,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
       case 'Notifications':
         return <NotificationCenter />;
       case 'GeneratorDetails':
-        return <GeneratorDetails onNavigate={setCurrentPage} />;
+        return <GeneratorDetails onNavigate={setCurrentPage} generatorId={selectedGeneratorId ?? ''} />;
       default:
         return (
           <div className="flex-1 p-6 md:p-8">

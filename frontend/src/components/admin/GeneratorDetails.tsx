@@ -1,24 +1,27 @@
 "use client";
-import React,{useState} from "react";
-import { MdCalendarToday,
-    MdOutlineArrowBack , MdOutlineCrisisAlert} from "react-icons/md"
-    import Link from "next/link";
+import React,{useEffect, useMemo, useState} from "react";
+import { MdCalendarToday, MdOutlineArrowBack , MdOutlineCrisisAlert} from "react-icons/md";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { onValue, ref, get, query, orderByChild, equalTo } from "firebase/database";
+import { db } from "../../firebaseConfig";
 
-
-    interface IndividualProps {
+interface IndividualProps {
   onNavigate: (page: string) => void;
+  generatorId?: string;
 }
 
-export default function Dashboard({ onNavigate }: IndividualProps){
+export default function Dashboard({ onNavigate, generatorId }: IndividualProps){
+  const params = useParams() as { id?: string } | null;
+  const effectiveId = generatorId ?? (params?.id ? String(params.id) : undefined);
 
     // active tab state eka (default 1)
   const [activeTab, setActiveTab] = useState("1");
 
-  //service togle form
+  // service toggle form
   const [showModal, setShowModal] = useState(false);
 
-
-   const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     generatorId: "",
     serviceType: "",
     description: "",
@@ -36,6 +39,114 @@ export default function Dashboard({ onNavigate }: IndividualProps){
   console.log("Form submitted:", formData);
   setShowModal(false);
 };
+
+  // Loaded generator
+  type RawGeneratorRecord = {
+    id?: string;
+    brand?: string;
+    size?: string;
+    serial_no?: string;
+    serialNumber?: string;
+    issued_date?: number | string | null;
+    installed_date?: number | string | null;
+    status?: string;
+    shop_id?: string;
+    location?: string;
+    hasAutoStart?: number | boolean;
+    hasBatteryCharger?: number | boolean;
+    warranty?: number | string | null;
+    extracted_parts?: any[];
+    createdAt?: number;
+    updatedAt?: number;
+  };
+
+  const [gen, setGen] = useState<RawGeneratorRecord | null>(null);
+  const [shopName, setShopName] = useState<string>("");
+  const [serviceHistory, setServiceHistory] = useState<any[]>([]);
+  const [repairLogs, setRepairLogs] = useState<any[]>([]);
+
+  const toTitle = (s?: string | null) => {
+    const v = String(s ?? "").trim();
+    if (!v) return "";
+    return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+  };
+  const normalizeStatus = (s?: string) => {
+    const v = String(s ?? "").toLowerCase().replace(/_/g, " ");
+    if (v.includes("unusable")) return "Unusable";
+    if (v.includes("under") || v.includes("repair")) return "Under Repair";
+    return "Active";
+  };
+  const statusColor = useMemo(() => {
+    const v = normalizeStatus(gen?.status).toLowerCase();
+    if (v.includes("unusable")) return "text-red-600 bg-red-100";
+    if (v.includes("repair")) return "text-yellow-700 bg-yellow-100";
+    return "text-green-600 bg-green-100";
+  }, [gen?.status]);
+
+  const fmtDate = (d?: number | string | null): string => {
+    if (d == null || d === "") return "--";
+    try {
+      const date = typeof d === "number" ? new Date(d) : new Date(String(d));
+      if (isNaN(date.getTime())) return String(d);
+      return date.toLocaleDateString();
+    } catch { return String(d); }
+  };
+
+  useEffect(() => {
+    let unsub: (() => void) | null = null;
+    let cancelled = false;
+    const load = async () => {
+      if (!effectiveId) { setGen(null); return; }
+      const byKeyRef = ref(db, `generators/${effectiveId}`);
+      try {
+        const snap = await get(byKeyRef);
+        if (cancelled) return;
+        if (snap.exists()) {
+          setGen(snap.val() as RawGeneratorRecord);
+          unsub = onValue(byKeyRef, (s) => { if (!cancelled) setGen((s.val() ?? null) as RawGeneratorRecord | null); });
+          return;
+        }
+        // Fallback: query by child id equal to generatorId
+        const q = query(ref(db, 'generators'), orderByChild('id'), equalTo(effectiveId));
+        const snap2 = await get(q);
+        if (cancelled) return;
+        const val2 = (snap2.val() ?? null) as Record<string, RawGeneratorRecord> | null;
+        if (val2 && Object.keys(val2).length) {
+          const firstKey = Object.keys(val2)[0];
+          const rec = val2[firstKey];
+          setGen(rec ?? null);
+          if (firstKey) {
+            const realRef = ref(db, `generators/${firstKey}`);
+            unsub = onValue(realRef, (s) => { if (!cancelled) setGen((s.val() ?? null) as RawGeneratorRecord | null); });
+          }
+        } else {
+          setGen(null);
+        }
+      } catch {
+        setGen(null);
+      }
+    };
+    load();
+    return () => { cancelled = true; if (unsub) unsub(); };
+  }, [effectiveId]);
+
+  useEffect(() => {
+    if (!gen?.shop_id) { setShopName(""); return; }
+    const unsub = onValue(ref(db, `shops/${gen.shop_id}`), (snap) => {
+      const v = snap.val() as any;
+      setShopName(v?.name || v?.code || gen.shop_id || "");
+    });
+    return () => unsub();
+  }, [gen?.shop_id]);
+
+  // Attempt to load logs if available under common patterns
+  useEffect(() => {
+    if (!effectiveId) { setServiceHistory([]); setRepairLogs([]); return; }
+    const norm = (obj: any) => obj && typeof obj === 'object' ? Object.values(obj) : Array.isArray(obj) ? obj : [];
+    const u1 = onValue(ref(db, `generator_services/${effectiveId}`), (s) => setServiceHistory(norm(s.val())));
+    const u2 = onValue(ref(db, `generator_repairs/${effectiveId}`), (s) => setRepairLogs(norm(s.val())));
+    return () => { u1(); u2(); };
+  }, [effectiveId]);
 
 
 return(
@@ -134,8 +245,8 @@ return(
           
           
           <div>
-            <h2 className="text-3xl font-bold text-gray-800">Generator G001</h2>
-            <p className="text-gray-500">Caterpillar CAT-3516B - 50kW</p>
+            <h2 className="text-3xl font-bold text-gray-800">Generator {gen?.id ?? effectiveId ?? ""}</h2>
+            <p className="text-gray-500">{[gen?.brand, gen?.size].filter(Boolean).join(" - ")}</p>
           </div>
 
           </div>
@@ -154,39 +265,35 @@ return(
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-8 text-sm">
                 <div>
                   <p className="text-gray-500">Serial Number</p>
-                  <p className="font-medium text-gray-800">CAT123456789</p>
+                  <p className="font-medium text-gray-800">{gen?.serial_no ?? (gen as any)?.serialNumber ?? "--"}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Status</p>
-                  <p className="font-medium text-green-500 bg-green-100 px-2 py-1 rounded-full inline-block">Active</p>
+                  <p className={`font-medium px-2 py-1 rounded-full inline-block ${statusColor}`}>{normalizeStatus(gen?.status)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Location</p>
-                  <p className="font-medium text-gray-800">UP</p>
+                  <p className="font-medium text-gray-800">{toTitle(gen?.location) || "--"}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Issued Date</p>
-                  <p className="font-medium text-gray-800">11/12/2022</p>
+                  <p className="font-medium text-gray-800">{fmtDate(gen?.issued_date)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Auto Start</p>
-                  <p className="font-medium text-gray-800">Not Enabled</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Operating Hours</p>
-                  <p className="font-medium text-gray-800">2450 hrs</p>
+                  <p className="font-medium text-gray-800">{(gen?.hasAutoStart ? 1 : 0) ? "Enabled" : "Not Enabled"}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Warranty Expiry</p>
-                  <p className="font-medium text-gray-800">11/12/2026</p>
+                  <p className="font-medium text-gray-800">{(() => { const m = Number(gen?.warranty ?? 0); const base = typeof gen?.installed_date === 'number' ? new Date(gen!.installed_date as number) : gen?.installed_date ? new Date(String(gen?.installed_date)) : null; if (!base || isNaN(base.getTime()) || !m) return "--"; const dt = new Date(base); dt.setMonth(dt.getMonth() + m); return dt.toLocaleDateString(); })()}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Installed Date</p>
-                  <p className="font-medium text-gray-800">11/12/2022</p>
+                  <p className="font-medium text-gray-800">{fmtDate(gen?.installed_date)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Battery Charger</p>
-                  <p className="font-medium text-blue-500">Installed</p>
+                  <p className="font-medium text-blue-500">{(gen?.hasBatteryCharger ? 1 : 0) ? "Installed" : "Not Installed"}</p>
                 </div>
               </div>
             </div>
@@ -198,14 +305,14 @@ return(
                 <p className="text-sm text-gray-500">Last Service</p>
                 <div className="flex items-center mt-1">
                   <span className="material-icons text-blue-500 mr-4"><MdCalendarToday /></span>
-                  <p className="font-medium text-gray-800">10/4/2025</p>
+                  <p className="font-medium text-gray-800">{serviceHistory.length ? fmtDate(serviceHistory[serviceHistory.length-1]?.date ?? null) : "--"}</p>
                 </div>
               </div>
               <div className="mb-4">
                 <p className="text-sm text-gray-500">Due Service</p>
                 <div className="flex items-center mt-1">
                   <span className="material-icons text-orange-500 mr-4"><MdCalendarToday /></span>
-                  <p className="font-medium text-gray-800">10/8/2025</p>
+                  <p className="font-medium text-gray-800">{serviceHistory.length ? fmtDate(serviceHistory[serviceHistory.length-1]?.nextServiceDate ?? null) : "--"}</p>
                 </div>
               </div>
               <button onClick={() => setShowModal(true)} className="w-full bg-blue-900 text-white py-2 rounded-md hover:bg-blue-950">Log Service</button>
@@ -265,47 +372,21 @@ return(
                     <th className="p-3">Invoice No.</th>
                   </tr>
                 </thead>
-                <tbody className="text-gray-700 text-sm/7">
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">10/4/2025</td>
-                    <td className="p-3">Routine Maintenance</td>
-                    <td className="p-3">Sahan Perera</td>
-                    <td className="p-3">Oil change, filter replacement, general inspection</td>
-                    <td className="p-3">LKR 10,000</td>
-                    <td className="p-3">INV-2025-001</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">11/3/2025</td>
-                    <td className="p-3">Preventive Service</td>
-                    <td className="p-3">Nihal Karuna</td>
-                    <td className="p-3">Cooling system check, battery maintenance</td>
-                    <td className="p-3">LKR 4,000</td>
-                    <td className="p-3">INV-2025-002</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">12/2/2025</td>
-                    <td className="p-3">Emergency Repair</td>
-                    <td className="p-3">Dinal Rasmika</td>
-                    <td className="p-3">Fuel pump replacement</td>
-                    <td className="p-3">LKR 15,000</td>
-                    <td className="p-3">INV-2025-003</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="p-3">10/4/2025</td>
-                    <td className="p-3">Emergency Repair</td>
-                    <td className="p-3">Dinal Rasmika</td>
-                    <td className="p-3">Radiator hose replacement</td>
-                    <td className="p-3">LKR 3,000</td>
-                    <td className="p-3">INV-2025-004</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">11/7/2025</td>
-                    <td className="p-3">Routine Maintenance</td>
-                    <td className="p-3">Dinal Rasmika</td>
-                    <td className="p-3">Battery maintenance</td>
-                    <td className="p-3">LKR 5,000</td>
-                    <td className="p-3">INV-2025-006</td>
-                  </tr>
+                 <tbody className="text-gray-700 text-sm/7">
+                  {serviceHistory.length === 0 ? (
+                    <tr><td colSpan={6} className="p-3 text-gray-500">No service records</td></tr>
+                  ) : (
+                    serviceHistory.map((s:any, idx:number) => (
+                      <tr key={idx} className="border-b border-gray-100">
+                        <td className="p-3">{fmtDate(s?.date)}</td>
+                        <td className="p-3">{s?.type || s?.serviceType || "-"}</td>
+                        <td className="p-3">{s?.technician || "-"}</td>
+                        <td className="p-3">{s?.description || "-"}</td>
+                        <td className="p-3">{s?.cost != null ? `LKR ${s.cost}` : "-"}</td>
+                        <td className="p-3">{s?.invoiceNo || s?.invoice || "-"}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -315,13 +396,39 @@ return(
 
             {activeTab === "2" && (
              <div id="2">
+               {repairLogs.length > 0 && (
+                 <div className="space-y-2">
+                   {repairLogs.map((r:any, idx:number) => (
+                     <div key={idx} className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
+                       <div className="flex items-center mb-2">
+                         <div className="flex items-center gap-2 mr-4">
+                           <span className="text-red-500 text-lg">!</span>
+                           <h2 className="font-semibold text-black-900">{r?.title || r?.issue || 'Repair'}</h2>
+                         </div>
+                         <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">{r?.status || 'Resolved'}</span>
+                       </div>
+                       <div className="text-sm  space-y-1 mb-3">
+                         <p className="text-sm text-gray-600">{r?.description || '-'}</p>
+                         {r?.notes && <p className="text-sm text-black-900">{r.notes}</p>}
+                       </div>
+                       <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
+                         <p><span className="font-medium">Technician:</span> {r?.technician || '-'}</p>
+                         <p><span className="font-medium">Cost:</span> {r?.cost != null ? `LKR ${r.cost}` : '-'}</p>
+                         <p><span className="font-medium">Date:</span> {fmtDate(r?.date)}</p>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+                {repairLogs.length === 0 && (
+                <>
                <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white mb-2">
                {/* Header */}
                     <div className="flex items-center mb-2">
                        <div className="flex items-center gap-2 mr-4">
                           <span className="text-red-500 text-lg">⚠️</span>
                           <h2 className="font-semibold text-black-900">Fuel pressure drop</h2>
-                        </div>
+                </div>
                         <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">
                         Resolved
                         </span>
@@ -353,7 +460,7 @@ return(
                         </p>
                  </div>
 
-                <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
+               <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
                {/* Header */}
                     <div className="flex items-center mb-2">
                        <div className="flex items-center gap-2 mr-4">
@@ -390,8 +497,10 @@ return(
                         O-Ring Kit
                         </p>
                  </div>
+                </>
+                )}
 
-                 </div>
+                  </div>
             )}
              {activeTab === "3" && (
             
@@ -400,8 +509,8 @@ return(
               <table className="w-full text-left ">
                 <thead className="bg-gray-200 sticky top-0">
                   <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">
-                    <th className="p-3">Part Name</th>
-                    <th className="p-3">Part Number</th>
+                    <th className="p-3">Part</th>
+                    <th className="p-3">Notes</th>
                     <th className="p-3">Extrct Date</th>
                     <th className="p-3">Condition</th>
                     <th className="p-3">Reason</th>
