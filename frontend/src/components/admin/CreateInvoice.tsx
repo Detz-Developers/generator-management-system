@@ -239,8 +239,9 @@ export default function CreateInvoice({
       // Close after success when used as modal; fall back to parent navigation if not provided
       if (onClose) onClose();
       else onBack?.();
-    } catch (e: any) {
-      const code = e?.code || e?.message || "unknown";
+    } catch (e: unknown) {
+      const error = e as { code?: string; message?: string };
+      const code = error?.code || error?.message || "unknown";
       if (String(code).includes("already-exists")) {
         setError("An invoice with this ID already exists.");
       } else if (String(code).includes("permission-denied")) {
@@ -248,7 +249,7 @@ export default function CreateInvoice({
       } else {
         setError("Failed to save invoice. Please try again.");
       }
-      setBanner({ type: "error", msg: String(e?.message || "Save failed") });
+      setBanner({ type: "error", msg: String(error?.message || "Save failed") });
     } finally {
       setSubmitting(false);
     }
@@ -530,8 +531,8 @@ export default function CreateInvoice({
                         const callable = httpsCallable(functions, "updateInvoiceStatus");
                         await callable({ id, status });
                         setBanner({ type: "success", msg: "Status updated" });
-                      } catch (e: any) {
-                        setBanner({ type: "error", msg: String(e?.message || "Failed to update status") });
+                      } catch (e: unknown) {
+                        setBanner({ type: "error", msg: String((e as Error)?.message || "Failed to update status") });
                       } finally {
                         setSavingStatus(false);
                       }
@@ -604,18 +605,18 @@ function fromInputDate(input: string): number {
   return dt.getTime();
 }
 
-function toNumber(v: any, fallback: number): number {
+function toNumber(v: string | number | undefined | null, fallback: number): number {
   const n = typeof v === "string" ? Number(v) : (v as number);
   return Number.isFinite(n) ? n : fallback;
 }
 
-function toOptionalNumber(v: any): number | undefined {
+function toOptionalNumber(v: string | number | undefined | null): number | undefined {
   if (v === undefined || v === null || v === "") return undefined;
   const n = Number(v);
   return Number.isFinite(n) ? n : undefined;
 }
 
-function hasAmountValue(v: any): boolean {
+function hasAmountValue(v: string | number | undefined | null): boolean {
   return !(v === undefined || v === null || v === "");
 }
 

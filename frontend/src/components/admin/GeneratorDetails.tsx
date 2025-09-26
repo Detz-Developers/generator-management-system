@@ -1,7 +1,6 @@
 "use client";
-import React,{useEffect, useMemo, useState} from "react";
-import { MdCalendarToday, MdOutlineArrowBack , MdOutlineCrisisAlert} from "react-icons/md";
-import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
+import { MdCalendarToday, MdOutlineArrowBack } from "react-icons/md";
 import { useParams } from "next/navigation";
 import { onValue, ref, get, query, orderByChild, equalTo } from "firebase/database";
 import { db } from "../../firebaseConfig";
@@ -11,11 +10,11 @@ interface IndividualProps {
   generatorId?: string;
 }
 
-export default function Dashboard({ onNavigate, generatorId }: IndividualProps){
+export default function Dashboard({ onNavigate, generatorId }: IndividualProps) {
   const params = useParams() as { id?: string } | null;
   const effectiveId = generatorId ?? (params?.id ? String(params.id) : undefined);
 
-    // active tab state eka (default 1)
+  // active tab state eka (default 1)
   const [activeTab, setActiveTab] = useState("1");
 
   // service toggle form
@@ -32,13 +31,13 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps){
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-  setFormData({ ...formData, [e.target.name]: e.target.value });
-};
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  console.log("Form submitted:", formData);
-  setShowModal(false);
-};
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    setShowModal(false);
+  };
 
   // Loaded generator
   type RawGeneratorRecord = {
@@ -55,15 +54,15 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps){
     hasAutoStart?: number | boolean;
     hasBatteryCharger?: number | boolean;
     warranty?: number | string | null;
-    extracted_parts?: any[];
+    extracted_parts?: unknown[];
     createdAt?: number;
     updatedAt?: number;
   };
 
   const [gen, setGen] = useState<RawGeneratorRecord | null>(null);
   const [shopName, setShopName] = useState<string>("");
-  const [serviceHistory, setServiceHistory] = useState<any[]>([]);
-  const [repairLogs, setRepairLogs] = useState<any[]>([]);
+  const [serviceHistory, setServiceHistory] = useState<Record<string, unknown>[]>([]);
+  const [repairLogs, setRepairLogs] = useState<Record<string, unknown>[]>([]);
 
   const toTitle = (s?: string | null) => {
     const v = String(s ?? "").trim();
@@ -133,7 +132,7 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps){
   useEffect(() => {
     if (!gen?.shop_id) { setShopName(""); return; }
     const unsub = onValue(ref(db, `shops/${gen.shop_id}`), (snap) => {
-      const v = snap.val() as any;
+      const v = snap.val() as { name?: string; code?: string } | null;
       setShopName(v?.name || v?.code || gen.shop_id || "");
     });
     return () => unsub();
@@ -142,14 +141,14 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps){
   // Attempt to load logs if available under common patterns
   useEffect(() => {
     if (!effectiveId) { setServiceHistory([]); setRepairLogs([]); return; }
-    const norm = (obj: any) => obj && typeof obj === 'object' ? Object.values(obj) : Array.isArray(obj) ? obj : [];
+    const norm = (obj: unknown) => obj && typeof obj === 'object' ? Object.values(obj as Record<string, unknown>) : Array.isArray(obj) ? obj : [];
     const u1 = onValue(ref(db, `generator_services/${effectiveId}`), (s) => setServiceHistory(norm(s.val())));
     const u2 = onValue(ref(db, `generator_repairs/${effectiveId}`), (s) => setRepairLogs(norm(s.val())));
     return () => { u1(); u2(); };
   }, [effectiveId]);
 
 
-return(
+  return (
     <div className="flex bg-white min-h-screen font-roboto">
       {/* Sidebar 
       <aside className="w-64 bg-white shadow-md flex flex-col p-4">
@@ -237,26 +236,26 @@ return(
       <main className="flex-1 p-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-2">
-         <div className="flex mb-2 gap-x-4">
-          
-            <button onClick={() => onNavigate("Generators")} className="box-border size-4 border h-8 w-8 p-2 mt-4 border-indigo-500 hover:bg-gray-200 justify-items-center..."> 
-              <MdOutlineArrowBack className="font-bold ..."/>         
+          <div className="flex mb-2 gap-x-4">
+
+            <button onClick={() => onNavigate("Generators")} className="box-border size-4 border h-8 w-8 p-2 mt-4 border-indigo-500 hover:bg-gray-200 justify-items-center...">
+              <MdOutlineArrowBack className="font-bold ..." />
             </button>
-          
-          
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">Generator {gen?.id ?? effectiveId ?? ""}</h2>
-            <p className="text-gray-500">{[gen?.brand, gen?.size].filter(Boolean).join(" - ")}</p>
-          </div>
+
+
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Generator {gen?.id ?? effectiveId ?? ""}</h2>
+              <p className="text-gray-500">{[gen?.brand, gen?.size].filter(Boolean).join(" - ")}</p>
+            </div>
 
           </div>
 
-        
+
         </header>
 
         {/* Generator Details */}
         <div className="bg-white p-6 rounded-lg shadow-md pt-2">
-          
+
           {/* Info & Schedule */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {/* Generator Info */}
@@ -265,7 +264,7 @@ return(
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-8 text-sm">
                 <div>
                   <p className="text-gray-500">Serial Number</p>
-                  <p className="font-medium text-gray-800">{gen?.serial_no ?? (gen as any)?.serialNumber ?? "--"}</p>
+                  <p className="font-medium text-gray-800">{gen?.serial_no ?? (gen as RawGeneratorRecord & { serialNumber?: string })?.serialNumber ?? "--"}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Status</p>
@@ -305,14 +304,14 @@ return(
                 <p className="text-sm text-gray-500">Last Service</p>
                 <div className="flex items-center mt-1">
                   <span className="material-icons text-blue-500 mr-4"><MdCalendarToday /></span>
-                  <p className="font-medium text-gray-800">{serviceHistory.length ? fmtDate(serviceHistory[serviceHistory.length-1]?.date ?? null) : "--"}</p>
+                  <p className="font-medium text-gray-800">{serviceHistory.length ? fmtDate((serviceHistory[serviceHistory.length - 1]?.date as number | string | null) ?? null) : "--"}</p>
                 </div>
               </div>
               <div className="mb-4">
                 <p className="text-sm text-gray-500">Due Service</p>
                 <div className="flex items-center mt-1">
                   <span className="material-icons text-orange-500 mr-4"><MdCalendarToday /></span>
-                  <p className="font-medium text-gray-800">{serviceHistory.length ? fmtDate(serviceHistory[serviceHistory.length-1]?.nextServiceDate ?? null) : "--"}</p>
+                  <p className="font-medium text-gray-800">{serviceHistory.length ? fmtDate((serviceHistory[serviceHistory.length - 1]?.nextServiceDate as number | string | null) ?? null) : "--"}</p>
                 </div>
               </div>
               <button onClick={() => setShowModal(true)} className="w-full bg-blue-900 text-white py-2 rounded-md hover:bg-blue-950">Log Service</button>
@@ -321,355 +320,352 @@ return(
 
           {/* Tabs + Table */}
           <div className=" p-2 border border-indigo-500/100 rounded-lg ... ">
-           <div className="flex border-b w-full bg-sky-100 mb-4 border-blue-100 rounded-full ...">
-            <button
-              className={`flex-1 text-center px-4 py-1 rounded-full ${
-                activeTab === "1"
+            <div className="flex border-b w-full bg-sky-100 mb-4 border-blue-100 rounded-full ...">
+              <button
+                className={`flex-1 text-center px-4 py-1 rounded-full ${activeTab === "1"
                   ? "text-white font-semibold bg-blue-500"
                   : "text-gray-700 hover:bg-blue-200"
-              }`}
-              onClick={() => setActiveTab("1")}
-            >
-               Service History
-            </button>
+                  }`}
+                onClick={() => setActiveTab("1")}
+              >
+                Service History
+              </button>
 
-            <button
-              className={`flex-1 text-center px-4 py-1 rounded-full ${
-                activeTab === "2"
+              <button
+                className={`flex-1 text-center px-4 py-1 rounded-full ${activeTab === "2"
                   ? "text-white font-semibold bg-blue-500"
                   : "text-gray-700 hover:bg-blue-200"
-              }`}
-              onClick={() => setActiveTab("2")}
-            >
-              Repair Logs
-            </button>
+                  }`}
+                onClick={() => setActiveTab("2")}
+              >
+                Repair Logs
+              </button>
 
-            <button
-              className={`flex-1 text-center px-4 py-1 rounded-full ${
-                activeTab === "3"
+              <button
+                className={`flex-1 text-center px-4 py-1 rounded-full ${activeTab === "3"
                   ? "text-white font-semibold bg-blue-500"
                   : "text-gray-700 hover:bg-blue-200"
-              }`}
-              onClick={() => setActiveTab("3")}
-            >
-              Extracted Parts
-            </button>
+                  }`}
+                onClick={() => setActiveTab("3")}
+              >
+                Extracted Parts
+              </button>
 
-          </div>
-           
-            {activeTab === "1" &&(
-              <div  id="1">
-            {/*<div className="overflow-auto max-h-48" id="1">*/}
-             
-              <table className="w-full text-left ">
-                <thead className="bg-gray-200 sticky top-0">
-                  <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">
-                    <th className="p-3">Date</th>
-                    <th className="p-3">Type</th>
-                    <th className="p-3">Technician</th>
-                    <th className="p-3">Description</th>
-                    <th className="p-3">Cost</th>
-                    <th className="p-3">Invoice No.</th>
-                  </tr>
-                </thead>
-                 <tbody className="text-gray-700 text-sm/7">
-                  {serviceHistory.length === 0 ? (
-                    <tr><td colSpan={6} className="p-3 text-gray-500">No service records</td></tr>
-                  ) : (
-                    serviceHistory.map((s:any, idx:number) => (
-                      <tr key={idx} className="border-b border-gray-100">
-                        <td className="p-3">{fmtDate(s?.date)}</td>
-                        <td className="p-3">{s?.type || s?.serviceType || "-"}</td>
-                        <td className="p-3">{s?.technician || "-"}</td>
-                        <td className="p-3">{s?.description || "-"}</td>
-                        <td className="p-3">{s?.cost != null ? `LKR ${s.cost}` : "-"}</td>
-                        <td className="p-3">{s?.invoiceNo || s?.invoice || "-"}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
             </div>
-                )}
-          
-           
+
+            {activeTab === "1" && (
+              <div id="1">
+                {/*<div className="overflow-auto max-h-48" id="1">*/}
+
+                <table className="w-full text-left ">
+                  <thead className="bg-gray-200 sticky top-0">
+                    <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">
+                      <th className="p-3">Date</th>
+                      <th className="p-3">Type</th>
+                      <th className="p-3">Technician</th>
+                      <th className="p-3">Description</th>
+                      <th className="p-3">Cost</th>
+                      <th className="p-3">Invoice No.</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-700 text-sm/7">
+                    {serviceHistory.length === 0 ? (
+                      <tr><td colSpan={6} className="p-3 text-gray-500">No service records</td></tr>
+                    ) : (
+                      serviceHistory.map((s: Record<string, unknown>, idx: number) => (
+                        <tr key={idx} className="border-b border-gray-100">
+                          <td className="p-3">{fmtDate(s?.date as number | string | null)}</td>
+                          <td className="p-3">{(s?.type as string) || (s?.serviceType as string) || "-"}</td>
+                          <td className="p-3">{(s?.technician as string) || "-"}</td>
+                          <td className="p-3">{(s?.description as string) || "-"}</td>
+                          <td className="p-3">{s?.cost != null ? `LKR ${s.cost}` : "-"}</td>
+                          <td className="p-3">{(s?.invoiceNo as string) || (s?.invoice as string) || "-"}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+
 
             {activeTab === "2" && (
-             <div id="2">
-               {repairLogs.length > 0 && (
-                 <div className="space-y-2">
-                   {repairLogs.map((r:any, idx:number) => (
-                     <div key={idx} className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
-                       <div className="flex items-center mb-2">
-                         <div className="flex items-center gap-2 mr-4">
-                           <span className="text-red-500 text-lg">!</span>
-                           <h2 className="font-semibold text-black-900">{r?.title || r?.issue || 'Repair'}</h2>
-                         </div>
-                         <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">{r?.status || 'Resolved'}</span>
-                       </div>
-                       <div className="text-sm  space-y-1 mb-3">
-                         <p className="text-sm text-gray-600">{r?.description || '-'}</p>
-                         {r?.notes && <p className="text-sm text-black-900">{r.notes}</p>}
-                       </div>
-                       <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
-                         <p><span className="font-medium">Technician:</span> {r?.technician || '-'}</p>
-                         <p><span className="font-medium">Cost:</span> {r?.cost != null ? `LKR ${r.cost}` : '-'}</p>
-                         <p><span className="font-medium">Date:</span> {fmtDate(r?.date)}</p>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               )}
-                {repairLogs.length === 0 && (
-                <>
-               <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white mb-2">
-               {/* Header */}
-                    <div className="flex items-center mb-2">
-                       <div className="flex items-center gap-2 mr-4">
-                          <span className="text-red-500 text-lg">⚠️</span>
-                          <h2 className="font-semibold text-black-900">Fuel pressure drop</h2>
-                </div>
-                        <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">
-                        Resolved
-                        </span>
-                     </div>
-
-                        {/* Description */}
-                     <div className="text-sm  space-y-1 mb-3">
-                         <p className="text-sm text-gray-600">Investigated fuel system, found clogged filter</p>
-                         <p className="text-sm text-black-900">Replaced fuel filter, tested system</p>
+              <div id="2">
+                {repairLogs.length > 0 && (
+                  <div className="space-y-2">
+                    {repairLogs.map((r: Record<string, unknown>, idx: number) => (
+                      <div key={idx} className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
+                        <div className="flex items-center mb-2">
+                          <div className="flex items-center gap-2 mr-4">
+                            <span className="text-red-500 text-lg">!</span>
+                            <h2 className="font-semibold text-black-900">{(r?.title as string) || (r?.issue as string) || 'Repair'}</h2>
+                          </div>
+                          <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">{(r?.status as string) || 'Resolved'}</span>
+                        </div>
+                        <div className="text-sm  space-y-1 mb-3">
+                          <p className="text-sm text-gray-600">{(r?.description as string) || '-'}</p>
+                          {r?.notes ? <p className="text-sm text-black-900">{String(r.notes)}</p> : null}
+                        </div>
+                        <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
+                          <p><span className="font-medium">Technician:</span> {(r?.technician as string) || '-'}</p>
+                          <p><span className="font-medium">Cost:</span> {r?.cost != null ? `LKR ${r.cost}` : '-'}</p>
+                          <p><span className="font-medium">Date:</span> {fmtDate(r?.date as number | string | null)}</p>
+                        </div>
                       </div>
-
-                      {/* Technician Info */}
-                     <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
-                         <p>
-                         <span className="font-medium">Technician:</span> Dinal Rashmika
-                         </p>
-                          <p>
-                         <span className="font-medium">Cost:</span> LKR 900
-                         </p>
-                         <p>
-                        <span className="font-medium">Date:</span> 7/20/2025
-                        </p>
-                     </div>
-
-                      {/* Parts Used */}
-                     <p className="text-sm text-gray-500">
-                       <span className="font-medium text-black-900">Parts Used:</span> Fuel Filter - FFS320,
-                        O-Ring Kit
-                        </p>
-                 </div>
-
-               <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
-               {/* Header */}
-                    <div className="flex items-center mb-2">
-                       <div className="flex items-center gap-2 mr-4">
+                    ))}
+                  </div>
+                )}
+                {repairLogs.length === 0 && (
+                  <>
+                    <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white mb-2">
+                      {/* Header */}
+                      <div className="flex items-center mb-2">
+                        <div className="flex items-center gap-2 mr-4">
                           <span className="text-red-500 text-lg">⚠️</span>
                           <h2 className="font-semibold text-black-900">Fuel pressure drop</h2>
                         </div>
                         <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">
-                        Resolved
+                          Resolved
                         </span>
-                     </div>
+                      </div>
 
-                        {/* Description */}
-                     <div className="text-sm  space-y-1 mb-3">
-                         <p className="text-sm text-gray-600">Investigated fuel system, found clogged filter</p>
-                         <p className="text-sm text-black-900">Replaced fuel filter, tested system</p>
+                      {/* Description */}
+                      <div className="text-sm  space-y-1 mb-3">
+                        <p className="text-sm text-gray-600">Investigated fuel system, found clogged filter</p>
+                        <p className="text-sm text-black-900">Replaced fuel filter, tested system</p>
                       </div>
 
                       {/* Technician Info */}
-                     <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
-                         <p>
-                         <span className="font-medium">Technician:</span> Dinal Rashmika
-                         </p>
-                          <p>
-                         <span className="font-medium">Cost:</span> LKR 900
-                         </p>
-                         <p>
-                        <span className="font-medium">Date:</span> 7/20/2025
+                      <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
+                        <p>
+                          <span className="font-medium">Technician:</span> Dinal Rashmika
                         </p>
-                     </div>
+                        <p>
+                          <span className="font-medium">Cost:</span> LKR 900
+                        </p>
+                        <p>
+                          <span className="font-medium">Date:</span> 7/20/2025
+                        </p>
+                      </div>
 
                       {/* Parts Used */}
-                     <p className="text-sm text-gray-500">
-                       <span className="font-medium text-black-900">Parts Used:</span> Fuel Filter - FFS320,
+                      <p className="text-sm text-gray-500">
+                        <span className="font-medium text-black-900">Parts Used:</span> Fuel Filter - FFS320,
                         O-Ring Kit
+                      </p>
+                    </div>
+
+                    <div className="border border-blue-300 rounded-md p-4 shadow-sm bg-white">
+                      {/* Header */}
+                      <div className="flex items-center mb-2">
+                        <div className="flex items-center gap-2 mr-4">
+                          <span className="text-red-500 text-lg">⚠️</span>
+                          <h2 className="font-semibold text-black-900">Fuel pressure drop</h2>
+                        </div>
+                        <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded">
+                          Resolved
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <div className="text-sm  space-y-1 mb-3">
+                        <p className="text-sm text-gray-600">Investigated fuel system, found clogged filter</p>
+                        <p className="text-sm text-black-900">Replaced fuel filter, tested system</p>
+                      </div>
+
+                      {/* Technician Info */}
+                      <div className="text-sm text-gray-500 flex gap-4 mb-2 ">
+                        <p>
+                          <span className="font-medium">Technician:</span> Dinal Rashmika
                         </p>
-                 </div>
-                </>
+                        <p>
+                          <span className="font-medium">Cost:</span> LKR 900
+                        </p>
+                        <p>
+                          <span className="font-medium">Date:</span> 7/20/2025
+                        </p>
+                      </div>
+
+                      {/* Parts Used */}
+                      <p className="text-sm text-gray-500">
+                        <span className="font-medium text-black-900">Parts Used:</span> Fuel Filter - FFS320,
+                        O-Ring Kit
+                      </p>
+                    </div>
+                  </>
                 )}
 
-                  </div>
+              </div>
             )}
-             {activeTab === "3" && (
-            
-               
-            <div id="3">
-              {Array.isArray(gen?.extracted_parts) && gen!.extracted_parts!.length > 0 ? (
-                <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
-                  {gen!.extracted_parts!.map((p:any, idx:number) => (
-                    <li key={idx} className="px-4 py-2 text-sm text-gray-800">
-                      {typeof p === 'string' ? p : (p?.name || JSON.stringify(p))}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="p-3 text-sm text-gray-500">No extracted parts</p>
-              )}
+            {activeTab === "3" && (
+
+
+              <div id="3">
+                {Array.isArray(gen?.extracted_parts) && gen!.extracted_parts!.length > 0 ? (
+                  <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+                    {gen!.extracted_parts!.map((p: unknown, idx: number) => (
+                      <li key={idx} className="px-4 py-2 text-sm text-gray-800">
+                        {typeof p === 'string' ? p : ((p as { name?: string })?.name || JSON.stringify(p))}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="p-3 text-sm text-gray-500">No extracted parts</p>
+                )}
+              </div>
+
+
+            )}
+          </div>
+
+        </div>
+
+
+
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
+              <h2 className="text-xl font-semibold mb-4">Service Details</h2>
+              <p className="text-gray-500 mb-6">
+                Record service information and maintenance activities
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Generator & Service Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                      Generator ID
+                    </label>
+                    <select
+                      name="generatorId"
+                      value={formData.generatorId}
+                      onChange={handleChange}
+                      className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                    >
+                      <option value="">Select generator</option>
+                      <option value="gen1">Generator 1</option>
+                      <option value="gen2">Generator 2</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                      Service Type
+                    </label>
+                    <select
+                      name="serviceType"
+                      value={formData.serviceType}
+                      onChange={handleChange}
+                      className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                    >
+                      <option value="">Select service type</option>
+                      <option value="repair">Repair</option>
+                      <option value="maintenance">Maintenance</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Service Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Service Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Enter detailed service description..."
+                    className="mt-1 block w-full pl-2 py-2 bg-gray-100 rounded-md border border-blue-100"
+                    rows={3}
+                  />
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                      Service Date
+                    </label>
+                    <input
+                      type="date"
+                      name="serviceDate"
+                      value={formData.serviceDate}
+                      onChange={handleChange}
+                      className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                      Next Service Date
+                    </label>
+                    <input
+                      type="date"
+                      name="nextServiceDate"
+                      value={formData.nextServiceDate}
+                      onChange={handleChange}
+                      className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                    />
+                  </div>
+                </div>
+
+                {/* Service Cost */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Service Cost
+                  </label>
+                  <input
+                    type="number"
+                    name="cost"
+                    value={formData.cost}
+                    onChange={handleChange}
+                    placeholder="Enter service cost"
+                    className="mt-1 pl-2 py-2 block w-full rounded-md bg-gray-100 border border-blue-100"
+                  />
+                </div>
+
+                {/* Technician Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Technician Notes
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    placeholder="Enter technician notes and observations..."
+                    className="mt-1 block pl-2 py-3 w-full rounded-lg bg-gray-100 border border-blue-100"
+                    rows={3}
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    type="button"
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    type="submit"
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Log Service
+                  </button>
+                </div>
+              </form>
             </div>
-          
-            
-             )}
-             </div>
-            
-        </div>
-        
-
-
-         {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
-        <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
-      <h2 className="text-xl font-semibold mb-4">Service Details</h2>
-      <p className="text-gray-500 mb-6">
-        Record service information and maintenance activities
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Generator & Service Type */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Generator ID
-            </label>
-            <select
-              name="generatorId"
-              value={formData.generatorId}
-              onChange={handleChange}
-              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
-            >
-              <option value="">Select generator</option>
-              <option value="gen1">Generator 1</option>
-              <option value="gen2">Generator 2</option>
-            </select>
           </div>
-
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Service Type
-            </label>
-            <select
-              name="serviceType"
-              value={formData.serviceType}
-              onChange={handleChange}
-              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
-            >
-              <option value="">Select service type</option>
-              <option value="repair">Repair</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Service Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Service Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Enter detailed service description..."
-            className="mt-1 block w-full pl-2 py-2 bg-gray-100 rounded-md border border-blue-100"
-            rows={3}
-          />
-        </div>
-
-        {/* Dates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Service Date
-            </label>
-            <input
-              type="date"
-              name="serviceDate"
-              value={formData.serviceDate}
-              onChange={handleChange}
-              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Next Service Date
-            </label>
-            <input
-              type="date"
-              name="nextServiceDate"
-              value={formData.nextServiceDate}
-              onChange={handleChange}
-              className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
-            />
-          </div>
-        </div>
-
-        {/* Service Cost */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Service Cost
-          </label>
-          <input
-            type="number"
-            name="cost"
-            value={formData.cost}
-            onChange={handleChange}
-            placeholder="Enter service cost"
-            className="mt-1 pl-2 py-2 block w-full rounded-md bg-gray-100 border border-blue-100"
-          />
-        </div>
-
-        {/* Technician Notes */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Technician Notes
-          </label>
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            placeholder="Enter technician notes and observations..."
-            className="mt-1 block pl-2 py-3 w-full rounded-lg bg-gray-100 border border-blue-100"
-            rows={3}
-          />
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={() => setShowModal(false)}
-            type="button"
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => setShowModal(false)}
-            type="submit"
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Log Service
-          </button>
-        </div>
-      </form>
-    </div>
-    </div>
-       )}
+        )}
 
 
 
       </main>
     </div>
-);
+  );
 }

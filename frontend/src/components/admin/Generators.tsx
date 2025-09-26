@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { onValue, ref } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import { httpsCallable, getFunctions } from "firebase/functions";
 import app from "../../firebaseConfig";
 
-import { MdAdd, MdBrightness1, MdOutlineRemoveRedEye, MdEditSquare, MdSearch, MdDelete } from "react-icons/md";
+import { MdAdd, MdOutlineRemoveRedEye, MdEditSquare, MdSearch, MdDelete } from "react-icons/md";
 
 const statusColors: Record<string, string> = {
   green: "bg-green-100 text-green-700",
@@ -64,7 +63,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     hasAutoStart?: number | boolean;
     hasBatteryCharger?: number | boolean;
     warranty?: number | string | null;
-    extracted_parts?: any[];
+    extracted_parts?: unknown[];
     createdAt?: number;
     updatedAt?: number;
   };
@@ -169,7 +168,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         const id = String(data.id ?? key);
         const brand = String(data.brand ?? "");
         const size = String(data.size ?? "");
-        const sn = String((data as any).serialNumber ?? data.serial_no ?? "");
+        const sn = String((data as RawGeneratorRecord & { serialNumber?: string }).serialNumber ?? data.serial_no ?? "");
         const date = formatDate(data.installed_date ?? null);
         const status = normalizeStatus(data.status);
         const statusColor = statusColorFor(status);
@@ -218,7 +217,19 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         ? monthsBetween(formInstalledDate, formWarrantyExpire)
         : null;
 
-      const payload: any = {
+      const payload: {
+        brand: string;
+        size: string | null;
+        serial_no: string;
+        issued_date: number | null;
+        installed_date: number | null;
+        shop_id: string;
+        location: string;
+        hasAutoStart: boolean;
+        hasBatteryCharger: boolean;
+        warranty: number | null;
+        extracted_parts: string[];
+      } = {
         brand: formBrand,
         size: formSize || null,
         serial_no: formSerial,
@@ -239,7 +250,20 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         // Then update extracted parts and other editable fields (excluding status to avoid overriding)
         const update = httpsCallable(fns, "updateGenerator");
         const partsPayload = formStatus === "Unusable" ? formParts : [];
-        const updatePayload: any = {
+        const updatePayload: {
+          id: string;
+          brand: string;
+          size: string | null;
+          serial_no: string;
+          issued_date: number | null;
+          installed_date: number | null;
+          shop_id: string;
+          location: string;
+          hasAutoStart: boolean;
+          hasBatteryCharger: boolean;
+          warranty: number | null;
+          extracted_parts: string[];
+        } = {
           id: editId,
           brand: payload.brand,
           size: payload.size,
@@ -261,8 +285,8 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
       // Close and reset
       setShowForm(false);
       resetForm();
-    } catch (e: any) {
-      setFormError(String(e?.message || "Failed to create generator"));
+    } catch (e: unknown) {
+      setFormError(String((e as Error)?.message || "Failed to create generator"));
     } finally {
       setSubmitting(false);
     }
@@ -297,7 +321,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     setEditId(String(raw.id ?? gen.id));
     setFormBrand(String(raw.brand ?? gen.brand ?? ""));
     setFormSize(String(raw.size ?? gen.size ?? ""));
-    setFormSerial(String((raw as any).serialNumber ?? raw.serial_no ?? gen.sn ?? ""));
+    setFormSerial(String((raw as RawGeneratorRecord & { serialNumber?: string }).serialNumber ?? raw.serial_no ?? gen.sn ?? ""));
     setFormInstalledDate(toInputDate(raw.installed_date ?? null));
     setFormIssuedDate(toInputDate(raw.issued_date ?? null));
     setFormShopId(String(raw.shop_id ?? ""));
@@ -305,8 +329,8 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     setFormAutoStart(Boolean(raw.hasAutoStart));
     setFormBatteryCharger(Boolean(raw.hasBatteryCharger));
     setFormWarrantyExpire(computeWarrantyExpireFromMonths(raw.installed_date ?? null, raw.warranty ?? null));
-    setFormStatus(normalizeStatus(raw.status) as any);
-    setFormParts(Array.isArray(raw.extracted_parts) ? (raw.extracted_parts as any[]).map(String) : []);
+    setFormStatus(normalizeStatus(raw.status) as "Active" | "Under Repair" | "Unusable");
+    setFormParts(Array.isArray(raw.extracted_parts) ? (raw.extracted_parts as unknown[]).map(String) : []);
     setShowForm(true);
   };
 
@@ -540,7 +564,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                     <select
                       className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
                       value={formStatus}
-                      onChange={(e) => setFormStatus(e.target.value as any)}
+                      onChange={(e) => setFormStatus(e.target.value as "Active" | "Under Repair" | "Unusable")}
                     >
                       <option value="Active">Active</option>
                       <option value="Under Repair">Under Repair</option>

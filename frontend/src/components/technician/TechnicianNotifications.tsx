@@ -33,7 +33,11 @@ const getIcon = (type: string) => {
   }
 };
 
-export default function TechnicianNotifications() {
+interface TechnicianNotificationsProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function TechnicianNotifications({ onNavigate }: TechnicianNotificationsProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // 🔹 Load notifications from Firebase realtime
@@ -44,14 +48,14 @@ export default function TechnicianNotifications() {
     const notifRef = ref(db, `notifications/technician/${uid}`);
     const unsub = onValue(notifRef, (snap) => {
       const data = snap.val() || {};
-      const arr: Notification[] = Object.values(data).map((n: any) => ({
-        id: n.id,
-        title: n.title,
-        description: n.body,
-        type: n.type,
-        icon: getIcon(n.type),
-        timestamp: new Date(n.createdAt).toLocaleString(),
-        read: n.read,
+      const arr: Notification[] = (Object.values(data) as Record<string, unknown>[]).map((n: Record<string, unknown>) => ({
+        id: n.id as string,
+        title: n.title as string,
+        description: n.body as string,
+        type: n.type as string,
+        icon: getIcon(n.type as string),
+        timestamp: new Date(n.createdAt as string | number).toLocaleString(),
+        read: n.read as boolean,
       }));
       setNotifications(
         arr.sort(

@@ -217,7 +217,17 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
       const fns = getFunctions(app, "us-central1");
       const call = httpsCallable(fns, isEditing ? "updateBattery" : "createBattery");
       
-      const payload: any = {
+      const payload: {
+        size: string;
+        serial_no: string;
+        issued_date: number | null;
+        install_date: number | null;
+        issue_type: string;
+        gate_pass: string | null;
+        generator_id?: string;
+        shop_id?: string;
+        id?: string;
+      } = {
         size: formSize,
         serial_no: formSerial,
         issued_date: parseDateOrNull(formIssuedDate),
@@ -240,8 +250,8 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
       await call(payload);
       setShowForm(false);
       resetForm();
-    } catch (e: any) {
-      setFormError(String(e?.message || "Failed to save battery"));
+    } catch (e: unknown) {
+      setFormError(String((e as Error)?.message || "Failed to save battery"));
     } finally {
       setSubmitting(false);
     }

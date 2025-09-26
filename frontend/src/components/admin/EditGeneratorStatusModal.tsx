@@ -57,8 +57,8 @@ export default function EditGeneratorStatusModal({
       }
 
       onClose();
-    } catch (e: any) {
-      setError(String(e?.message || "Failed to update status"));
+    } catch (e: unknown) {
+      setError(String((e as Error)?.message || "Failed to update status"));
     } finally {
       setSaving(false);
     }

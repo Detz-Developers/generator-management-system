@@ -21,7 +21,11 @@ const initialRecords: GatePassRecord[] = [
   { id: "GP-2024-004", batteryId: "BAT-2024-123", technician: "Sarah Wilson", issueDate: "2025-05-08", status: "Pending" },
 ];
 
-export default function InventoryGatePassManagement() {
+interface InventoryGatePassManagementProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function InventoryGatePassManagement({ onNavigate }: InventoryGatePassManagementProps) {
   const [records, setRecords] = useState<GatePassRecord[]>(initialRecords);
 
   // Filters

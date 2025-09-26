@@ -1,11 +1,10 @@
-import {useState} from "react";
+import { JSX } from "react";
 
 interface TechnicianAssignedGeneratorsProps {
   onNavigate?: (page: string) => void;
 }
 
-export default function TechnicianAssignedGenerators({ onNavigate }: TechnicianAssignedGeneratorsProps) {
-  const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
+export default function TechnicianAssignedGenerators({ onNavigate }: TechnicianAssignedGeneratorsProps): JSX.Element {
 
   const generators = [
     {
@@ -19,7 +18,7 @@ export default function TechnicianAssignedGenerators({ onNavigate }: TechnicianA
       issues: 1
     },
     {
-      id: "CAT-3508-G301", 
+      id: "CAT-3508-G301",
       model: "Caterpillar 3508",
       location: "Shop C - Emergency Bay",
       capacity: "800 kW",
@@ -32,7 +31,7 @@ export default function TechnicianAssignedGenerators({ onNavigate }: TechnicianA
       id: "CAT-3512-G201",
       model: "Caterpillar 3512",
       location: "Shop B - Main Floor",
-      capacity: "1000 kW", 
+      capacity: "1000 kW",
       runningHours: "1,234h",
       nextService: "2025-09-10",
       status: "operational",

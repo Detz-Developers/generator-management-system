@@ -160,7 +160,7 @@ export default function TechnicianIssueReporting({ onNavigate }: TechnicianIssue
     pdfDoc.text(`Generated on: ${date}`, 14, 30);
 
     const tableColumn = ["ID", "Title", "Status", "Priority", "Category", "Location", "Reported Date"];
-    const tableRows: any[] = [];
+    const tableRows: string[][] = [];
 
     filteredIssues.forEach((issue) => {
       const issueData = [
@@ -192,10 +192,10 @@ export default function TechnicianIssueReporting({ onNavigate }: TechnicianIssue
       headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold", fontSize: 8 },
       alternateRowStyles: { fillColor: [245, 245, 245] },
       margin: { top: 40 },
-      didDrawPage: function (data: any) {
+      didDrawPage: function (data) {
         const pageSize = pdfDoc.internal.pageSize;
         const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
-        pdfDoc.text("Page " + data.pageCount, 14, pageHeight - 10);
+        pdfDoc.text("Page " + (data as unknown as { pageCount: number }).pageCount, 14, pageHeight - 10);
       },
     });
 

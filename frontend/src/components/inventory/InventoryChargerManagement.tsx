@@ -13,7 +13,11 @@ interface Charger {
   conditionStatus: "Good" | "Excellent" | "Fair" | "Needs Repair";
 }
 
-export default function InventoryChargerManagement() {
+interface InventoryChargerManagementProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function InventoryChargerManagement({ onNavigate }: InventoryChargerManagementProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All Status");

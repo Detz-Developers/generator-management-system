@@ -37,7 +37,7 @@ export default function InvoiceManagement({ onNavigate }: Props) {
   useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
   useEffect(() => { const u = auth.onAuthStateChanged(async (user) => {
     if (!user) { setIsAdmin(false); return; }
-    try { const r = await user.getIdTokenResult(); const c:any = r.claims||{}; const ok = c.admin===true || c.isAdmin===true || ["admin","superadmin","owner"].includes(String(c.role||"").toLowerCase()); setIsAdmin(ok); } catch { setIsAdmin(false); }
+    try { const r = await user.getIdTokenResult(); const c: Record<string, unknown> = r.claims||{}; const ok = c.admin===true || c.isAdmin===true || ["admin","superadmin","owner"].includes(String(c.role||"").toLowerCase()); setIsAdmin(ok); } catch { setIsAdmin(false); }
   }); return () => u(); }, []);
 
   const fmtAmt = (n: number) => new Intl.NumberFormat(undefined, { style: "currency", currency: "LKR" }).format(n||0);
@@ -47,11 +47,12 @@ export default function InvoiceManagement({ onNavigate }: Props) {
     setLoading(true);
     try {
       const call = httpsCallable(functions, "listInvoices");
-      const p:any = { limit: 50 }; if (status !== "All") p.status = status; const r:any = await call(p);
-      const arr:any[] = Array.isArray(r?.data?.invoices) ? r.data.invoices : Array.isArray(r?.data) ? r.data : [];
-      const list:InvoiceRow[] = arr.map((x:any) => ({ id: String(x.id ?? x.invoiceId ?? x.invoice_no ?? ""), company_name: String(x.company_name ?? x.company ?? x.customer ?? ""), amount: Number(x.amount ?? 0)||0, date: Number(x.date ?? x.invoice_date ?? x.createdAt ?? 0)||0, due_date: x.due_date!=null?Number(x.due_date):(x.dueDate!=null?Number(x.dueDate):null), status: toStatus(x.status), updatedAt: Number(x.updatedAt ?? x.updated_at ?? x.updated ?? 0)||undefined }));
+      const p: { limit: number; status?: string } = { limit: 50 }; if (status !== "All") p.status = status; const r: { data?: { invoices?: unknown[] } | unknown[] } = await call(p) as { data?: { invoices?: unknown[] } | unknown[] };
+      const dataObj = r?.data as { invoices?: unknown[] } | undefined;
+      const arr: unknown[] = Array.isArray(dataObj?.invoices) ? dataObj.invoices : Array.isArray(r?.data) ? r.data : [];
+      const list: InvoiceRow[] = (arr as Record<string, unknown>[]).map((x: Record<string, unknown>) => ({ id: String(x.id ?? x.invoiceId ?? x.invoice_no ?? ""), company_name: String(x.company_name ?? x.company ?? x.customer ?? ""), amount: Number(x.amount ?? 0)||0, date: Number(x.date ?? x.invoice_date ?? x.createdAt ?? 0)||0, due_date: x.due_date!=null?Number(x.due_date):(x.dueDate!=null?Number(x.dueDate):null), status: toStatus(x.status), updatedAt: Number(x.updatedAt ?? x.updated_at ?? x.updated ?? 0)||undefined }));
       list.sort((a,b)=>(b.date||0)-(a.date||0)); setInvoices(list);
-    } catch(e:any) { setToast({type:"error", msg: String(e?.message||"Failed to load")}); setInvoices([]); }
+    } catch(e: unknown) { setToast({type:"error", msg: String((e as Error)?.message||"Failed to load")}); setInvoices([]); }
     finally { setLoading(false); }
   };
 
@@ -59,8 +60,8 @@ export default function InvoiceManagement({ onNavigate }: Props) {
   useEffect(() => { if (!isAdmin) return; const off = onValue(ref(db, "/invoices"), () => fetchList()); return () => off(); }, [isAdmin]);
 
   const openCreate = () => { setMode("create"); setEditData(null); setReadOnly(false); setOpen(true); };
-  const openEdit = async (id: string) => { try { const call = httpsCallable(functions, "getInvoice"); const r:any = await call({ id }); const d = r?.data||{}; const rec:InvoicePayload = { id: String(d.id ?? id), company_name: String(d.company_name ?? d.company ?? d.customer ?? ""), description: d.description ?? "", date: Number(d.date ?? d.invoice_date ?? d.createdAt ?? Date.now()), due_date: d.due_date!=null?Number(d.due_date):(d.dueDate!=null?Number(d.dueDate):null), status: toStatus(d.status), line_items: (Array.isArray(d.line_items)?d.line_items:[]) as any }; setEditData(rec); setMode("edit"); setReadOnly(rec.status === "Paid"); setOpen(true); } catch(e:any) { setToast({type:"error", msg:String(e?.message||"Failed to load invoice")}); } };
-  const openView = async (id: string) => { try { const call = httpsCallable(functions, "getInvoice"); const r:any = await call({ id }); const d = r?.data||{}; const rec:InvoicePayload = { id: String(d.id ?? id), company_name: String(d.company_name ?? d.company ?? d.customer ?? ""), description: d.description ?? "", date: Number(d.date ?? d.invoice_date ?? d.createdAt ?? Date.now()), due_date: d.due_date!=null?Number(d.due_date):(d.dueDate!=null?Number(d.dueDate):null), status: toStatus(d.status), line_items: (Array.isArray(d.line_items)?d.line_items:[]) as any }; setEditData(rec); setMode("edit"); setReadOnly(true); setOpen(true); } catch(e:any) { setToast({type:"error", msg:String(e?.message||"Failed to load invoice")}); } };
+  const openEdit = async (id: string) => { try { const call = httpsCallable(functions, "getInvoice"); const r: { data?: Record<string, unknown> } = await call({ id }) as { data?: Record<string, unknown> }; const d = r?.data||{}; const rec: InvoicePayload = { id: String(d.id ?? id), company_name: String(d.company_name ?? d.company ?? d.customer ?? ""), description: (d.description as string) ?? "", date: Number(d.date ?? d.invoice_date ?? d.createdAt ?? Date.now()), due_date: d.due_date!=null?Number(d.due_date):(d.dueDate!=null?Number(d.dueDate):null), status: toStatus(d.status), line_items: (Array.isArray(d.line_items)?d.line_items:[]) as InvoicePayload['line_items'] }; setEditData(rec); setMode("edit"); setReadOnly(rec.status === "Paid"); setOpen(true); } catch(e: unknown) { setToast({type:"error", msg:String((e as Error)?.message||"Failed to load invoice")}); } };
+  const openView = async (id: string) => { try { const call = httpsCallable(functions, "getInvoice"); const r: { data?: Record<string, unknown> } = await call({ id }) as { data?: Record<string, unknown> }; const d = r?.data||{}; const rec: InvoicePayload = { id: String(d.id ?? id), company_name: String(d.company_name ?? d.company ?? d.customer ?? ""), description: (d.description as string) ?? "", date: Number(d.date ?? d.invoice_date ?? d.createdAt ?? Date.now()), due_date: d.due_date!=null?Number(d.due_date):(d.dueDate!=null?Number(d.dueDate):null), status: toStatus(d.status), line_items: (Array.isArray(d.line_items)?d.line_items:[]) as InvoicePayload['line_items'] }; setEditData(rec); setMode("edit"); setReadOnly(true); setOpen(true); } catch(e: unknown) { setToast({type:"error", msg:String((e as Error)?.message||"Failed to load invoice")}); } };
 
   const doDelete = async (id:string) => {
     if (!confirm("Delete this invoice? This action cannot be undone.")) return;
@@ -70,14 +71,14 @@ export default function InvoiceManagement({ onNavigate }: Props) {
       await call({ id });
       setInvoices((p) => p.filter((r) => r.id !== id));
       setToast({ type: "success", msg: "Invoice deleted" });
-    } catch (e: any) {
+    } catch (e: unknown) {
       try {
         // Fallback: attempt RTDB removal if callable isn't available
         await remove(ref(db, `/invoices/${id}`));
         setInvoices((p) => p.filter((r) => r.id !== id));
         setToast({ type: "success", msg: "Invoice deleted" });
-      } catch (e2: any) {
-        setToast({ type: "error", msg: String(e?.message || e2?.message || "Delete failed") });
+      } catch (e2: unknown) {
+        setToast({ type: "error", msg: String((e as Error)?.message || (e2 as Error)?.message || "Delete failed") });
       }
     } finally {
       setRowBusy(null);
@@ -119,7 +120,7 @@ export default function InvoiceManagement({ onNavigate }: Props) {
           <div className="relative md:col-span-2"><MdSearch className="absolute left-3 top-3 text-gray-400" />
             <input type="text" placeholder="Search by ID or Company..." value={search} onChange={(e)=>setSearch(e.target.value)} className="w-full px-4 py-2 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
           </div>
-          <select value={status} onChange={(e)=>setStatus(e.target.value as any)} className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <select value={status} onChange={(e)=>setStatus(e.target.value as "All" | InvoiceStatus)} className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <option value="All">All</option>
             <option value="Pending">Pending</option>
             <option value="Paid">Paid</option>
@@ -209,7 +210,7 @@ export default function InvoiceManagement({ onNavigate }: Props) {
   );
 }
 
-function toStatus(s:any):InvoiceStatus { const v=String(s||"Pending").toLowerCase(); if (v.includes("paid")) return "Paid"; if (v.includes("overdue")) return "Overdue"; return "Pending"; }
+function toStatus(s: unknown): InvoiceStatus { const v=String(s||"Pending").toLowerCase(); if (v.includes("paid")) return "Paid"; if (v.includes("overdue")) return "Overdue"; return "Pending"; }
 function badge(s:InvoiceStatus){
   if (s==="Paid") return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Paid</span>;
   if (s==="Overdue") return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Overdue</span>;

@@ -1,11 +1,8 @@
-import { useState } from "react";
-
 interface TechnicianTasksProps {
   onNavigate?: (page: string) => void;
 }
 
-export default function TechnicianTasks({ onNavigate }: TechnicianTasksProps) {
-  const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
+export default function TechnicianTasks({ onNavigate }: TechnicianTasksProps): React.JSX.Element {
 
   const tasks = [
     {

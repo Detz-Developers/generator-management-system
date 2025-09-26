@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
@@ -22,7 +22,7 @@ interface AdminPanelProps {
   onLogout?: () => void;
 }
 
-export default function AdminPanel({ onLogout }: AdminPanelProps) {
+function AdminPanelContent({ onLogout }: AdminPanelProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialPage = (searchParams?.get('page') as string) || 'Dashboard';
@@ -43,7 +43,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
       case 'Generators':
         return <Generators onNavigate={setCurrentPage} onSelectGenerator={setSelectedGeneratorId}/>;
       case 'Batteries':
-        return <Batteries />;
+        return <Batteries onNavigate={setCurrentPage} />;
       case 'Tasks':
         return <Tasks />;
       case 'Services':
@@ -106,5 +106,13 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
         {renderContent()}
       </main>
     </div>
+  );
+}
+
+export default function AdminPanel({ onLogout }: AdminPanelProps) {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <AdminPanelContent onLogout={onLogout} />
+    </Suspense>
   );
 }

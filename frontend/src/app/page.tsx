@@ -93,7 +93,7 @@ export default function Home() {
       case 'Generators':
         return <Generators onNavigate={setCurrentPage}/>;
       case 'Batteries':
-        return <Batteries />;
+        return <Batteries onNavigate={setCurrentPage} />;
       case 'Tasks':
         return <Tasks />;
       case 'Services':
@@ -212,7 +212,7 @@ export default function Home() {
       case 'Dashboard':
         return <InventoryDashboard onNavigate={setCurrentPage} />;
       case 'Batteries':
-        return <Batteries />;
+        return <Batteries onNavigate={setCurrentPage} />;
       case 'Generators':
         return <Generators onNavigate={setCurrentPage}/>;
       case 'Notifications':

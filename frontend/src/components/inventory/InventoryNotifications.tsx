@@ -18,7 +18,11 @@ interface InventoryNotification {
   createdAt: number;
 }
 
-export default function InventoryNotifications() {
+interface InventoryNotificationsProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function InventoryNotifications({ onNavigate }: InventoryNotificationsProps) {
   const [notifications, setNotifications] = useState<InventoryNotification[]>([]);
   const [counts, setCounts] = useState({
     unread: 0,
@@ -35,18 +39,18 @@ export default function InventoryNotifications() {
     const notifRef = ref(db, `notifications/inventory/${uid}`);
     const unsub = onValue(notifRef, (snap) => {
       const data = snap.val() || {};
-      const arr: InventoryNotification[] = Object.values(data).map((n: any) => ({
-        id: n.id,
-        status: n.status ?? "Pending Review",
-        issue: n.title ?? "Unknown Issue",
-        details: n.body ?? "",
-        technician: n.technician ?? "N/A",
-        cost: n.cost ?? "N/A",
-        date: n.date ?? new Date(n.createdAt).toLocaleDateString(),
-        battery: n.battery ?? "N/A",
-        charger: n.charger ?? "N/A",
-        read: n.read ?? false,
-        createdAt: n.createdAt ?? Date.now(),
+      const arr: InventoryNotification[] = (Object.values(data) as Record<string, unknown>[]).map((n: Record<string, unknown>) => ({
+        id: n.id as string,
+        status: (n.status as string) ?? "Pending Review",
+        issue: (n.title as string) ?? "Unknown Issue",
+        details: (n.body as string) ?? "",
+        technician: (n.technician as string) ?? "N/A",
+        cost: (n.cost as string) ?? "N/A",
+        date: (n.date as string) ?? new Date((n.createdAt as number) || Date.now()).toLocaleDateString(),
+        battery: (n.battery as string) ?? "N/A",
+        charger: (n.charger as string) ?? "N/A",
+        read: (n.read as boolean) ?? false,
+        createdAt: (n.createdAt as number) ?? Date.now(),
       }));
 
       // sort latest → oldest

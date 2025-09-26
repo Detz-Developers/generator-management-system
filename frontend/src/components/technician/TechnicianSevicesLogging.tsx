@@ -4,8 +4,7 @@ interface TechnicianServicesLoggingProps {
   onNavigate?: (page: string) => void;
 }
 
-export default function TechnicianServicesLogging({ onNavigate }: TechnicianServicesLoggingProps) {
-  const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
+export default function TechnicianServicesLogging({ onNavigate }: TechnicianServicesLoggingProps): React.JSX.Element {
   const [formData, setFormData] = useState({
     generator: "",
     serviceType: "",

@@ -27,16 +27,28 @@ export default function NotificationCenter() {
     const notifRef = ref(db, `notifications/${uid}`);
     const unsub = onValue(notifRef, (snap) => {
       const data = snap.val() || {};
-      const arr: Notification[] = Object.entries<any>(data).map(([id, n]) => ({
-        id,
-        type: n.type,
-        title: n.title,
-        message: n.message || n.body || "",
-        priority: n.priority ?? 'low',
-        timestamp: n.createdAt ? new Date(n.createdAt).getTime() : Date.now(),
-        isRead: n.read ?? false,
-        hasIndicator: n.hasIndicator ?? false,
-      }));
+      const arr: Notification[] = Object.entries<Record<string, unknown>>(data).map(([id, n]) => {
+        const notification = n as {
+          type?: string;
+          title?: string;
+          message?: string;
+          body?: string;
+          priority?: string;
+          createdAt?: string | number;
+          read?: boolean;
+          hasIndicator?: boolean;
+        };
+        return {
+          id,
+          type: notification.type as 'service-due' | 'battery-return' | 'task-reminder' | 'repair-completed' | 'service-overdue' | 'new-task',
+          title: notification.title || '',
+          message: notification.message || notification.body || "",
+          priority: (notification.priority as 'high' | 'medium' | 'low') ?? 'low',
+          timestamp: notification.createdAt ? new Date(notification.createdAt).getTime() : Date.now(),
+          isRead: notification.read ?? false,
+          hasIndicator: notification.hasIndicator ?? false,
+        };
+      });
       // Sort by createdAt descending
       setNotifications(arr.sort((a, b) => b.timestamp - a.timestamp));
     });
@@ -149,7 +161,7 @@ export default function NotificationCenter() {
                 {filteredNotifications.length === 0 && (
                   <div className="text-center py-12">
                     <h3 className="text-lg font-medium text-blue-900 mb-2">No notifications</h3>
-                    <p className="text-gray-500">You're all caught up! No new notifications at this time.</p>
+                    <p className="text-gray-500">You&apos;re all caught up! No new notifications at this time.</p>
                   </div>
                 )}
 
