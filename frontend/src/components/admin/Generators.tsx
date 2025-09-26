@@ -139,12 +139,22 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     }
   };
 
+  // Load shops data - Enhanced version similar to batteries
   useEffect(() => {
     const unsub = onValue(ref(db, "shops"), (snap) => {
-      const value = (snap.val() ?? {}) as Record<string, { name?: string; code?: string }>;
+      const value = (snap.val() ?? {}) as Record<string, { 
+        name?: string; 
+        code?: string; 
+        city?: string;
+        district?: string;
+        status?: string;
+      }>;
       const map: Record<string, string> = {};
       Object.entries(value).forEach(([id, data]) => {
-        map[id] = data.name || data.code || id;
+        // Prioritize name over code, and include city/district info if available
+        const displayName = data.name || data.code || id;
+        const location = data.city || data.district;
+        map[id] = location ? `${displayName} (${location})` : displayName;
       });
       setShopNameById(map);
     });
@@ -250,21 +260,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
       }
       // Close and reset
       setShowForm(false);
-      setFormBrand("");
-      setFormSize("");
-      setFormSerial("");
-      setFormInstalledDate("");
-      setFormIssuedDate("");
-      setFormShopId("");
-      setFormLocation("Up");
-      setFormAutoStart(false);
-      setFormBatteryCharger(false);
-      setFormWarrantyExpire("");
-      setIsEditing(false);
-      setEditId(null);
-      setFormStatus("Active");
-      setFormParts([]);
-      setNewPart("");
+      resetForm();
     } catch (e: any) {
       setFormError(String(e?.message || "Failed to create generator"));
     } finally {
@@ -350,6 +346,10 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
     const unusable = generators.filter((g) => g.status.toLowerCase().includes("unusable")).length;
     return { total, active, underRepair, unusable };
   }, [generators]);
+
+  // Get unique values for filters from database
+  const uniqueBrands = Array.from(new Set(generators.map(g => g.brand).filter(Boolean)));
+  const uniqueShops = Array.from(new Set(generators.map(g => g.shop).filter(Boolean)));
 
   return (
     <div className="flex font-inter min-h-screen">
@@ -444,9 +444,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
               className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
             >
               <option value="all">All Brands</option>
-              <option value="Caterpillar">Caterpillar</option>
-              <option value="Honda">Honda</option>
-              <option value="Kohler">Kohler</option>
+              {uniqueBrands.map(brand => (
+                <option key={brand} value={brand}>{brand}</option>
+              ))}
             </select>
 
             <select
@@ -465,10 +465,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
               className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
             >
               <option value="all">All Shops</option>
-              <option value="Colombo">Colombo</option>
-              <option value="Gampaha">Gampaha</option>
-              <option value="Kandy">Kandy</option>
-              <option value="Ratmalana">Ratmalana</option>
+              {uniqueShops.map(shop => (
+                <option key={shop} value={shop}>{shop}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -535,18 +534,21 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
 
               {/* Form Grid */}
               <form className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex flex-col">
-                  <label className="mb-1 font-medium text-gray-700">Update Status</label>
-                  <select
-                    className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
-                    value={formStatus}
-                    onChange={(e) => setFormStatus(e.target.value as any)}
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Under Repair">Under Repair</option>
-                    <option value="Unusable">Unusable</option>
-                  </select>
-                </div>
+                {isEditing && (
+                  <div className="flex flex-col">
+                    <label className="mb-1 font-medium text-gray-700">Update Status</label>
+                    <select
+                      className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
+                      value={formStatus}
+                      onChange={(e) => setFormStatus(e.target.value as any)}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Under Repair">Under Repair</option>
+                      <option value="Unusable">Unusable</option>
+                    </select>
+                  </div>
+                )}
+                
                 <div className="flex flex-col">
                   <label className="mb-1 font-medium text-gray-700">Generator Brand</label>
                   <select
@@ -721,7 +723,10 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
 
               {/* Buttons */}
               <div className="flex justify-end gap-3 mt-6">
-                <button className="px-4 py-2 rounded-md bg-gray-200 text-gray-700" onClick={() => { resetForm(); setShowForm(false); }}>
+                <button 
+                  className="px-4 py-2 rounded-md bg-gray-200 text-gray-700" 
+                  onClick={() => { resetForm(); setShowForm(false); }}
+                >
                   Cancel
                 </button>
                 <button

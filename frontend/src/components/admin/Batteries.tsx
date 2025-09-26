@@ -1,310 +1,480 @@
 'use client';
 
-import { useState } from 'react';
-import { Battery, Clock, CheckCircle, CalendarX, Calendar, Eye, Pencil } from 'lucide-react';
-import { MdSearch } from 'react-icons/md';
+import React, { useEffect, useMemo, useState } from 'react';
+import { onValue, ref } from "firebase/database";
+import { db } from "../../firebaseConfig";
+import { httpsCallable, getFunctions } from "firebase/functions";
+import app from "../../firebaseConfig";
+import { Battery, Clock, CheckCircle, CalendarX, Calendar, Eye, Pencil, Trash2 } from 'lucide-react';
+import { MdSearch, MdAdd } from 'react-icons/md';
 
-interface Battery {
-  id: string;
-  batteryId: string;
-  brand: string;
-  size: string;
-  serialNumber: string;
-  type: 'permanent' | 'temporary';
-  installDate: string;
-  generatorId: string;
-  gatePass: string | null;
-  isReturnOverdue: boolean;
+interface Batteries {
+  onNavigate: (page: string) => void;
+  onSelectBattery?: (id: string) => void;
 }
 
-const batteries: Battery[] = [
-  {
-    id: '1',
-    batteryId: 'B001',
-    brand: 'Exide',
-    size: 'NS 40',
-    serialNumber: 'EXI123456789',
-    type: 'permanent',
-    installDate: '8/12/2024',
-    generatorId: 'G001',
-    gatePass: null,
-    isReturnOverdue: false
-  },
-  {
-    id: '2',
-    batteryId: 'B002',
-    brand: 'Amaron',
-    size: '100Ah',
-    serialNumber: 'AMA987654321',
-    type: 'temporary',
-    installDate: '9/12/2024',
-    generatorId: 'G002',
-    gatePass: 'GP20250501',
-    isReturnOverdue: true
-  },
-  {
-    id: '3',
-    batteryId: 'B003',
-    brand: 'Luminous',
-    size: '150Ah',
-    serialNumber: 'LUM555444333',
-    type: 'permanent',
-    installDate: '5/12/2024',
-    generatorId: 'G003',
-    gatePass: null,
-    isReturnOverdue: false
-  },
-  {
-    id: '4',
-    batteryId: 'B004',
-    brand: 'Okaya',
-    size: '120Ah',
-    serialNumber: 'OKAY777888999',
-    type: 'temporary',
-    installDate: '4/12/2024',
-    generatorId: 'G004',
-    gatePass: 'GP20250101',
-    isReturnOverdue: true
-  }
-];
+type RawBatteryRecord = {
+  id?: string;
+  size?: string;
+  serial_no?: string;
+  issued_date?: number | string | null;
+  install_date?: number | string | null;
+  generator_id?: string;
+  shop_id?: string;
+  issue_type?: string; // Fix | Temporary
+  gate_pass?: string;
+  createdAt?: number;
+  updatedAt?: number;
+};
 
-export default function BatteriesPage() {
+type BatteryRow = {
+  id: string;
+  batteryId: string;
+  size: string;
+  serialNumber: string;
+  type: 'Fix' | 'Temporary';
+  installDate: string;
+  issuedDate: string;
+  generatorId: string;
+  shopName: string;
+  gatePass: string;
+  dbKey: string;
+};
+
+export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [brandFilter, setBrandFilter] = useState('all');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [shopFilter, setShopFilter] = useState('all');
+  const [showForm, setShowForm] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [editBattery, setEditBattery] = useState<Battery | null>(null);
-  const [viewBattery, setViewBattery] = useState<Battery | null>(null);
-  const [batteryList, setBatteryList] = useState<Battery[]>(batteries);
-  const [form, setForm] = useState({
-    batteryId: '',
-    brand: '',
-    size: '',
-    serialNumber: '',
-    type: 'permanent',
-    installDate: '',
-    generatorId: '',
-    gatePass: '',
-    isReturnOverdue: false
-  });
-  // View Battery
-  const handleViewBattery = (battery: Battery) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [viewBattery, setViewBattery] = useState<BatteryRow | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Form state
+  const [formSize, setFormSize] = useState("");
+  const [formSerial, setFormSerial] = useState("");
+  const [formIssuedDate, setFormIssuedDate] = useState("");
+  const [formInstallDate, setFormInstallDate] = useState("");
+  const [formGeneratorId, setFormGeneratorId] = useState("");
+  const [formShopId, setFormShopId] = useState("");
+  const [formIssueType, setFormIssueType] = useState<"Fix" | "Temporary">("Fix");
+  const [formGatePass, setFormGatePass] = useState("");
+  const [formAssignmentType, setFormAssignmentType] = useState<"generator" | "shop">("generator");
+
+  const [batteries, setBatteries] = useState<BatteryRow[]>([]);
+  const [shopNameById, setShopNameById] = useState<Record<string, string>>({});
+  const [generatorNameById, setGeneratorNameById] = useState<Record<string, string>>({});
+  const [rawByKey, setRawByKey] = useState<Record<string, RawBatteryRecord>>({});
+
+  const resetForm = () => {
+    setIsEditing(false);
+    setEditId(null);
+    setFormError(null);
+    setFormSize("");
+    setFormSerial("");
+    setFormIssuedDate("");
+    setFormInstallDate("");
+    setFormGeneratorId("");
+    setFormShopId("");
+    setFormIssueType("Fix");
+    setFormGatePass("");
+    setFormAssignmentType("generator");
+  };
+
+  const formatDate = (d?: number | string | null): string => {
+    if (d == null || d === "") return "";
+    try {
+      const date = typeof d === "number" ? new Date(d) : new Date(String(d));
+      if (isNaN(date.getTime())) return String(d);
+      const dd = String(date.getDate()).padStart(2, "0");
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const yyyy = date.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    } catch {
+      return String(d);
+    }
+  };
+
+  const toInputDate = (d?: number | string | null): string => {
+    if (!d && d !== 0) return "";
+    const dt = typeof d === 'number' ? new Date(d) : new Date(String(d));
+    if (isNaN(dt.getTime())) return "";
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const parseDateOrNull = (iso: string): number | null => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    const t = d.getTime();
+    return isNaN(t) ? null : t;
+  };
+
+  // Load shops data
+  useEffect(() => {
+    const unsub = onValue(ref(db, "shops"), (snap) => {
+      const value = (snap.val() ?? {}) as Record<string, { 
+        name?: string; 
+        code?: string; 
+        city?: string;
+        district?: string;
+        status?: string;
+      }>;
+      const map: Record<string, string> = {};
+      Object.entries(value).forEach(([id, data]) => {
+        // Prioritize name over code, and include city/district info if available
+        const displayName = data.name || data.code || id;
+        const location = data.city || data.district;
+        map[id] = location ? `${displayName} (${location})` : displayName;
+      });
+      setShopNameById(map);
+    });
+    return () => unsub();
+  }, []);
+
+  // Load generators data for dropdown
+  useEffect(() => {
+    const unsub = onValue(ref(db, "generators"), (snap) => {
+      const value = (snap.val() ?? {}) as Record<string, { id?: string; brand?: string; size?: string }>;
+      const map: Record<string, string> = {};
+      Object.entries(value).forEach(([key, data]) => {
+        const id = String(data.id ?? key);
+        const display = `${id} (${data.brand || ''} ${data.size || ''})`.trim();
+        map[id] = display;
+      });
+      setGeneratorNameById(map);
+    });
+    return () => unsub();
+  }, []);
+
+  // Load batteries data
+  useEffect(() => {
+    const unsub = onValue(ref(db, "batteries"), (snap) => {
+      const value = (snap.val() ?? {}) as Record<string, RawBatteryRecord>;
+      setRawByKey(value);
+      const items: BatteryRow[] = Object.entries(value).map(([key, data]) => {
+        const id = String(data.id ?? key);
+        const batteryId = `B${String(data.id ?? key).padStart(3, '0')}`;
+        const size = String(data.size ?? "");
+        const serialNumber = String(data.serial_no ?? "");
+        const type = (data.issue_type === "Temporary" ? "Temporary" : "Fix") as "Fix" | "Temporary";
+        const installDate = formatDate(data.install_date ?? null);
+        const issuedDate = formatDate(data.issued_date ?? null);
+        const generatorId = String(data.generator_id ?? "");
+        const shopName = data.shop_id ? (shopNameById[data.shop_id] ?? data.shop_id) : "";
+        const gatePass = String(data.gate_pass ?? "");
+        return { 
+          id, 
+          batteryId, 
+          size, 
+          serialNumber, 
+          type, 
+          installDate, 
+          issuedDate, 
+          generatorId, 
+          shopName, 
+          gatePass, 
+          dbKey: key 
+        };
+      });
+      items.sort((a, b) => a.id.localeCompare(b.id));
+      setBatteries(items);
+    });
+    return () => unsub();
+  }, [shopNameById]);
+
+  const handleCreate = async () => {
+    setFormError(null);
+    if (!formSize || !formSerial) {
+      setFormError("Size and Serial Number are required.");
+      return;
+    }
+    
+    // Validate that either generator OR shop is provided, not both
+    if (!formGeneratorId && !formShopId) {
+      setFormError("Either Generator or Shop must be selected.");
+      return;
+    }
+    
+    if (formGeneratorId && formShopId) {
+      setFormError("Select either Generator or Shop, not both.");
+      return;
+    }
+
+    // Validate gate pass for temporary issue type
+    if (formIssueType === "Temporary" && !formGatePass) {
+      setFormError("Gate Pass is required for Temporary issue type.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const fns = getFunctions(app, "us-central1");
+      const call = httpsCallable(fns, isEditing ? "updateBattery" : "createBattery");
+      
+      const payload: any = {
+        size: formSize,
+        serial_no: formSerial,
+        issued_date: parseDateOrNull(formIssuedDate),
+        install_date: parseDateOrNull(formInstallDate),
+        issue_type: formIssueType,
+        gate_pass: formGatePass || null,
+      };
+
+      // Only include the selected assignment (either generator_id OR shop_id)
+      if (formGeneratorId) {
+        payload.generator_id = formGeneratorId;
+      } else if (formShopId) {
+        payload.shop_id = formShopId;
+      }
+
+      if (isEditing && editId) {
+        payload.id = editId;
+      }
+
+      await call(payload);
+      setShowForm(false);
+      resetForm();
+    } catch (e: any) {
+      setFormError(String(e?.message || "Failed to save battery"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleOpenEdit = (battery: BatteryRow) => {
+    const raw = rawByKey[battery.dbKey] || ({} as RawBatteryRecord);
+    setIsEditing(true);
+    setEditId(String(raw.id ?? battery.id));
+    setFormSize(String(raw.size ?? battery.size ?? ""));
+    setFormSerial(String(raw.serial_no ?? battery.serialNumber ?? ""));
+    setFormIssuedDate(toInputDate(raw.issued_date ?? null));
+    setFormInstallDate(toInputDate(raw.install_date ?? null));
+    setFormGeneratorId(String(raw.generator_id ?? battery.generatorId ?? ""));
+    setFormShopId(String(raw.shop_id ?? ""));
+    setFormIssueType((raw.issue_type === "Temporary" ? "Temporary" : "Fix") as "Fix" | "Temporary");
+    setFormGatePass(String(raw.gate_pass ?? battery.gatePass ?? ""));
+    
+    // Set assignment type based on which field has a value
+    if (raw.generator_id) {
+      setFormAssignmentType("generator");
+    } else if (raw.shop_id) {
+      setFormAssignmentType("shop");
+    } else {
+      setFormAssignmentType("generator"); // default
+    }
+    
+    setShowForm(true);
+  };
+
+  const handleDelete = async (battery: BatteryRow) => {
+    const raw = rawByKey[battery.dbKey] || ({} as RawBatteryRecord);
+    const id = String(raw.id ?? battery.id);
+    const ok = window.confirm(`Delete battery ${battery.batteryId}? This action cannot be undone.`);
+    if (!ok) return;
+    try {
+      const del = httpsCallable(getFunctions(app, "us-central1"), "deleteBattery");
+      await del({ id });
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete battery");
+    }
+  };
+
+  const handleViewBattery = (battery: BatteryRow) => {
     setViewBattery(battery);
     setShowViewModal(true);
   };
 
-  const filteredBatteries = batteryList.filter(battery => {
+  const filteredBatteries = batteries.filter(battery => {
     const matchesSearch = battery.batteryId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      battery.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      battery.serialNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === 'all' || battery.type === typeFilter;
-    const matchesBrand = brandFilter === 'all' || battery.brand === brandFilter;
-    return matchesSearch && matchesType && matchesBrand;
+      battery.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      battery.size.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = typeFilter === 'all' || battery.type.toLowerCase() === typeFilter.toLowerCase();
+    const matchesShop = shopFilter === 'all' || battery.shopName === shopFilter;
+    return matchesSearch && matchesType && matchesShop;
   });
 
-  const totalBatteries = batteryList.length;
-  const temporaryBatteries = batteryList.filter(b => b.type === 'temporary').length;
-  const permanentBatteries = batteryList.filter(b => b.type === 'permanent').length;
-  const returnOverdueBatteries = batteryList.filter(b => b.isReturnOverdue).length;
+  const metrics = useMemo(() => {
+    const total = batteries.length;
+    const fix = batteries.filter((b) => b.type === "Fix").length;
+    const temporary = batteries.filter((b) => b.type === "Temporary").length;
+    // Calculate overdue based on temporary batteries with gate pass older than 30 days
+    const now = new Date();
+    const overdue = batteries.filter(b => {
+      if (b.type !== "Temporary" || !b.installDate) return false;
+      const installDate = new Date(b.installDate.split('/').reverse().join('-'));
+      const daysDiff = (now.getTime() - installDate.getTime()) / (1000 * 3600 * 24);
+      return daysDiff > 30;
+    }).length;
+    return { total, fix, temporary, overdue };
+  }, [batteries]);
 
-  // Add Battery
-  const handleAddBattery = () => {
-    setShowAddModal(true);
-    setForm({
-      batteryId: '',
-      brand: '',
-      size: '',
-      serialNumber: '',
-      type: 'permanent',
-      installDate: '',
-      generatorId: '',
-      gatePass: '',
-      isReturnOverdue: false
-    });
-  };
-
-  const handleEditBattery = (battery: Battery) => {
-    setEditBattery(battery);
-    setForm({
-      batteryId: battery.batteryId,
-      brand: battery.brand,
-      size: battery.size,
-      serialNumber: battery.serialNumber,
-      type: battery.type,
-      installDate: battery.installDate,
-      generatorId: battery.generatorId,
-      gatePass: battery.gatePass || '',
-      isReturnOverdue: battery.isReturnOverdue
-    });
-    setShowEditModal(true);
-  };
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
-    const { name, value, type } = target;
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (target as HTMLInputElement).checked : value
-    }));
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (showAddModal) {
-      const newBattery: Battery = {
-        id: (batteryList.length + 1).toString(),
-        ...form
-      } as Battery;
-      setBatteryList([...batteryList, newBattery]);
-      setShowAddModal(false);
-    } else if (showEditModal && editBattery) {
-      setBatteryList(
-        batteryList.map(b =>
-          b.id === editBattery.id
-            ? {
-              ...editBattery,
-              ...form,
-              type: form.type as Battery["type"]
-            }
-            : b
-        )
-      );
-      setShowEditModal(false);
-      setEditBattery(null);
-    }
-  };
-
-  const closeModal = () => {
-    setShowAddModal(false);
-    setShowEditModal(false);
-    setShowViewModal(false);
-    setEditBattery(null);
-    setViewBattery(null);
-  };
+  const uniqueShops = Array.from(new Set(batteries.map(b => b.shopName).filter(Boolean)));
 
   return (
-    <div className="flex-1 p-8">
+    <div className="flex-1 p-8 font-inter">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">Batteries</h1>
-            <p className="text-gray-600 text-lg">Manage battery inventory and assignments</p>
-          </div>
-          <button className="bg-blue-600 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-medium transition-colors" onClick={handleAddBattery}>
-            + Add Battery
-          </button>
+      <header className="flex flex-nowrap items-center mb-4 sm:mb-6 justify-start sm:justify-between gap-2">
+        <div className="min-w-0 sm:flex-1">
+          <h1 className="text-2xl sm:text-4xl font-bold text-blue-600 truncate mb-1 sm:mb-2">Batteries</h1>
+          <p className="text-gray-500 text-sm sm:text-base truncate">Manage battery inventory and assignments</p>
         </div>
-      </div>
+        <button
+          className="bg-blue-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold flex items-center shadow-md hover:bg-blue-600 flex-shrink-0 ml-2 sm:ml-0"
+          onClick={() => { resetForm(); setShowForm(true); }}
+        >
+          <MdAdd className="mr-1 sm:mr-2" />
+          Add Battery
+        </button>
+      </header>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <Battery className="mx-auto text-3xl text-gray-700 mb-2" />
-          <h3 className="text-sm text-gray-500">Total Batteries</h3>
-          <p className="text-xl font-bold">{totalBatteries}</p>
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="flex items-center space-x-3">
+            <Battery className="text-gray-700" size={24} />
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Total Batteries</h3>
+              <p className="text-3xl font-bold text-gray-900">{metrics.total}</p>
+            </div>
+          </div>
         </div>
-        <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <Battery className="mx-auto text-3xl text-yellow-500 mb-2" />
-          <h3 className="text-sm text-gray-500">Temporary</h3>
-          <p className="text-xl font-bold">{temporaryBatteries}</p>
+
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="flex items-center space-x-3">
+            <CheckCircle className="text-blue-500" size={24} />
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Fix</h3>
+              <p className="text-3xl font-bold text-gray-900">{metrics.fix}</p>
+            </div>
+          </div>
         </div>
-        <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <Battery className="mx-auto text-3xl text-blue-500 mb-2" />
-          <h3 className="text-sm text-gray-500">Permanent</h3>
-          <p className="text-xl font-bold">{permanentBatteries}</p>
+
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="flex items-center space-x-3">
+            <Clock className="text-yellow-500" size={24} />
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Temporary</h3>
+              <p className="text-3xl font-bold text-gray-900">{metrics.temporary}</p>
+            </div>
+          </div>
         </div>
-        <div className="border text-center border-blue-200 bg-white rounded-lg shadow-lg p-6">
-          <Clock className="mx-auto text-red-500 mb-2" />
-          <h3 className="text-sm text-gray-500">Return Overdue</h3>
-          <p className="text-xl font-bold">{returnOverdueBatteries}</p>
+
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="flex items-center space-x-3">
+            <CalendarX className="text-red-500" size={24} />
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Return Overdue</h3>
+              <p className="text-3xl font-bold text-gray-900">{metrics.overdue}</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+      <div className="bg-white py-4 px-6 rounded-lg shadow-md mb-4 border border-blue-300">
+        <p className="text-gray-500 mb-2">Filters</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
+            <MdSearch className="absolute left-3 top-3 text-gray-400" />
             <input
               type="text"
               placeholder="Search batteries..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="pl-10 pr-4 py-2 bg-gray-100 border border-blue-100 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <MdSearch className="absolute left-3 top-3 text-gray-400" />
           </div>
+
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
           >
             <option value="all">All Types</option>
-            <option value="permanent">Permanent</option>
+            <option value="fix">Fix</option>
             <option value="temporary">Temporary</option>
           </select>
+
           <select
-            value={brandFilter}
-            onChange={(e) => setBrandFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={shopFilter}
+            onChange={(e) => setShopFilter(e.target.value)}
+            className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
           >
-            <option value="all">All Brands</option>
-            <option value="Exide">Exide</option>
-            <option value="Amaron">Amaron</option>
-            <option value="Luminous">Luminous</option>
-            <option value="Okaya">Okaya</option>
+            <option value="all">All Shops</option>
+            {uniqueShops.map(shop => (
+              <option key={shop} value={shop}>{shop}</option>
+            ))}
           </select>
         </div>
       </div>
 
-      {/* Batteries Table/List */}
-      <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Battery List</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-blue-50">
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Battery ID</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Serial No.</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Install Date</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Generator ID</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Gate Pass</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Return Overdue</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+      {/* Batteries Table */}
+      <div className="bg-white px-4 py-4 rounded-lg shadow-md border border-blue-300 mb-4">
+        <h3 className="text-md font-semibold mb-1">Battery List</h3>
+        <p className="text-sm/9">{filteredBatteries.length} Batteries Found</p>
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="sticky top-0 bg-gray-50 border-b border-blue-100">
+              <tr>
+                {["Battery ID", "Size", "Serial Number", "Type", "Install Date", "Generator ID", "Shop", "Gate Pass", "Actions"].map((col, idx) => (
+                  <th key={idx} className="px-4 py-2 text-sm font-semibold text-gray-600">
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filteredBatteries.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-4 text-gray-500">No batteries found.</td>
+                  <td colSpan={9} className="text-center py-4 text-gray-500">No batteries found.</td>
                 </tr>
               ) : (
-                filteredBatteries.map(battery => (
-                  <tr key={battery.id} className="hover:bg-blue-50">
-                    <td className="px-4 py-2 text-sm">{battery.id}</td>
-                    <td className="px-4 py-2 text-sm">{battery.batteryId}</td>
-                    <td className="px-4 py-2 text-sm">{battery.brand}</td>
-                    <td className="px-4 py-2 text-sm">{battery.size}</td>
-                    <td className="px-4 py-2 text-sm">{battery.serialNumber}</td>
-                    <td className="px-4 py-2 text-sm">{battery.type}</td>
-                    <td className="px-4 py-2 text-sm">{battery.installDate}</td>
-                    <td className="px-4 py-2 text-sm">{battery.generatorId}</td>
-                    <td className="px-4 py-2 text-sm">{battery.gatePass || '-'}</td>
-                    <td className="px-4 py-2 text-sm">{battery.isReturnOverdue ? <span className="text-red-500">Yes</span> : <span className="text-green-500">No</span>}</td>
-                    <td className="px-4 py-2 text-sm">
-                      <div className="flex flex-row gap-2">
-                        <button title="Edit" className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center justify-center" onClick={() => handleEditBattery(battery)}>
-                          <Pencil size={18} />
+                filteredBatteries.map((battery, idx) => (
+                  <tr key={idx} className="border-b border-blue-100 hover:bg-gray-50 py-2">
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.batteryId}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.size}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.serialNumber}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">
+                      <span className={`px-2 py-1 rounded-md text-sm font-medium ${
+                        battery.type === 'Fix' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {battery.type}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.installDate}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.generatorId}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.shopName}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{battery.gatePass || '-'}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => handleViewBattery(battery)} 
+                          className="bg-green-100 p-2 rounded-md hover:bg-green-200" 
+                          title="View"
+                        >
+                          <Eye className="text-green-600" size={16} />
                         </button>
-                        <button title="View" className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded flex items-center justify-center" onClick={() => handleViewBattery(battery)}>
-                          <Eye size={18} />
+                        <button 
+                          onClick={() => handleOpenEdit(battery)} 
+                          className="bg-blue-100 p-2 rounded-md hover:bg-blue-200" 
+                          title="Edit"
+                        >
+                          <Pencil className="text-blue-500" size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(battery)} 
+                          className="bg-red-100 p-2 rounded-md hover:bg-red-200" 
+                          title="Delete"
+                        >
+                          <Trash2 className="text-red-600" size={16} />
                         </button>
                       </div>
                     </td>
@@ -316,72 +486,179 @@ export default function BatteriesPage() {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
-      {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
-            {/* Header */}
-            <div className={`px-8 py-4 flex items-center justify-between ${showAddModal ? 'bg-blue-600' : 'bg-blue-500'}`}>
-              <h2 className="text-xl font-bold text-white">{showAddModal ? 'Add Battery' : 'Edit Battery'}</h2>
-              <button type="button" className="text-white hover:text-gray-200 text-2xl font-bold" onClick={closeModal}>&times;</button>
-            </div>
-            {/* Details Section */}
-            <form onSubmit={handleFormSubmit} className="px-8 py-6">
-              <div className="flex items-center gap-4 mb-6">
-                <Battery className={showAddModal ? "text-blue-600" : "text-blue-500"} size={40} />
-                <div>
-                  <div className="text-lg font-semibold text-gray-800">{form.brand} {form.size}</div>
-                  <div className="text-sm text-gray-500">Serial: {form.serialNumber}</div>
-                </div>
+      {/* Add/Edit Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">
+              {isEditing ? "Edit Battery" : "Add Battery"}
+            </h2>
+            {formError && (
+              <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {formError}
               </div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="font-semibold text-gray-700">Battery ID:</label>
-                  <input name="batteryId" value={form.batteryId} onChange={handleFormChange} required placeholder="Battery ID" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Brand:</label>
-                  <input name="brand" value={form.brand} onChange={handleFormChange} required placeholder="Brand" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Size:</label>
-                  <input name="size" value={form.size} onChange={handleFormChange} required placeholder="Size" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Serial Number:</label>
-                  <input name="serialNumber" value={form.serialNumber} onChange={handleFormChange} required placeholder="Serial Number" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Type:</label>
-                  <select name="type" value={form.type} onChange={handleFormChange} className="border px-3 py-2 rounded w-full mt-1">
-                    <option value="permanent">Permanent</option>
-                    <option value="temporary">Temporary</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Install Date:</label>
-                  <input name="installDate" value={form.installDate} onChange={handleFormChange} required placeholder="Install Date" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Generator ID:</label>
-                  <input name="generatorId" value={form.generatorId} onChange={handleFormChange} required placeholder="Generator ID" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div>
-                  <label className="font-semibold text-gray-700">Gate Pass:</label>
-                  <input name="gatePass" value={form.gatePass} onChange={handleFormChange} placeholder="Gate Pass" className="border px-3 py-2 rounded w-full mt-1" />
-                </div>
-                <div className="col-span-2">
-                  <label className="font-semibold text-gray-700 flex items-center">
-                    <input type="checkbox" name="isReturnOverdue" checked={form.isReturnOverdue} onChange={handleFormChange} className="mr-2" />
-                    Return Overdue
+            )}
+
+            <form className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium text-gray-700">Size</label>
+                <select
+                  className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
+                  value={formSize}
+                  onChange={(e) => setFormSize(e.target.value)}
+                >
+                  <option value="">Select size</option>
+                  <option value="NS 40">NS 40</option>
+                  <option value="100Ah">100Ah</option>
+                  <option value="120Ah">120Ah</option>
+                  <option value="150Ah">150Ah</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium text-gray-700">Serial Number</label>
+                <input
+                  type="text"
+                  placeholder="Enter serial number"
+                  className="border rounded-md px-3 py-2 focus:ring bg-gray-100 border border-blue-100 focus:ring-blue-200"
+                  value={formSerial}
+                  onChange={(e) => setFormSerial(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium text-gray-700">Issue Type</label>
+                <select
+                  className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
+                  value={formIssueType}
+                  onChange={(e) => setFormIssueType(e.target.value as "Fix" | "Temporary")}
+                >
+                  <option value="Fix">Fix</option>
+                  <option value="Temporary">Temporary</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium text-gray-700">Issued Date</label>
+                <input
+                  type="date"
+                  className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                  value={formIssuedDate}
+                  onChange={(e) => setFormIssuedDate(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium text-gray-700">Install Date</label>
+                <input
+                  type="date"
+                  className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                  value={formInstallDate}
+                  onChange={(e) => setFormInstallDate(e.target.value)}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="mb-1 font-medium text-gray-700">Assignment Type</label>
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="assignmentType"
+                      value="generator"
+                      checked={formAssignmentType === "generator"}
+                      onChange={(e) => {
+                        setFormAssignmentType("generator");
+                        if (e.target.checked) {
+                          setFormShopId(""); // Clear shop when selecting generator
+                        }
+                      }}
+                    />
+                    Assign to Generator
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="assignmentType"
+                      value="shop"
+                      checked={formAssignmentType === "shop"}
+                      onChange={(e) => {
+                        setFormAssignmentType("shop");
+                        if (e.target.checked) {
+                          setFormGeneratorId(""); // Clear generator when selecting shop
+                        }
+                      }}
+                    />
+                    Assign to Shop
                   </label>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button type="button" className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={closeModal}>Cancel</button>
-                <button type="submit" className={`px-4 py-2 rounded text-white ${showAddModal ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}`}>{showAddModal ? 'Add' : 'Save'}</button>
-              </div>
+
+              {formAssignmentType === "generator" && (
+                <div className="flex flex-col col-span-2">
+                  <label className="mb-1 font-medium text-gray-700">Generator</label>
+                  <select
+                    className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                    value={formGeneratorId}
+                    onChange={(e) => setFormGeneratorId(e.target.value)}
+                  >
+                    <option value="">Select generator</option>
+                    {Object.entries(generatorNameById).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {formAssignmentType === "shop" && (
+                <div className="flex flex-col col-span-2">
+                  <label className="mb-1 font-medium text-gray-700">Assigned Shop</label>
+                  <select
+                    className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                    value={formShopId}
+                    onChange={(e) => setFormShopId(e.target.value)}
+                  >
+                    <option value="">Select shop</option>
+                    {Object.entries(shopNameById).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {formIssueType === "Temporary" && (
+                <div className="flex flex-col col-span-2">
+                  <label className="mb-1 font-medium text-gray-700">Gate Pass *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter gate pass number (required for temporary)"
+                    className="border rounded-md px-3 py-2 focus:ring bg-gray-100 border border-blue-100 focus:ring-blue-200"
+                    value={formGatePass}
+                    onChange={(e) => setFormGatePass(e.target.value)}
+                  />
+                </div>
+              )}
             </form>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button 
+                className="px-4 py-2 rounded-md bg-gray-200 text-gray-700" 
+                onClick={() => { resetForm(); setShowForm(false); }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                onClick={handleCreate}
+                disabled={submitting}
+              >
+                {isEditing ? (submitting ? "Saving..." : "Save Changes") : (submitting ? "Adding..." : "Add Battery")}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -390,69 +667,65 @@ export default function BatteriesPage() {
       {showViewModal && viewBattery && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-brightness-75">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
-            {/* Header */}
             <div className="bg-blue-600 px-8 py-4 flex items-center justify-between">
               <h2 className="text-xl font-bold text-white">Battery Details</h2>
               <button
                 type="button"
                 className="text-white hover:text-gray-200 text-2xl font-bold"
-                onClick={closeModal}
+                onClick={() => setShowViewModal(false)}
               >
                 &times;
               </button>
             </div>
-      {/* Details Section */}
-      <div className="px-8 py-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Battery className="text-blue-600" size={40} />
-          <div>
-            <div className="text-lg font-semibold text-gray-800">
-              {viewBattery.brand} {viewBattery.size}
+            <div className="px-8 py-6">
+              <div className="flex items-center gap-4 mb-6">
+                <Battery className="text-blue-600" size={40} />
+                <div>
+                  <div className="text-lg font-semibold text-gray-800">
+                    {viewBattery.batteryId} - {viewBattery.size}
+                  </div>
+                  <div className="text-sm text-gray-500">Serial: {viewBattery.serialNumber}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <span className="font-semibold text-gray-700">Type:</span>
+                  <div className="text-gray-800">{viewBattery.type}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Install Date:</span>
+                  <div className="text-gray-800">{viewBattery.installDate}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Issued Date:</span>
+                  <div className="text-gray-800">{viewBattery.issuedDate}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Generator ID:</span>
+                  <div className="text-gray-800">{viewBattery.generatorId}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Shop:</span>
+                  <div className="text-gray-800">{viewBattery.shopName}</div>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Gate Pass:</span>
+                  <div className="text-gray-800">{viewBattery.gatePass || '-'}</div>
+                </div>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={() => setShowViewModal(false)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
-            <div className="text-sm text-gray-500">Serial: {viewBattery.serialNumber}</div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <span className="font-semibold text-gray-700">Battery ID:</span>
-            <div className="text-gray-800">{viewBattery.batteryId}</div>
-          </div>
-          <div>
-            <span className="font-semibold text-gray-700">Type:</span>
-            <div className="text-gray-800 capitalize">{viewBattery.type}</div>
-          </div>
-          <div>
-            <span className="font-semibold text-gray-700">Install Date:</span>
-            <div className="text-gray-800">{viewBattery.installDate}</div>
-          </div>
-          <div>
-            <span className="font-semibold text-gray-700">Generator ID:</span>
-            <div className="text-gray-800">{viewBattery.generatorId}</div>
-          </div>
-          <div>
-            <span className="font-semibold text-gray-700">Gate Pass:</span>
-            <div className="text-gray-800">{viewBattery.gatePass || '-'}</div>
-          </div>
-          <div>
-            <span className="font-semibold text-gray-700">Return Overdue:</span>
-            <div className={viewBattery.isReturnOverdue ? "text-red-600" : "text-green-600"}>
-              {viewBattery.isReturnOverdue ? 'Yes' : 'No'}
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-end mt-6">
-          <button
-            type="button"
-            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-            onClick={closeModal}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  )}
+      )}
     </div>
   );
 }

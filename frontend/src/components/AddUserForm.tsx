@@ -6,7 +6,6 @@ import {
   deleteUser,
   signOut as signOutSecondary,
 } from 'firebase/auth';
-import { ref, update } from 'firebase/database';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions, getSecondaryAuth } from '../firebaseConfig';
 
@@ -33,12 +32,6 @@ const roles = [
   },
 ] as const;
 
-const centers = [
-  'Downtown Generator Center',
-  'Industrial Zone Hub',
-  'Mumbai Central',
-];
-
 interface AddUserFormProps {
   onCancel: () => void;
   onSuccess?: () => void;
@@ -50,7 +43,6 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<(typeof roles)[number]['value']>('operator');
-  const [center, setCenter] = useState('');
   const [active, setActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,10 +64,6 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
     }
     if (!password || password.length < 6) {
       setError('Please enter a password with at least 6 characters.');
-      return false;
-    }
-    if (role === 'operator' && !center) {
-      setError('Please select a center for the operator.');
       return false;
     }
     return true;
@@ -113,14 +101,6 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
         role,
       });
 
-      const updates: Record<string, unknown> = {};
-      if (role === 'operator' && center) {
-        updates.center = center;
-      }
-      if (Object.keys(updates).length) {
-        await update(ref(db, `users/${uid}`), updates);
-      }
-
       if (!active) {
         const setUserStatus = httpsCallable(functions, 'setUserStatus');
         await setUserStatus({ uid, disabled: true });
@@ -130,7 +110,6 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
       setFullName('');
       setEmail('');
       setPassword('');
-      setCenter('');
       setRole('operator');
       setActive(true);
       onSuccess?.();
@@ -237,24 +216,6 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
           </select>
           <div className="text-xs text-gray-400 mt-1">{roles.find((r) => r.value === role)?.description}</div>
         </div>
-        {role === 'operator' && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-            <div className="font-semibold text-green-700 mb-2">Operator Assignment</div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Center</label>
-            <select
-              className="w-full bg-green-100 rounded-lg px-4 py-2"
-              value={center}
-              onChange={(e) => setCenter(e.target.value)}
-            >
-              <option value="">Select center</option>
-              {centers.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
           <div className="flex items-center gap-2">
