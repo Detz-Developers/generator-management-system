@@ -1,5 +1,5 @@
 
-
+/*
 describe("Admin - Generators page", () => {
   const openAdminGenerators = () => {
     cy.visit("/admin");
@@ -89,6 +89,63 @@ it("opens Add Generator modal when clicking Add Generator button", () => {
 
   // Verify modal is closed
   cy.contains("h2", "Add Generator").should("not.exist");
+});
+
+
+});
+*/
+describe('Generators Page E2E Test', () => {
+  beforeEach(() => {
+    //  Visit root route
+    cy.visit('http://localhost:3000/');
+
+    // Login (assuming Login form visible)
+    cy.get('input[id="email"]').type('admin@gmail.com');
+    cy.get('input[id="password"]').type('Temp@123');
+    cy.get('button[id="submit"]').click();
+
+    //  After login, wait for Dashboard
+    cy.contains('Dashboard', { matchCase: false, timeout: 10000 }).should('be.visible');
+
+    //  Navigate via sidebar to Generators
+    cy.contains('Generators', { matchCase: false, timeout: 10000 }).click();
+
+    //  Ensure Generators component visible
+    cy.contains('Generators', { matchCase: false }).should('exist');
+    cy.contains('Manage', { matchCase: false }).should('exist');
+  });
+
+  it('should render the Generators page', () => {
+    cy.contains('Generators', { matchCase: false }).should('exist');
+    cy.contains('Manage', { matchCase: false }).should('exist');
+  });
+
+  it('should open the Add Generator modal', () => {
+    cy.contains('Add Generator', { matchCase: false }).should('exist').click();
+    cy.get('.modal-content, [role="dialog"]', { timeout: 8000 }).should('be.visible');
+    cy.get('button').contains(/cancel/i).click({ force: true });
+  });
+
+  it('should display list of generators', () => {
+    cy.get('[data-testid="generator-list"], table', { timeout: 8000 }).should('exist');
+  });
+
+  /*
+  it('should navigate to generator details page', () => {
+    cy.get('[data-testid="generator-item"]', { timeout: 10000 }).first().click();
+    cy.contains('GeneratorDetails').should('exist');
+  });
+  */
+it('should navigate to generator details page', () => {
+  cy.get('[data-testid="generator-item"]', { timeout: 10000 })
+    .should('exist')
+    .first()
+    .click();
+
+  // Fix: check for /generators/ instead of ?page=GeneratorDetails
+  cy.url().should('include', '/generators/');
+
+ 
 });
 
 

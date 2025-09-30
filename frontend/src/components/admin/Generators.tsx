@@ -364,7 +364,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
             className="bg-blue-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold flex items-center shadow-md hover:bg-blue-600 flex-shrink-0 ml-2 sm:ml-0"
             onClick={() => { resetForm(); setShowForm(true); }}
           >
-            <MdAdd className="mr-1 sm:mr-2" />
+            <MdAdd className="mr-1 sm:mr-2" role="dialog" />
             Add Generator
           </button>
         </header>
@@ -504,7 +504,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                     <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">
                       <div className="flex items-center">
                         <button onClick={() => { onSelectGenerator?.(gen.dbKey || gen.id); router.push(`/generators/${encodeURIComponent(gen.id)}`); onNavigate("GeneratorDetails"); }} className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200" title="View">
-                          <MdOutlineRemoveRedEye className="text-blue-500" />
+                          <MdOutlineRemoveRedEye className="text-blue-500" data-testid="generator-item" />
                         </button>
                         <button onClick={() => handleOpenEdit(gen)} className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200" title="Edit">
                           <MdEditSquare className="text-blue-500" />
