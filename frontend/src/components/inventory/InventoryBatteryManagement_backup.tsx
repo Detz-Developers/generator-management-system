@@ -17,8 +17,51 @@ type RawBatteryRecord = {
   issued_date?: number | string | null;
   install_date?: number | string | null;
   generator_id?: string;
-  shop_id?: string;
-  issue_type?: string; // Fix | Temporary
+  shop_i                    <div>
+                      <label htmlFor="editAssignedDate" className="font-semibold text-gray-700">Assigned Date:</label>
+                      <input
+                          type="date"
+                          id="editAssignedDate"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={editedBattery.assignedDate}
+                          onChange={(e) => setEditedBattery({...editedBattery, assignedDate: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="editIssueType" className="font-semibold text-gray-700">Issue Type:</label>
+                      <select
+                          id="editIssueType"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={editedBattery.brand}
+                          onChange={(e) => setEditedBattery({...editedBattery, brand: e.target.value})}
+                      >
+                        <option value="Fix">Fix</option>
+                        <option value="Temporary">Temporary</option>
+                      </select>
+                    </div>
+                  </div>
+                  {formError && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                      {formError}
+                    </div>
+                  )}
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button 
+                      type="button" 
+                      className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50" 
+                      onClick={closeModal}
+                      disabled={submitting}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                      disabled={submitting}
+                    >
+                      {submitting ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>issue_type?: string; // Fix | Temporary
   gate_pass?: string;
   createdAt?: number;
   updatedAt?: number;
@@ -47,28 +90,14 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewBattery, setViewBattery] = useState<Battery | null>(null);
+
+  // New state for the edit modal
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedBattery, setEditedBattery] = useState<Battery | null>(null);
 
   const [batteries, setBatteries] = useState<Battery[]>([]);
   const [shopNameById, setShopNameById] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  // State for the "Add Battery" form inputs
-  const [newBattery, setNewBattery] = useState({
-    size: "",
-    serialNumber: "",
-    assignedDate: "",
-    status: "In Stock",
-    location: "Up",
-    shop: "",
-    issueType: "Fix" as "Fix" | "Temporary",
-    installDate: "",
-    generatorId: "",
-    gatePass: "",
-  });
 
   // Helper function to format date
   const formatDate = (d?: number | string | null): string => {
@@ -156,6 +185,22 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
     return () => unsub();
   }, [shopNameById]);
 
+  // State for the "Add Battery" form inputs
+  const [newBattery, setNewBattery] = useState({
+    size: "",
+    serialNumber: "",
+    assignedDate: "",
+    status: "In Stock",
+    location: "Up",
+    shop: "",
+    issueType: "Fix" as "Fix" | "Temporary",
+    installDate: "",
+    generatorId: "",
+    gatePass: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   const filteredBatteries = useMemo(() => {
     if (loading) return [];
     return batteries.filter(battery => {
@@ -211,6 +256,7 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
     setShowViewModal(true);
   };
 
+  // New function to handle the edit button click
   const handleEditBattery = (battery: Battery) => {
     setEditedBattery(battery);
     setShowEditModal(true);
@@ -219,10 +265,9 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
   const closeModal = () => {
     setShowAddModal(false);
     setShowViewModal(false);
-    setShowEditModal(false);
+    setShowEditModal(false); // Close the edit modal as well
     setViewBattery(null);
     setEditedBattery(null);
-    setFormError(null);
   };
 
   const handleAddFormSubmit = async (e: React.FormEvent) => {
@@ -268,6 +313,7 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
     }
   };
 
+  // Handle delete battery
   const handleDeleteBattery = async (battery: Battery) => {
     const confirmed = window.confirm(`Delete battery ${battery.batteryId}? This action cannot be undone.`);
     if (!confirmed) return;
@@ -280,12 +326,20 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
     }
   };
 
+  // New function to handle the edit form submission
   const handleEditFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editedBattery) return;
 
     try {
       setSubmitting(true);
+      const parseDateOrNull = (dateStr: string): number | null => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        const t = d.getTime();
+        return isNaN(t) ? null : t;
+      };
+
       const updates = {
         size: editedBattery.type,
         serial_no: editedBattery.serialNumber,
@@ -302,21 +356,6 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
       setSubmitting(false);
     }
   };
-
-  const uniqueShops = Array.from(new Set(batteries.map(b => b.shop).filter(Boolean)));
-
-  if (loading) {
-    return (
-      <div className="flex-1 p-8 bg-gray-50 min-h-screen">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading batteries...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
       <>
@@ -397,21 +436,21 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
               </select>
               <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 <option>All Brands</option>
-                <option>NS 40</option>
-                <option>100Ah</option>
-                <option>120Ah</option>
-                <option>150Ah</option>
+                <option>Type-A</option>
+                <option>Type-B</option>
+                <option>Type-C</option>
               </select>
               <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 <option>All Locations</option>
-                <option>With Gen</option>
-                <option>In Stock</option>
+                <option>Up</option>
+                <option>Down</option>
               </select>
               <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 <option>All Shops</option>
-                {uniqueShops.map(shop => (
-                  <option key={shop} value={shop}>{shop}</option>
-                ))}
+                <option>Colombo</option>
+                <option>Gampaha</option>
+                <option>Kandy</option>
+                <option>Ratmalana</option>
               </select>
             </div>
           </div>
@@ -454,11 +493,8 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                             <button onClick={() => handleViewBattery(battery)} className="text-blue-600 hover:text-blue-900 mr-2">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.575 3.01 9.963 7.172.01.037.01.074 0 .111a.75.75 0 01-1.35.639C19.577 16.49 15.64 19.5 12 19.5c-4.638 0-8.575-3.01-9.963-7.172zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
                             </button>
-                            <button onClick={() => handleEditBattery(battery)} className="text-gray-400 hover:text-gray-600 mr-2">
+                            <button onClick={() => handleEditBattery(battery)} className="text-gray-400 hover:text-gray-600">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.498L18.42 6.056l-6.857 6.857-1.558 1.558-1.558-1.558L10.27 11.19a.75.75 0 011.06 1.06L11.558 13.5zM12 4.5l-6.857 6.857-1.558 1.558-1.558-1.558z" /></svg>
-                            </button>
-                            <button onClick={() => handleDeleteBattery(battery)} className="text-red-600 hover:text-red-900">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                             </button>
                           </td>
                         </tr>
@@ -523,6 +559,49 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                       />
                     </div>
                     <div>
+                      <label htmlFor="status" className="font-semibold text-gray-700">Status:</label>
+                      <select
+                          id="status"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={newBattery.status}
+                          onChange={(e) => setNewBattery({...newBattery, status: e.target.value})}
+                      >
+                        <option>Active</option>
+                        <option>In Stock</option>
+                        <option>Final Assignment</option>
+                        <option>Overdue</option>
+                        <option>Under Repair</option>
+                        <option>Unusable</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="location" className="font-semibold text-gray-700">Location:</label>
+                      <select
+                          id="location"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={newBattery.location}
+                          onChange={(e) => setNewBattery({...newBattery, location: e.target.value})}
+                      >
+                        <option>Up</option>
+                        <option>Down</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="shop" className="font-semibold text-gray-700">Shop:</label>
+                      <select
+                          id="shop"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={newBattery.shop}
+                          onChange={(e) => setNewBattery({...newBattery, shop: e.target.value})}
+                      >
+                        <option></option>
+                        <option>Colombo</option>
+                        <option>Gampaha</option>
+                        <option>Kandy</option>
+                        <option>Ratmalana</option>
+                      </select>
+                    </div>
+                    <div>
                       <label htmlFor="assignedDate" className="font-semibold text-gray-700">Assigned Date:</label>
                       <input
                           type="date"
@@ -533,27 +612,9 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                       />
                     </div>
                   </div>
-                  {formError && (
-                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-                      {formError}
-                    </div>
-                  )}
                   <div className="flex justify-end gap-2 mt-6">
-                    <button 
-                      type="button" 
-                      className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50" 
-                      onClick={closeModal}
-                      disabled={submitting}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                      disabled={submitting}
-                    >
-                      {submitting ? "Adding..." : "Add Battery"}
-                    </button>
+                    <button type="button" className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={closeModal}>Cancel</button>
+                    <button type="submit" className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700">Add Battery</button>
                   </div>
                 </form>
               </div>
@@ -611,7 +672,7 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
             </div>
         )}
 
-        {/* Edit Battery Modal */}
+        {/* New Edit Battery Modal */}
         {showEditModal && editedBattery && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
               <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-0 overflow-hidden">
@@ -636,18 +697,6 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="editIssueType" className="font-semibold text-gray-700">Issue Type:</label>
-                      <select
-                          id="editIssueType"
-                          className="border px-3 py-2 rounded w-full mt-1"
-                          value={editedBattery.brand}
-                          onChange={(e) => setEditedBattery({...editedBattery, brand: e.target.value})}
-                      >
-                        <option value="Fix">Fix</option>
-                        <option value="Temporary">Temporary</option>
-                      </select>
-                    </div>
-                    <div>
                       <label htmlFor="editSerialNumber" className="font-semibold text-gray-700">Serial Number:</label>
                       <input
                           type="text"
@@ -656,6 +705,59 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                           className="border px-3 py-2 rounded w-full mt-1"
                           value={editedBattery.serialNumber}
                           onChange={(e) => setEditedBattery({...editedBattery, serialNumber: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="editStatus" className="font-semibold text-gray-700">Status:</label>
+                      <select
+                          id="editStatus"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={editedBattery.status}
+                          onChange={(e) => setEditedBattery({...editedBattery, status: e.target.value})}
+                      >
+                        <option>Active</option>
+                        <option>In Stock</option>
+                        <option>Final Assignment</option>
+                        <option>Overdue</option>
+                        <option>Under Repair</option>
+                        <option>Unusable</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="editLocation" className="font-semibold text-gray-700">Location:</label>
+                      <select
+                          id="editLocation"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={editedBattery.location}
+                          onChange={(e) => setEditedBattery({...editedBattery, location: e.target.value})}
+                      >
+                        <option>Up</option>
+                        <option>Down</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="editShop" className="font-semibold text-gray-700">Shop:</label>
+                      <select
+                          id="editShop"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={editedBattery.shop}
+                          onChange={(e) => setEditedBattery({...editedBattery, shop: e.target.value})}
+                      >
+                        <option></option>
+                        <option>Colombo</option>
+                        <option>Gampaha</option>
+                        <option>Kandy</option>
+                        <option>Ratmalana</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="editAssignedDate" className="font-semibold text-gray-700">Assigned Date:</label>
+                      <input
+                          type="date"
+                          id="editAssignedDate"
+                          className="border px-3 py-2 rounded w-full mt-1"
+                          value={editedBattery.assignedDate}
+                          onChange={(e) => setEditedBattery({...editedBattery, assignedDate: e.target.value})}
                       />
                     </div>
                   </div>

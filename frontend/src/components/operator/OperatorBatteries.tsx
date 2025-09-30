@@ -1,8 +1,34 @@
 import {useEffect, useRef, useState} from "react";
+import { onValue, ref } from "firebase/database";
+import { db } from "../../firebaseConfig";
 import { FaBell } from "react-icons/fa";
 
 interface OperatorBatteriesProps {
   onNavigate?: (page: string) => void;
+}
+
+// Firebase battery record structure
+type RawBatteryRecord = {
+  id?: string;
+  size?: string;
+  serial_no?: string;
+  issued_date?: number | string | null;
+  install_date?: number | string | null;
+  generator_id?: string;
+  shop_id?: string;
+  issue_type?: string; // Fix | Temporary
+  gate_pass?: string;
+  createdAt?: number;
+  updatedAt?: number;
+};
+
+// UI battery object structure
+interface BatteryItem {
+  id: string;
+  status: string;
+  type: string;
+  color: string;
+  dot: string;
 }
 
 interface CustomDatePickerProps {
@@ -28,8 +54,16 @@ function CustomDatePicker({ selectedDate, onDateChange, onClose }: CustomDatePic
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const formatDateForInput = (year: number, month: number, day: number) => {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentMonth(prev => {
+      const newMonth = new Date(prev);
+      if (direction === 'prev') {
+        newMonth.setMonth(prev.getMonth() - 1);
+      } else {
+        newMonth.setMonth(prev.getMonth() + 1);
+      }
+      return newMonth;
+    });
   };
 
   const renderCalendarDays = () => {
@@ -44,17 +78,21 @@ function CustomDatePicker({ selectedDate, onDateChange, onClose }: CustomDatePic
 
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = formatDateForInput(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isSelected = dateStr === tempSelectedDate;
       const isToday = dateStr === new Date().toISOString().split('T')[0];
 
       days.push(
         <button
           key={day}
-          className={`w-8 h-8 rounded-full text-sm flex items-center justify-center hover:bg-blue-100 ${
-            isSelected ? 'bg-blue-500 text-white' : isToday ? 'bg-blue-100 text-blue-600' : 'text-gray-700'
-          }`}
           onClick={() => setTempSelectedDate(dateStr)}
+          className={`w-8 h-8 text-sm rounded flex items-center justify-center hover:bg-blue-100 ${
+            isSelected 
+              ? 'bg-blue-500 text-white' 
+              : isToday 
+                ? 'bg-blue-100 text-blue-600 font-medium' 
+                : 'text-gray-700'
+          }`}
         >
           {day}
         </button>
@@ -64,33 +102,20 @@ function CustomDatePicker({ selectedDate, onDateChange, onClose }: CustomDatePic
     return days;
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    const newMonth = new Date(currentMonth);
-    if (direction === 'prev') {
-      newMonth.setMonth(newMonth.getMonth() - 1);
-    } else {
-      newMonth.setMonth(newMonth.getMonth() + 1);
-    }
-    setCurrentMonth(newMonth);
-  };
-
-  const handleOK = () => {
+  const handleConfirm = () => {
     onDateChange(tempSelectedDate);
     onClose();
   };
 
-  const handleCancel = () => {
-    setTempSelectedDate(selectedDate);
-    onClose();
-  };
-
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 w-80 border">
-      <div className="mb-4">
-        <div className="font-semibold text-gray-700 mb-2">Select date</div>
-        <div className="text-lg font-medium text-gray-800">
+    <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4 w-80">
+      {/* Current Selection Display */}
+      <div className="mb-4 p-2 bg-gray-50 rounded">
+        <div className="text-xs text-gray-500 mb-1">Selected Date:</div>
+        <div className="font-medium">
           {new Date(tempSelectedDate).toLocaleDateString('en-US', { 
-            weekday: 'short', 
+            weekday: 'long', 
+            year: 'numeric', 
             month: 'short', 
             day: 'numeric' 
           })}
@@ -142,370 +167,345 @@ function CustomDatePicker({ selectedDate, onDateChange, onClose }: CustomDatePic
           onClick={onClose}
           className="text-blue-500 text-sm hover:text-blue-600"
         >
-          Close
+          Cancel
         </button>
-        <div className="flex gap-4">
-          <button
-            onClick={handleCancel}
-            className="text-blue-500 text-sm hover:text-blue-600"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleOK}
-            className="text-blue-500 text-sm hover:text-blue-600 font-medium"
-          >
-            OK
-          </button>
-        </div>
+        <button
+          onClick={handleConfirm}
+          className="bg-blue-500 text-white px-4 py-1 rounded text-sm hover:bg-blue-600"
+        >
+          Confirm
+        </button>
       </div>
     </div>
   );
 }
 
 export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps) {
-    const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
-    const [search, setSearch] = useState("");
-    const [withGen, setWithGen] = useState(true);
-    const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const datePickerRef = useRef<HTMLDivElement | null>(null);
+  // Firebase data state
+  const [batteries, setBatteries] = useState<RawBatteryRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // UI state
+  const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [withGen, setWithGen] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement | null>(null);
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d'>('30d');
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-    // Close popover on outside click or ESC key
-    useEffect(() => {
-      if (!showDatePicker) return;
-      const onClick = (e: MouseEvent) => {
-        if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
-          setShowDatePicker(false);
+  // Load batteries from Firebase
+  useEffect(() => {
+    const batteriesRef = ref(db, 'batteries');
+    
+    const unsubscribe = onValue(batteriesRef, (snapshot) => {
+      try {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const batteriesArray = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+          }));
+          setBatteries(batteriesArray);
+        } else {
+          setBatteries([]);
         }
-      };
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') setShowDatePicker(false);
-      };
-      document.addEventListener('mousedown', onClick);
-      document.addEventListener('keydown', onKey);
-      return () => {
-        document.removeEventListener('mousedown', onClick);
-        document.removeEventListener('keydown', onKey);
-      };
-    }, [showDatePicker]);
-    // Mock battery data
-    const batteries = [
-      { id: "B00281", status: "Online", type: "With Gen", color: "bg-green-100", dot: "bg-green-400" },
-      { id: "G06723", status: "Extra", type: "Without Gen", color: "bg-blue-100", dot: "bg-blue-400" },
-      { id: "G02386", status: "Replace Request Sent", type: "With Gen", color: "bg-red-100", dot: "bg-red-400" },
-    ];
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading batteries:", err);
+        setError("Failed to load batteries");
+        setLoading(false);
+      }
+    }, (error) => {
+      console.error("Firebase error:", error);
+      setError("Database connection error");
+      setLoading(false);
+    });
 
-    // Filter batteries by search and toggle
-    const filteredBatteries = batteries.filter(b =>
-      b.id.toLowerCase().includes(search.toLowerCase()) &&
-      (withGen ? b.type === "With Gen" : b.type === "Without Gen")
-    );
+    return () => unsubscribe();
+  }, []);
 
-    return (
-      <div className="flex-1 p-8 bg-gray-50 min-h-screen">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-4xl font-bold text-blue-600">Batteries</h1>
-          <button className="bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center">
-            <FaBell className="text-white text-xl" />
-          </button>
+  // Convert Firebase data to UI format with status derivation
+  const getBatteryItems = () => {
+    return batteries.map((battery) => {
+      let status = "Available";
+      let type = "Without Gen";
+      let color = "bg-blue-100";
+      let dot = "bg-blue-400";
+
+      // Determine if battery is with generator
+      if (battery.shop_id && battery.generator_id && battery.install_date) {
+        type = "With Gen";
+        status = "Online";
+        color = "bg-green-100";
+        dot = "bg-green-400";
+      } else if (battery.shop_id && battery.issued_date && !battery.install_date) {
+        type = "With Gen";
+        status = "Issued (Not Installed)";
+        color = "bg-yellow-100";
+        dot = "bg-yellow-400";
+      } else if (battery.issue_type) {
+        status = battery.issue_type === "Fix" ? "Replace Request Sent" : "Maintenance Required";
+        color = "bg-red-100";
+        dot = "bg-red-400";
+        type = battery.generator_id ? "With Gen" : "Without Gen";
+      } else {
+        status = "Extra";
+        type = "Without Gen";
+      }
+
+      return {
+        id: battery.serial_no || battery.id || "",
+        status,
+        type,
+        color,
+        dot
+      };
+    });
+  };
+
+  const batteryItems = getBatteryItems();
+
+  // Close popover on outside click or ESC key
+  useEffect(() => {
+    if (!showDatePicker) return;
+    const onClick = (e: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
+        setShowDatePicker(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowDatePicker(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [showDatePicker]);
+
+  // Filter batteries by search and toggle
+  const filteredBatteries = batteryItems.filter(b =>
+    b.id.toLowerCase().includes(search.toLowerCase()) &&
+    (withGen ? b.type === "With Gen" : b.type === "Without Gen")
+  );
+
+  return (
+    <div className="flex-1 p-8 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-4xl font-bold text-blue-600">Batteries</h1>
+        <button className="bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center">
+          <FaBell className="text-white text-xl" />
+        </button>
+      </div>
+      <p className="text-gray-600 mb-6">Monitor and manage battery status</p>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading batteries...</span>
         </div>
-        <p className="text-gray-600 mb-6">Monitor and manage battery status</p>
+      )}
 
-        {/* Search and Toggle */}
-        <div className="flex items-center gap-4 mb-8">
-          <input
-            type="text"
-            placeholder="Serial Number"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="border rounded px-4 py-2 w-64"
-          />
-          <div
-            className="relative w-[360px] h-10 rounded-full bg-blue-400 p-1 shadow"
-            role="tablist"
-            aria-label="Generator filter"
-          >
-            <div
-              className="absolute top-1 bottom-1 rounded-full bg-white shadow transition-all duration-300"
-              style={{ width: 'calc(50% - 0.25rem)', left: withGen ? '0.25rem' : 'calc(50% + 0.25rem)' }}
-              aria-hidden="true"
-            />
-            <div className="relative z-10 flex h-full select-none">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={withGen}
-                className="flex-1 rounded-full font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                onClick={() => setWithGen(true)}
-              >
-                With Gen
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={!withGen}
-                className="flex-1 rounded-full font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                onClick={() => setWithGen(false)}
-              >
-                Without Gen
-              </button>
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error Loading Batteries</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Battery Cards */}
-        <div className="space-y-4 mb-10">
-          {filteredBatteries.map(b => (
-            <div key={b.id} className={`flex items-center justify-between rounded-lg h-15 shadow ${b.color}`}>
-              <div className="flex items-center gap-4 my-4 mx-2">
-                <span className={`w-6 h-6 rounded-full ${b.dot}`}></span>
-                <div>
-                  <div className="font-bold text-lg">Battery {b.id}</div>
-                  <div className="text-sm text-gray-700">{b.status}</div>
+      {/* Content - only show when not loading */}
+      {!loading && !error && (
+        <>
+          {/* Search and Toggle */}
+          <div className="flex items-center gap-4 mb-8">
+            <input
+              type="text"
+              placeholder="Serial Number"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-2 w-64"
+            />
+            
+            {/* Toggle */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">With Gen</span>
+              <button
+                onClick={() => setWithGen(!withGen)}
+                className={`relative inline-flex w-11 h-6 items-center rounded-full transition-colors ${
+                  withGen ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`transform transition-transform duration-200 inline-block h-4 w-4 rounded-full bg-white ${
+                    withGen ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <span className="text-sm text-gray-600">Without Gen</span>
+            </div>
+
+            {/* Date Picker */}
+            <div className="relative" ref={datePickerRef}>
+              <button
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded bg-white hover:bg-gray-50"
+              >
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-sm">
+                  {new Date(selectedDate).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+              </button>
+              
+              {showDatePicker && (
+                <CustomDatePicker
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  onClose={() => setShowDatePicker(false)}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Active Batteries</p>
+                  <p className="text-2xl font-bold text-gray-900">{batteryItems.filter(b => b.status === "Online").length}</p>
                 </div>
               </div>
-              <div className={`w-20 h-15 rounded-r-lg ${b.dot}`}></div>
             </div>
-          ))}
-        </div>
 
-  {/* Date Picker and Breakdown */}
-        
-        <div className="flex gap-8 items-start">
-          {/* Date Picker */}
-          <div className="relative w-80" ref={datePickerRef}>
-            <div className="bg-white rounded-xl shadow p-4">
-              <div className="font-semibold mb-3 text-gray-800">Date</div>
-              <button
-                type="button"
-                onClick={() => setShowDatePicker(v => !v)}
-                className="w-full flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-white hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200 px-3 py-2 transition"
-                aria-haspopup="dialog"
-                aria-expanded={showDatePicker}
-              >
-                <div className="flex items-center gap-3">
-                  {/* Calendar icon */}
-                  <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <path d="M16 2v4M8 2v4M3 10h18"/>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                  <span className="text-gray-800">
-                    {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                  </span>
                 </div>
-                <svg className={`w-4 h-4 text-gray-500 transition-transform ${showDatePicker ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M6 9l6 6 6-6"/>
-                </svg>
-              </button>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Available</p>
+                  <p className="text-2xl font-bold text-gray-900">{batteryItems.filter(b => b.status === "Extra").length}</p>
+                </div>
+              </div>
+            </div>
 
-              {/* Popover */}
-              {showDatePicker && (
-                <div className="absolute z-20 mt-2 w-80">
-                  <div className="origin-top left-0 bg-white rounded-xl shadow-xl border border-gray-100 p-3 animate-in fade-in slide-in-from-top-2">
-                    <CustomDatePicker
-                      selectedDate={selectedDate}
-                      onDateChange={(d) => setSelectedDate(d)}
-                      onClose={() => setShowDatePicker(false)}
-                    />
-                  </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Issues</p>
+                  <p className="text-2xl font-bold text-gray-900">{batteryItems.filter(b => b.status.includes("Replace") || b.status.includes("Maintenance")).length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Battery List */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                Battery Status ({filteredBatteries.length} batteries)
+              </h3>
+            </div>
+            <div className="p-6">
+              {filteredBatteries.length === 0 ? (
+                <div className="text-center py-8">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No batteries found</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {search ? `No batteries match "${search}"` : "No batteries in this category"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredBatteries.map((battery, index) => (
+                    <div key={battery.id} className={`p-4 rounded-lg border ${battery.color} border-opacity-50`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full ${battery.dot}`}></div>
+                          <div>
+                            <p className="font-medium text-gray-900">{battery.id}</p>
+                            <p className="text-sm text-gray-600">{battery.type}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-medium ${battery.color.replace('bg-', 'text-').replace('-100', '-700')}`}>
+                            {battery.status}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </div>
-          {/* Breakdown & Chart */}
-          <div className="flex-1">
-            {/* Header with timeframe */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold text-blue-600">Recently Breakdown</div>
-              <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
-                {([['7d','7D'],['30d','30D'],['90d','90D']] as const).map(([key,label]) => (
+
+          {/* Chart Section */}
+          <div className="mt-8 bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium text-gray-900">Battery Performance Trend</h3>
+              <div className="flex gap-2">
+                {(['7d', '30d', '90d'] as const).map((period) => (
                   <button
-                    key={key}
-                    onClick={() => setTimeframe(key)}
-                    className={`px-3 py-1 rounded-full text-sm ${timeframe===key ? 'bg-white text-blue-600 shadow' : 'text-gray-600 hover:text-gray-900'}`}
-                    aria-pressed={timeframe===key}
-                  >{label}</button>
+                    key={period}
+                    onClick={() => setTimeframe(period)}
+                    className={`px-3 py-1 text-sm rounded ${
+                      timeframe === period
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {period}
+                  </button>
                 ))}
               </div>
             </div>
-
-            {/* Mini summary pills */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                <span className="text-sm text-green-700">Online</span>
-              </div>
-              <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-                <span className="text-sm text-blue-700">Extra</span>
-              </div>
-              <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                <span className="text-sm text-red-600">Replace Requests</span>
+            
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              {/* Placeholder for chart */}
+              <div className="text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p className="mt-2 text-sm">Performance chart will be displayed here</p>
               </div>
             </div>
-
-            {/* Modern area chart (SVG) */}
-            <ChartArea timeframe={timeframe} hoverIndex={hoverIndex} setHoverIndex={setHoverIndex} selectedDate={selectedDate} />
           </div>
-        </div>
-      </div>
-    );
-}
-
-// Lightweight responsive area chart using pure SVG with gradient and tooltip
-function ChartArea({
-  timeframe,
-  hoverIndex,
-  setHoverIndex,
-  selectedDate
-}: {
-  timeframe: '7d' | '30d' | '90d';
-  hoverIndex: number | null;
-  setHoverIndex: (i: number | null) => void;
-  selectedDate: string;
-}) {
-  const width = 720; // viewBox width
-  const height = 220; // viewBox height
-  const pad = { l: 36, r: 12, t: 16, b: 28 };
-
-  const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
-
-  // Build labels from selectedDate backwards
-  const labels = Array.from({ length: days }, (_, i) => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() - (days - 1 - i));
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  });
-
-  // Generate smoothish demo data
-  const data = Array.from({ length: days }, (_, i) => {
-    const base = 20 + 6 * Math.sin((i / (days - 1 || 1)) * Math.PI * 1.5);
-    const wiggle = ((i % 5) - 2) * 0.8;
-    return Math.max(5, Math.round(base + wiggle));
-  });
-
-  const minY = Math.min(...data);
-  const maxY = Math.max(...data);
-  const innerW = width - pad.l - pad.r;
-  const innerH = height - pad.t - pad.b;
-
-  const xAt = (i: number) => pad.l + (i / (days - 1)) * innerW;
-  const yAt = (v: number) => {
-    const span = Math.max(1, maxY - minY);
-    return pad.t + (1 - (v - minY) / span) * innerH;
-  };
-
-  // Build line path
-  let dLine = '';
-  data.forEach((v, i) => {
-    const x = xAt(i);
-    const y = yAt(v);
-    dLine += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
-  });
-
-  // Build area path
-  const dArea = `${dLine} L ${xAt(days - 1)} ${pad.t + innerH} L ${xAt(0)} ${pad.t + innerH} Z`;
-
-  // Grid lines (y)
-  const gridYValues = 4;
-  const gridLines = Array.from({ length: gridYValues + 1 }, (_, i) => pad.t + (i / gridYValues) * innerH);
-
-  const handleMove = (evt: React.MouseEvent<SVGRectElement, MouseEvent>) => {
-    const { left } = (evt.currentTarget as SVGRectElement).getBoundingClientRect();
-    const px = evt.clientX - left;
-    // Find nearest index
-    let nearest = 0;
-    let best = Infinity;
-    for (let i = 0; i < days; i++) {
-      const dx = Math.abs(px - xAt(i));
-      if (dx < best) {
-        best = dx;
-        nearest = i;
-      }
-    }
-    setHoverIndex(nearest);
-  };
-
-  const handleLeave = () => setHoverIndex(null);
-
-  return (
-    <div className="relative bg-white rounded-xl border border-gray-200 p-4">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-56">
-        <defs>
-          <linearGradient id="strokeGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#1d4ed8" />
-          </linearGradient>
-          <linearGradient id="fillGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(59,130,246,0.28)" />
-            <stop offset="100%" stopColor="rgba(59,130,246,0.06)" />
-          </linearGradient>
-        </defs>
-
-        {/* Grid */}
-        {gridLines.map((y, idx) => (
-          <line key={idx} x1={pad.l} y1={y} x2={pad.l + innerW} y2={y} stroke="#e5e7eb" strokeWidth={1} />
-        ))}
-
-        {/* Area */}
-        <path d={dArea} fill="url(#fillGrad)" stroke="none" />
-        {/* Line */}
-        <path d={dLine} fill="none" stroke="url(#strokeGrad)" strokeWidth={3.5} strokeLinecap="round" />
-
-        {/* Points */}
-        {data.map((v, i) => (
-          <circle key={i} cx={xAt(i)} cy={yAt(v)} r={hoverIndex === i ? 4 : 3} fill="#3b82f6" />
-        ))}
-
-        {/* Hover capture */}
-        <rect
-          x={pad.l}
-          y={pad.t}
-          width={innerW}
-          height={innerH}
-          fill="transparent"
-          onMouseMove={handleMove}
-          onMouseLeave={handleLeave}
-        />
-
-        {/* Hover line */}
-        {hoverIndex !== null && (
-          <line
-            x1={xAt(hoverIndex)}
-            x2={xAt(hoverIndex)}
-            y1={pad.t}
-            y2={pad.t + innerH}
-            stroke="#93c5fd"
-            strokeDasharray="4 4"
-          />
-        )}
-      </svg>
-
-      {/* Tooltip */}
-      {hoverIndex !== null && (
-        <div
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-2 rounded-md bg-white shadow px-2 py-1 text-xs border"
-          style={{
-            left: `${((hoverIndex / (days - 1 || 1)) * 100)}%`,
-            top: 6,
-          }}
-        >
-          <div className="text-gray-500">{labels[hoverIndex]}</div>
-          <div className="font-semibold text-gray-800">{data[hoverIndex]}</div>
-        </div>
+        </>
       )}
-
-      {/* X labels (sparse) */}
-      <div className="mt-2 flex justify-between text-[11px] text-gray-500">
-        <span>{labels[0]}</span>
-        <span>{labels[Math.floor(labels.length/2)]}</span>
-        <span>{labels[labels.length-1]}</span>
-      </div>
     </div>
   );
 }
