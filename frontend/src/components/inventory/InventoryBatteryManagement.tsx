@@ -35,7 +35,7 @@ interface Battery {
   location: string;
   shop: string;
   brand: string;
-  dbKey: string; // Firebase key
+  dbKey: string; 
 }
 
 export default function InventoryBatteryManagement({ onNavigate }: BatteryManagementProps) {
