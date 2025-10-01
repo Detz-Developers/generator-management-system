@@ -394,8 +394,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
         </header>
 
         {/* Metrics cards */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+        {/* Metrics cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <div>
@@ -405,7 +406,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <div>
@@ -415,7 +416,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
               <div>
@@ -425,7 +426,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <div>
@@ -435,6 +436,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
             </div>
           </div>
         </div>
+
 
         {/* Filters */}
         <div className="bg-white py-4 px-6 rounded-lg shadow-md mb-4 border border-blue-300">
