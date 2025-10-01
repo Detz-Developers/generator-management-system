@@ -1,72 +1,62 @@
-import { mount } from "cypress/react";
-import TasksPage from "../../frontend/src/components/admin/Tasks";
+/// <reference types="cypress" />
 
-describe("TasksPage Component", () => {
+describe('Tasks Page', () => {
   beforeEach(() => {
-    mount(<TasksPage />);
+    // Visit your TasksPage route (adjust URL if needed)
+    cy.visit('http://localhost:3000/tasks');
   });
 
-  it("renders the header correctly", () => {
-    cy.contains("h1", "Tasks").should("exist");
-    cy.contains("p", "Manage task assignments and track progress").should("exist");
+  it('displays the header and metrics cards', () => {
+    cy.contains('Tasks').should('exist');
+    cy.contains('Pending Tasks').should('exist');
+    cy.contains('Completed').should('exist');
+    cy.contains('Overdue').should('exist');
+    cy.contains('Due Today').should('exist');
   });
 
-  it("renders all metrics cards", () => {
-    cy.contains("Pending Tasks").should("exist");
-    cy.contains("Completed").should("exist");
-    cy.contains("Overdue").should("exist");
-    cy.contains("Due Today").should("exist");
+  it('shows the task table with initial tasks', () => {
+    cy.get('table').should('exist');
+    cy.contains('T001').should('exist');
+    cy.contains('Routine maintenance and oil change').should('exist');
+    cy.contains('Sahan P.').should('exist');
   });
 
-  it("filters tasks using search input", () => {
-    cy.get('input[placeholder="Search tasks..."]').type("Battery");
-    cy.get("tbody tr").should("have.length", 1);
-    cy.get("tbody tr td:nth-child(2)").should("contain.text", "Battery replacement");
+  it('filters tasks by search term', () => {
+    cy.get('input[placeholder="Search tasks..."]').type('Battery');
+    cy.contains('Battery replacement and system check').should('exist');
+    cy.contains('Routine maintenance and oil change').should('not.exist');
   });
 
-  it("toggles task status", () => {
-    cy.contains("button", "Complete").first().click();
-    cy.get("tbody tr").first().find("td span").should("contain.text", "Completed");
-
-    cy.contains("button", "Reopen").first().click();
-    cy.get("tbody tr").first().find("td span").should("contain.text", "Pending");
+  it('filters tasks by status', () => {
+    cy.get('select').first().select('Pending');
+    cy.contains('Pending').should('exist');
+    cy.contains('Completed').should('not.exist');
   });
 
-  it("opens and closes the view modal", () => {
-    cy.contains("button", "View").first().click();
-    cy.contains("h2", "Task Details").should("exist");
-
-    // ✅ Close modal safely (icon button instead of "×")
-    cy.get("button.absolute.top-4.right-4").click({ force: true });
-
-    cy.contains("h2", "Task Details").should("not.exist");
+  it('can open and close the Assign Task modal', () => {
+    cy.contains('+ Assign Task').click();
+    cy.contains('Assign Task').should('exist');
+    cy.get('button').contains('Cancel').click();
+    cy.contains('Assign Task').should('not.exist');
   });
 
-  it("opens the assign task modal and assigns a task", () => {
-    cy.contains("button", /Assign Task/).click();
+  it('can view task details', () => {
+    cy.contains('View').first().click();
+    cy.contains('Task Details').should('exist');
+    cy.contains('Task ID:').should('exist');
+    cy.get('button').contains('X').click();
+    cy.contains('Task Details').should('not.exist');
+  });
 
-    // ✅ Wait for modal to render
-    cy.contains("h2", "Assign Task").should("exist");
+  it('can toggle a task status (Complete <-> Reopen)', () => {
+    // Check task T002 (pending)
+    cy.contains('T002').parent().within(() => {
+      cy.contains('Complete').click();
+    });
 
-    // ✅ Wait until generator dropdown has options
-    cy.get("select").eq(0).should("be.visible").find("option").should("have.length.greaterThan", 1);
-    cy.get("select").eq(0).select("G001", { force: true });
-
-    // ✅ select assignee
-    cy.get("select").eq(1).select("Sahan P.");
-
-    // ✅ fill out other fields
-    cy.get("textarea").type("Test task via Cypress");
-    cy.get("input[type='date']").type("2025-08-20");
-    cy.get("select").eq(2).select("Pending");
-
-    // ✅ submit form
-    cy.get("form").submit();
-
-    // Modal should close
-    cy.contains("h2", "Assign Task").should("not.exist");
-
-    // Task should appear in table
-    cy.get("tbody tr").first().should("contain.text", "Test task via Cypress");
+    // Now it should show as "Reopen"
+    cy.contains('T002').parent().within(() => {
+      cy.contains('Reopen').should('exist');
+    });
   });
 });

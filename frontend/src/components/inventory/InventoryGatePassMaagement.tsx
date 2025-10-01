@@ -9,16 +9,15 @@ type Status = "Active" | "Returned" | "Overdue" | "Pending";
 interface GatePassRecord {
   id: string;
   batteryId: string;
-  technician: string;
   issueDate: string; // yyyy-mm-dd
   status: Status;
 }
 
 const initialRecords: GatePassRecord[] = [
-  { id: "GP-2024-001", batteryId: "BAT-2024-001", technician: "Sarah Wilson", issueDate: "2025-04-08", status: "Active" },
-  { id: "GP-2024-002", batteryId: "BAT-2024-085", technician: "Sarah Wilson", issueDate: "2025-07-22", status: "Returned" },
-  { id: "GP-2024-003", batteryId: "BAT-2024-042", technician: "Sarah Wilson", issueDate: "2025-08-12", status: "Overdue" },
-  { id: "GP-2024-004", batteryId: "BAT-2024-123", technician: "Sarah Wilson", issueDate: "2025-05-08", status: "Pending" },
+  { id: "GP-2024-001", batteryId: "BAT-2024-001", issueDate: "2025-04-08", status: "Active" },
+  { id: "GP-2024-002", batteryId: "BAT-2024-085", issueDate: "2025-07-22", status: "Returned" },
+  { id: "GP-2024-003", batteryId: "BAT-2024-042", issueDate: "2025-08-12", status: "Overdue" },
+  { id: "GP-2024-004", batteryId: "BAT-2024-123", issueDate: "2025-05-08", status: "Pending" },
 ];
 
 interface InventoryGatePassManagementProps {
@@ -31,12 +30,10 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
   // Filters
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All Status");
-  const [assigneeFilter, setAssigneeFilter] = useState<string>("All Assignees");
 
   // Modal + form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [batteryId, setBatteryId] = useState("");
-  const [technician, setTechnician] = useState("");
   const [issueDate, setIssueDate] = useState(""); // yyyy-mm-dd
   const [status, setStatus] = useState<Status>("Pending");
 
@@ -61,7 +58,6 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
 
   const handleOpenModal = () => {
     setBatteryId("");
-    setTechnician("");
     setIssueDate("");
     setStatus("Pending");
     setIsModalOpen(true);
@@ -70,14 +66,13 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleAddRecord = () => {
-    if (!batteryId.trim() || !technician.trim() || !issueDate.trim()) {
-      alert("Please fill Battery ID, Technician and Issue Date.");
+    if (!batteryId.trim() || !issueDate.trim()) {
+      alert("Please fill Battery ID and Issue Date.");
       return;
     }
     const newRecord: GatePassRecord = {
       id: generateNextId(),
       batteryId: batteryId.trim(),
-      technician: technician.trim(),
       issueDate,
       status,
     };
@@ -101,18 +96,14 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
       q &&
       !(
         r.id.toLowerCase().includes(q) ||
-        r.batteryId.toLowerCase().includes(q) ||
-        r.technician.toLowerCase().includes(q)
+        r.batteryId.toLowerCase().includes(q)
       )
     ) {
       return false;
     }
     if (statusFilter !== "All Status" && r.status !== statusFilter) return false;
-    if (assigneeFilter !== "All Assignees" && r.technician !== assigneeFilter) return false;
     return true;
   });
-
-  const assignees = Array.from(new Set(records.map((r) => r.technician)));
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -153,7 +144,7 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
       {/* Filters (keep GRAY outline) */}
       <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
         <h3 className="text-sm font-medium text-gray-600 mb-4">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div>
             <label className="block text-sm font-medium mb-1">Search</label>
@@ -184,21 +175,6 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
               <option>Overdue</option>
             </select>
           </div>
-
-          {/* Assignee */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Assignee</label>
-            <select
-              value={assigneeFilter}
-              onChange={(e) => setAssigneeFilter(e.target.value)}
-              className="w-full rounded-md bg-gray-100 border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            >
-              <option>All Assignees</option>
-              {assignees.map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </select>
-          </div>
         </div>
       </div>
 
@@ -210,7 +186,6 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
             <tr className="bg-blue-50 text-left">
               <th className="p-3">Pass ID</th>
               <th className="p-3">Battery ID</th>
-              <th className="p-3">Technician</th>
               <th className="p-3">Issue Date</th>
               <th className="p-3">Status</th>
               <th className="p-3">Actions</th>
@@ -221,7 +196,6 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
               <tr key={record.id} className="hover:bg-blue-50 border-t border-blue-300">
                 <td className="p-3">{record.id}</td>
                 <td className="p-3">{record.batteryId}</td>
-                <td className="p-3">{record.technician}</td>
                 <td className="p-3">{formatDate(record.issueDate)}</td>
                 <td className="p-3">
                   <span
@@ -259,7 +233,7 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-4 text-center text-gray-500">
+                <td colSpan={5} className="p-4 text-center text-gray-500">
                   No records found.
                 </td>
               </tr>
@@ -290,17 +264,6 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
                   placeholder="BAT-2025-001"
                   value={batteryId}
                   onChange={(e) => setBatteryId(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1"
-                />
-              </label>
-
-              <label className="block">
-                <span className="text-sm text-gray-600">Technician</span>
-                <input
-                  type="text"
-                  placeholder="Technician name"
-                  value={technician}
-                  onChange={(e) => setTechnician(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1"
                 />
               </label>
