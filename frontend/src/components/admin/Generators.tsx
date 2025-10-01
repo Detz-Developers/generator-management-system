@@ -500,7 +500,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                       <span className={`${statusColors[gen.statusColor]} px-2 py-1 rounded-md text-sm font-medium w-16`}>{gen.status}</span>
                     </td>
                     <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.location}</td>
-                    <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">{gen.shop}</td>
+                    <td className="px-4 py-2 text-sm/9 leading-4 text-gray-800">{gen.shop}</td>
                     <td className="px-4 py-2 text-sm/9 leading-1 text-gray-800">
                       <div className="flex items-center">
                         <button onClick={() => { onSelectGenerator?.(gen.dbKey || gen.id); router.push(`/generators/${encodeURIComponent(gen.id)}`); onNavigate("GeneratorDetails"); }} className="bg-blue-100 p-2 rounded-md mr-2 hover:bg-blue-200" title="View">

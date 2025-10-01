@@ -1,0 +1,16 @@
+[
+  {
+    "id": "gen1",
+    "name": "Generator A",
+    "location": "Colombo",
+    "status": "Active",
+    "updatedAt": "2025-10-01T10:00:00Z"
+  },
+  {
+    "id": "gen2",
+    "name": "Generator B",
+    "location": "Kandy",
+    "status": "Inactive",
+    "updatedAt": "2025-10-01T09:30:00Z"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "log1",
+    "serviceType": "Generator Maintenance",
+    "generatorId": "gen1",
+    "technician": "Technician A",
+    "status": "Completed",
+    "date": "2025-10-01T10:00:00Z",
+    "notes": "Replaced worn-out parts, tested successfully."
+  },
+  {
+    "id": "log2",
+    "serviceType": "Battery Check",
+    "generatorId": "gen2",
+    "technician": "Technician B",
+    "status": "Pending",
+    "date": "2025-10-02T09:30:00Z",
+    "notes": "Battery needs replacement, awaiting approval."
+  }
+]

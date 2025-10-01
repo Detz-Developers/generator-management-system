@@ -1,0 +1,26 @@
+[
+  {
+    "id": "user1",
+    "name": "Admin User",
+    "email": "admin@gmail.com",
+    "role": "admin"
+  },
+  {
+    "id": "user2",
+    "name": "Operator User",
+    "email": "operator@gamil.com",
+    "role": "operator"
+  },
+  {
+    "id": "user3",
+    "name": "Technician User",
+    "email": "tech@gmail.com",
+    "role": "technician"
+  },
+  {
+    "id": "user4",
+    "name": "Inventory User",
+    "email": "inventory@example.com",
+    "role": "inventory"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "issue1",
+    "title": "Generator Overheating",
+    "description": "The generator in Colombo is overheating frequently.",
+    "status": "Open",
+    "priority": "High",
+    "reportedBy": "Operator A",
+    "reportedAt": "2025-10-01T08:45:00Z"
+  },
+  {
+    "id": "issue2",
+    "title": "Battery Replacement Required",
+    "description": "Battery at Kandy site needs replacement.",
+    "status": "In Progress",
+    "priority": "Medium",
+    "reportedBy": "Operator B",
+    "reportedAt": "2025-10-01T09:00:00Z"
+  }
+]
