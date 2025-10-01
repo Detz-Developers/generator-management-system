@@ -1,8 +1,9 @@
-// app/(your-route)/page.tsx  OR components/InventoryGatePassManagement.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
+import { db } from "../../firebaseConfig"; // adjust path
+import { ref, onValue, set } from "firebase/database";
 
 type Status = "Active" | "Returned" | "Overdue" | "Pending";
 
@@ -13,36 +14,33 @@ interface GatePassRecord {
   status: Status;
 }
 
-const initialRecords: GatePassRecord[] = [
-  { id: "GP-2024-001", batteryId: "BAT-2024-001", issueDate: "2025-04-08", status: "Active" },
-  { id: "GP-2024-002", batteryId: "BAT-2024-085", issueDate: "2025-07-22", status: "Returned" },
-  { id: "GP-2024-003", batteryId: "BAT-2024-042", issueDate: "2025-08-12", status: "Overdue" },
-  { id: "GP-2024-004", batteryId: "BAT-2024-123", issueDate: "2025-05-08", status: "Pending" },
-];
-
-interface InventoryGatePassManagementProps {
-  onNavigate?: (page: string) => void;
-}
-
-export default function InventoryGatePassManagement({ onNavigate }: InventoryGatePassManagementProps) {
-  const [records, setRecords] = useState<GatePassRecord[]>(initialRecords);
-
-  // Filters
+export default function InventoryGatePassManagement() {
+  const [records, setRecords] = useState<GatePassRecord[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All Status");
-
-  // Modal + form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [batteryId, setBatteryId] = useState("");
-  const [issueDate, setIssueDate] = useState(""); // yyyy-mm-dd
+  const [issueDate, setIssueDate] = useState(""); 
   const [status, setStatus] = useState<Status>("Pending");
 
-  // Helpers
-  const formatDate = (isoDate: string) => {
-    if (!isoDate) return "";
-    const d = new Date(isoDate);
-    return isNaN(d.getTime()) ? isoDate : d.toLocaleDateString("en-GB"); // dd/mm/yyyy
-  };
+  // Load gate pass records from Firebase
+  useEffect(() => {
+    const gatePassRef = ref(db, "gatepasses");
+    return onValue(gatePassRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list: GatePassRecord[] = Object.entries(data).map(([key, value]: any) => ({
+          id: key,
+          batteryId: value.batteryId,
+          issueDate: value.issueDate,
+          status: value.status,
+        }));
+        setRecords(list);
+      } else {
+        setRecords([]);
+      }
+    });
+  }, []);
 
   const generateNextId = () => {
     let max = 0;
@@ -56,49 +54,41 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
     return `GP-2024-${String(max + 1).padStart(3, "0")}`;
   };
 
-  const handleOpenModal = () => {
-    setBatteryId("");
-    setIssueDate("");
-    setStatus("Pending");
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => setIsModalOpen(false);
-
   const handleAddRecord = () => {
     if (!batteryId.trim() || !issueDate.trim()) {
       alert("Please fill Battery ID and Issue Date.");
       return;
     }
-    const newRecord: GatePassRecord = {
-      id: generateNextId(),
-      batteryId: batteryId.trim(),
-      issueDate,
-      status,
-    };
-    setRecords((prev) => [...prev, newRecord]);
-    handleCloseModal();
+
+    const id = generateNextId();
+    const newRecord: GatePassRecord = { id, batteryId, issueDate, status };
+
+    const newRef = ref(db, `gatepasses/${id}`);
+    set(newRef, newRecord);
+
+    setBatteryId("");
+    setIssueDate("");
+    setStatus("Pending");
+    setIsModalOpen(false);
   };
 
-  // Mark complete / reopen
   const handleToggleComplete = (id: string) => {
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: r.status === "Returned" ? "Pending" : "Returned" } : r
-      )
-    );
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+
+    const newStatus = record.status === "Returned" ? "Pending" : "Returned";
+    const recordRef = ref(db, `gatepasses/${id}/status`);
+    set(recordRef, newStatus);
   };
 
-  // Derived data
+  const formatDate = (isoDate: string) => {
+    const d = new Date(isoDate);
+    return isNaN(d.getTime()) ? isoDate : d.toLocaleDateString("en-GB");
+  };
+
   const filtered = records.filter((r) => {
     const q = search.trim().toLowerCase();
-    if (
-      q &&
-      !(
-        r.id.toLowerCase().includes(q) ||
-        r.batteryId.toLowerCase().includes(q)
-      )
-    ) {
+    if (q && !(r.id.toLowerCase().includes(q) || r.batteryId.toLowerCase().includes(q))) {
       return false;
     }
     if (statusFilter !== "All Status" && r.status !== statusFilter) return false;
@@ -114,14 +104,14 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
           <p className="text-gray-600 text-lg">Create, track, and manage equipment gate passes</p>
         </div>
         <button
-          onClick={handleOpenModal}
+          onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700"
         >
           + Create Gate Pass
         </button>
       </div>
 
-      {/* Stats (blue outline) */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-lg p-4 border border-blue-300">
           <p className="text-gray-500">Pending Tasks</p>
@@ -141,11 +131,10 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
         </div>
       </div>
 
-      {/* Filters (keep GRAY outline) */}
+      {/* Filters */}
       <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
         <h3 className="text-sm font-medium text-gray-600 mb-4">Filters</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Search */}
           <div>
             <label className="block text-sm font-medium mb-1">Search</label>
             <div className="relative">
@@ -160,7 +149,6 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
             </div>
           </div>
 
-          {/* Status */}
           <div>
             <label className="block text-sm font-medium mb-1">Status</label>
             <select
@@ -178,7 +166,7 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
         </div>
       </div>
 
-      {/* Table (blue outline + blue row separators) */}
+      {/* Table */}
       <div className="bg-white rounded-lg p-4 border border-blue-300">
         <h3 className="text-lg font-semibold mb-4">Gate Pass Records</h3>
         <table className="w-full border border-blue-300 rounded-lg overflow-hidden">
@@ -242,12 +230,12 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
         </table>
       </div>
 
-      {/* Modal (keep GRAY outline) */}
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative border border-gray-200">
             <button
-              onClick={handleCloseModal}
+              onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
               aria-label="Close"
             >
@@ -300,7 +288,7 @@ export default function InventoryGatePassManagement({ onNavigate }: InventoryGat
                   Save Gate Pass
                 </button>
                 <button
-                  onClick={handleCloseModal}
+                  onClick={() => setIsModalOpen(false)}
                   className="flex-1 border border-gray-300 rounded-lg py-2 hover:bg-gray-50"
                 >
                   Cancel

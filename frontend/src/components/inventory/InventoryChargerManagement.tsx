@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { FiSettings } from "react-icons/fi";
 import { X } from "lucide-react";
+import { db } from "../../firebaseConfig"; // adjust path
+import { ref, onValue, set, remove } from "firebase/database";
 
 interface Charger {
   id: string;
@@ -13,42 +14,13 @@ interface Charger {
   conditionStatus: "Good" | "Excellent" | "Fair" | "Needs Repair";
 }
 
-interface InventoryChargerManagementProps {
-  onNavigate?: (page: string) => void;
-}
-
-export default function InventoryChargerManagement({ onNavigate }: InventoryChargerManagementProps) {
+export default function InventoryChargerManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All Status");
   const [filterAssignee, setFilterAssignee] = useState("All Assignees");
-
-  const [chargers, setChargers] = useState<Charger[]>([
-    {
-      id: "CH-2024-001",
-      model: "FastCharge Pro 24V",
-      lastMaintenance: "2024-10-15",
-      location: "Colombo",
-      assignmentStatus: "Assigned",
-      conditionStatus: "Good",
-    },
-    {
-      id: "CH-2024-002",
-      model: "QuickCharge 12V",
-      lastMaintenance: "2024-10-20",
-      location: "Kandy",
-      assignmentStatus: "Available",
-      conditionStatus: "Excellent",
-    },
-    {
-      id: "CH-2024-003",
-      model: "PowerMax 48V",
-      lastMaintenance: "2024-11-01",
-      location: "Galle",
-      assignmentStatus: "Maintenance",
-      conditionStatus: "Needs Repair",
-    },
-  ]);
+  const [chargers, setChargers] = useState<Charger[]>([]);
+  const [editingChargerId, setEditingChargerId] = useState<string | null>(null);
 
   // Form fields
   const [chargerId, setChargerId] = useState("");
@@ -59,6 +31,27 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
     useState<Charger["assignmentStatus"]>("Available");
   const [conditionStatus, setConditionStatus] =
     useState<Charger["conditionStatus"]>("Good");
+
+  // Load chargers from Firebase
+  useEffect(() => {
+    const chargersRef = ref(db, "chargers");
+    return onValue(chargersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list: Charger[] = Object.entries(data).map(([key, value]: any) => ({
+          id: key,
+          model: value.model,
+          lastMaintenance: value.lastMaintenance,
+          location: value.location,
+          assignmentStatus: value.assignmentStatus,
+          conditionStatus: value.conditionStatus,
+        }));
+        setChargers(list);
+      } else {
+        setChargers([]);
+      }
+    });
+  }, []);
 
   // Generate next Charger ID
   const generateNextId = () => {
@@ -73,33 +66,25 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
     return `CH-2024-${String(max + 1).padStart(3, "0")}`;
   };
 
-  // Add new charger
-  const handleAddCharger = () => {
-    if (!model.trim() || !lastMaintenance.trim() || !location.trim()) {
-      alert("Please fill all fields");
-      return;
+  // Open modal for Add or Edit
+  const handleOpenModal = (charger?: Charger) => {
+    if (charger) {
+      setEditingChargerId(charger.id);
+      setChargerId(charger.id);
+      setModel(charger.model);
+      setLastMaintenance(charger.lastMaintenance);
+      setLocation(charger.location);
+      setAssignmentStatus(charger.assignmentStatus);
+      setConditionStatus(charger.conditionStatus);
+    } else {
+      setEditingChargerId(null);
+      setChargerId("");
+      setModel("");
+      setLastMaintenance("");
+      setLocation("");
+      setAssignmentStatus("Available");
+      setConditionStatus("Good");
     }
-
-    const newCharger: Charger = {
-      id: chargerId || generateNextId(),
-      model,
-      lastMaintenance,
-      location,
-      assignmentStatus,
-      conditionStatus,
-    };
-
-    setChargers((prev) => [...prev, newCharger]);
-    handleCloseModal();
-  };
-
-  const handleOpenModal = () => {
-    setChargerId("");
-    setModel("");
-    setLastMaintenance("");
-    setLocation("");
-    setAssignmentStatus("Available");
-    setConditionStatus("Good");
     setIsModalOpen(true);
   };
 
@@ -107,47 +92,91 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
     setIsModalOpen(false);
   };
 
+  // Add or Update charger
+  const handleSaveCharger = () => {
+    if (!model.trim() || !lastMaintenance.trim() || !location.trim()) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const id = chargerId || generateNextId();
+    const newCharger: Charger = {
+      id,
+      model,
+      lastMaintenance,
+      location,
+      assignmentStatus,
+      conditionStatus,
+    };
+
+    const chargerRef = ref(db, `chargers/${id}`);
+    set(chargerRef, newCharger);
+    handleCloseModal();
+  };
+
+  // Delete charger
+  const handleDeleteCharger = (id: string) => {
+    if (confirm("Are you sure you want to delete this charger?")) {
+      remove(ref(db, `chargers/${id}`));
+    }
+  };
+
+  // View charger
+  const handleViewCharger = (charger: Charger) => {
+    alert(
+      `Charger ID: ${charger.id}\nModel: ${charger.model}\nLast Maintenance: ${charger.lastMaintenance}\nLocation: ${charger.location}\nAssignment: ${charger.assignmentStatus}\nCondition: ${charger.conditionStatus}`
+    );
+  };
+
+  // Generate Charger report
+  const handleGenerateCharger = (charger: Charger) => {
+    const report = `
+Charger Report
+--------------
+ID: ${charger.id}
+Model: ${charger.model}
+Last Maintenance: ${charger.lastMaintenance}
+Location: ${charger.location}
+Assignment: ${charger.assignmentStatus}
+Condition: ${charger.conditionStatus}
+`;
+    console.log(report);
+    alert("Charger report generated! Check console.");
+  };
+
   // Toggle assignment status
   const toggleAssignmentStatus = (id: string) => {
-    setChargers((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              assignmentStatus:
-                c.assignmentStatus === "Assigned"
-                  ? "Available"
-                  : c.assignmentStatus === "Available"
-                  ? "Maintenance"
-                  : "Assigned",
-            }
-          : c
-      )
-    );
+    const charger = chargers.find((c) => c.id === id);
+    if (!charger) return;
+    const newStatus =
+      charger.assignmentStatus === "Assigned"
+        ? "Available"
+        : charger.assignmentStatus === "Available"
+        ? "Maintenance"
+        : "Assigned";
+
+    const statusRef = ref(db, `chargers/${id}/assignmentStatus`);
+    set(statusRef, newStatus);
   };
 
   // Toggle condition status
   const toggleConditionStatus = (id: string) => {
-    setChargers((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              conditionStatus:
-                c.conditionStatus === "Good"
-                  ? "Excellent"
-                  : c.conditionStatus === "Excellent"
-                  ? "Fair"
-                  : c.conditionStatus === "Fair"
-                  ? "Needs Repair"
-                  : "Good",
-            }
-          : c
-      )
-    );
+    const charger = chargers.find((c) => c.id === id);
+    if (!charger) return;
+    const newStatus =
+      charger.conditionStatus === "Good"
+        ? "Excellent"
+        : charger.conditionStatus === "Excellent"
+        ? "Fair"
+        : charger.conditionStatus === "Fair"
+        ? "Needs Repair"
+        : "Good";
+
+    const statusRef = ref(db, `chargers/${id}/conditionStatus`);
+    set(statusRef, newStatus);
   };
 
-  // Apply filters
+  // Filters
   const filteredChargers = chargers.filter((charger) => {
     const matchesSearch =
       charger.model.toLowerCase().includes(search.toLowerCase()) ||
@@ -175,7 +204,7 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
           </p>
         </div>
         <button
-          onClick={handleOpenModal}
+          onClick={() => handleOpenModal()}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
         >
           + Add Charger
@@ -186,7 +215,6 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
       <div className="bg-white shadow rounded-lg p-4 mb-8 border border-blue-300">
         <p className="text-xs text-gray-500 mb-2">Filters</p>
         <div className="grid grid-cols-3 gap-4">
-          {/* Search */}
           <div className="flex items-center border rounded-lg px-3 py-2 bg-gray-100">
             <AiOutlineSearch className="text-gray-400" />
             <input
@@ -197,8 +225,6 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
               className="ml-2 w-full outline-none bg-transparent"
             />
           </div>
-
-          {/* Status */}
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -209,8 +235,6 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
             <option value="Available">Available</option>
             <option value="Maintenance">Maintenance</option>
           </select>
-
-          {/* Assignee */}
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
@@ -279,8 +303,31 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
                     {charger.conditionStatus}
                   </button>
                 </td>
-                <td className="p-2">
-                  <FiSettings className="cursor-pointer text-gray-600" />
+                <td className="p-2 flex gap-1">
+                  <button
+                    onClick={() => handleViewCharger(charger)}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => handleOpenModal(charger)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCharger(charger.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => handleGenerateCharger(charger)}
+                    className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                  >
+                    Generate
+                  </button>
                 </td>
               </tr>
             ))}
@@ -288,7 +335,7 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
         </table>
       </div>
 
-      {/* Add Charger Modal */}
+      {/* Add/Edit Charger Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative border border-blue-300">
@@ -301,7 +348,7 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
             </button>
 
             <h2 className="text-2xl font-bold text-blue-600 mb-4">
-              Add New Charger
+              {editingChargerId ? "Edit Charger" : "Add New Charger"}
             </h2>
 
             <div className="space-y-4">
@@ -355,10 +402,10 @@ export default function InventoryChargerManagement({ onNavigate }: InventoryChar
 
               <div className="flex gap-2">
                 <button
-                  onClick={handleAddCharger}
+                  onClick={handleSaveCharger}
                   className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
                 >
-                  Save Charger
+                  {editingChargerId ? "Update Charger" : "Save Charger"}
                 </button>
                 <button
                   onClick={handleCloseModal}
