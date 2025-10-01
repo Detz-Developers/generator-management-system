@@ -1,4 +1,3 @@
-
 import MetricCard from '../MetricCard';
 import QuickActions from "@/components/QuickActions";
 import RecentActivities from "@/components/RecentActivities";
@@ -8,7 +7,7 @@ import { onValue, ref } from "firebase/database";
 import { db } from "../../firebaseConfig";
 
 interface DashboardProps {
-  onNavigate?: (page: string) => void;
+    onNavigate?: (page: string) => void;
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
@@ -24,30 +23,27 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
     // Fetch data from Firebase
     useEffect(() => {
-        // Fetch shops
         const shopsRef = ref(db, 'shops');
         onValue(shopsRef, (snapshot) => {
             const shopsData = snapshot.val();
             const totalCenters = shopsData ? Object.keys(shopsData).length : 0;
 
-            // Fetch services
             const servicesRef = ref(db, 'services');
             onValue(servicesRef, (servicesSnapshot) => {
                 const servicesData = servicesSnapshot.val();
-                const today = new Date(1759301100000); // Sept 30, 2025, 11:00 AM +0530
+                const today = new Date(1759382940000); // Oct 01, 2025, 04:49 PM +0530
                 const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
                 const upcomingServices = servicesData
                     ? Object.values(servicesData).filter((service: any) => {
-                          const scheduledDate = new Date(service.scheduledDate);
-                          return (
-                              scheduledDate >= today &&
-                              scheduledDate <= oneWeekLater &&
-                              service.status === "scheduled"
-                          );
-                      }).length
+                        const scheduledDate = new Date(service.scheduledDate);
+                        return (
+                            scheduledDate >= today &&
+                            scheduledDate <= oneWeekLater &&
+                            service.status === "scheduled"
+                        );
+                    }).length
                     : 0;
 
-                // Fetch generators
                 const generatorsRef = ref(db, 'generators');
                 onValue(generatorsRef, (generatorsSnapshot) => {
                     const generatorsData = generatorsSnapshot.val();
@@ -74,30 +70,27 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             console.error("Shops fetch error:", error);
         });
 
-        // Fetch recent activities
         const activitiesRef = ref(db, 'tasks');
         onValue(activitiesRef, (snapshot) => {
             const tasksData = snapshot.val();
             const activitiesArray = tasksData
                 ? Object.values(tasksData).map((task: any) => ({
-                      id: task.id,
-                      description: task.description,
-                      status: task.status,
-                      dueDate: task.dueDate,
-                  }))
+                    id: task.id,
+                    description: task.description,
+                    status: task.status,
+                    dueDate: task.dueDate,
+                }))
                 : [];
             setActivities(activitiesArray);
         }, (error) => {
             console.error("Activities fetch error:", error);
         });
 
-        // Cleanup listeners on unmount
         return () => {
-            // Detach listeners if needed
+            // Cleanup listeners if needed (implementation depends on Firebase version)
         };
     }, []);
 
-    // Generate AI Summary
     const handleGenerateAISummary = async () => {
         try {
             const res = await fetch("/api/ai-summary", { method: "POST" });
@@ -111,7 +104,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
     return (
         <div className="flex-1 p-8">
-            {/* Header */}
             <div className="mb-8">
                 <div className="flex items-center justify-between">
                     <div>
@@ -137,7 +129,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 </div>
             </div>
 
-            {/* Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <MetricCard
                     title="Total Centers"
@@ -166,13 +157,11 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 />
             </div>
 
-            {/* Quick Actions and Recent Activities */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <QuickActions />
+                <QuickActions onNavigate={onNavigate} />
                 <RecentActivities activities={activities} />
             </div>
 
-            {/* AI Summary Popup */}
             <AISummaryPopup
                 isOpen={isAISummaryOpen}
                 summary={aiSummary}
