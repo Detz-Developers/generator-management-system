@@ -345,8 +345,8 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
       </header>
 
       {/* Metrics Cards */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
           <div className="flex items-center space-x-3">
             <Battery className="text-gray-700" size={24} />
             <div>
@@ -356,7 +356,7 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
           <div className="flex items-center space-x-3">
             <CheckCircle className="text-blue-500" size={24} />
             <div>
@@ -366,7 +366,7 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
           <div className="flex items-center space-x-3">
             <Clock className="text-yellow-500" size={24} />
             <div>
@@ -376,7 +376,7 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200 w-full max-w-xs sm:max-w-sm md:max-w-md">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-200">
           <div className="flex items-center space-x-3">
             <CalendarX className="text-red-500" size={24} />
             <div>
