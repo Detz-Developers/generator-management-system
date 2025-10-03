@@ -14,6 +14,14 @@ interface Charger {
   conditionStatus: "Good" | "Excellent" | "Fair" | "Needs Repair";
 }
 
+interface ChargerData {
+  model: string;
+  lastMaintenance: string;
+  location: string;
+  assignmentStatus: "Assigned" | "Available" | "Maintenance";
+  conditionStatus: "Good" | "Excellent" | "Fair" | "Needs Repair";
+}
+
 export default function InventoryChargerManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -38,7 +46,7 @@ export default function InventoryChargerManagement() {
     return onValue(chargersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list: Charger[] = Object.entries(data).map(([key, value]: any) => ({
+        const list: Charger[] = Object.entries(data as Record<string, ChargerData>).map(([key, value]) => ({
           id: key,
           model: value.model,
           lastMaintenance: value.lastMaintenance,

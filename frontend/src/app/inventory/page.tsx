@@ -28,9 +28,9 @@ export default function InventoryPanel({ onLogout }: InventoryPanelProps) {
       case 'Battery Management':
         return <InventoryBatteryManagement onNavigate={setCurrentPage} />;
       case 'Gate Pass Management':
-        return <InventoryGatePassManagement onNavigate={setCurrentPage} />;
+        return <InventoryGatePassManagement />;
       case 'Charger Management':
-        return <InventoryChargerManagement onNavigate={setCurrentPage} />;
+        return <InventoryChargerManagement />;
       case 'Issue Triage':
         return <InventoryIssueTriage onNavigate={setCurrentPage} />;
       case 'Inventory Reports':

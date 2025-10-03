@@ -29,9 +29,9 @@ export default function InventoryMainDashboard({ onLogout, userRole = 'inventory
       case 'Battery Management':
         return <InventoryBatteryManagement onNavigate={handleNavigate} />;
       case 'Charger Management':
-        return <InventoryChargerManagement onNavigate={handleNavigate} />;
+        return <InventoryChargerManagement />;
       case 'Gate Pass Management':
-        return <InventoryGatePassManagement onNavigate={handleNavigate} />;
+        return <InventoryGatePassManagement />;
       case 'Issue Triage':
         return <InventoryIssueTriage onNavigate={handleNavigate} />;
       case 'Inventory Reports':

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { MdSearch, MdVisibility, MdEdit, MdDelete } from "react-icons/md";
 import { auth, db, functions } from "@/firebaseConfig";
 import { onValue, ref, remove } from "firebase/database";
@@ -43,7 +43,7 @@ export default function InvoiceManagement({ onNavigate }: Props) {
   const fmtAmt = (n: number) => new Intl.NumberFormat(undefined, { style: "currency", currency: "LKR" }).format(n||0);
   const fmtDate = (ms?: number|null) => (!ms ? "-" : new Date(ms).toLocaleDateString());
 
-  const fetchList = async () => {
+  const fetchList = useCallback(async () => {
     setLoading(true);
     try {
       const call = httpsCallable(functions, "listInvoices");
@@ -54,10 +54,10 @@ export default function InvoiceManagement({ onNavigate }: Props) {
       list.sort((a,b)=>(b.date||0)-(a.date||0)); setInvoices(list);
     } catch(e: unknown) { setToast({type:"error", msg: String((e as Error)?.message||"Failed to load")}); setInvoices([]); }
     finally { setLoading(false); }
-  };
+  }, [status]);
 
-  useEffect(() => { if (isAdmin) fetchList(); }, [isAdmin, status]);
-  useEffect(() => { if (!isAdmin) return; const off = onValue(ref(db, "/invoices"), () => fetchList()); return () => off(); }, [isAdmin]);
+  useEffect(() => { if (isAdmin) fetchList(); }, [isAdmin, status, fetchList]);
+  useEffect(() => { if (!isAdmin) return; const off = onValue(ref(db, "/invoices"), () => fetchList()); return () => off(); }, [isAdmin, fetchList]);
 
   const openCreate = () => { setMode("create"); setEditData(null); setReadOnly(false); setOpen(true); };
   const openEdit = async (id: string) => { try { const call = httpsCallable(functions, "getInvoice"); const r: { data?: Record<string, unknown> } = await call({ id }) as { data?: Record<string, unknown> }; const d = r?.data||{}; const rec: InvoicePayload = { id: String(d.id ?? id), company_name: String(d.company_name ?? d.company ?? d.customer ?? ""), description: (d.description as string) ?? "", date: Number(d.date ?? d.invoice_date ?? d.createdAt ?? Date.now()), due_date: d.due_date!=null?Number(d.due_date):(d.dueDate!=null?Number(d.dueDate):null), status: toStatus(d.status), line_items: (Array.isArray(d.line_items)?d.line_items:[]) as InvoicePayload['line_items'] }; setEditData(rec); setMode("edit"); setReadOnly(rec.status === "Paid"); setOpen(true); } catch(e: unknown) { setToast({type:"error", msg:String((e as Error)?.message||"Failed to load invoice")}); } };

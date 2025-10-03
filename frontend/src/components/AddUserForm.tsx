@@ -7,7 +7,7 @@ import {
   signOut as signOutSecondary,
 } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions, getSecondaryAuth } from '../firebaseConfig';
+import { functions, getSecondaryAuth } from '../firebaseConfig';
 
 const roles = [
   {

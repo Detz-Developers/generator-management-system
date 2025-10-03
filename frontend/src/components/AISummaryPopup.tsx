@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 interface AISummaryPopupProps {
   isOpen: boolean;
   onClose: () => void;

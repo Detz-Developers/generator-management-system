@@ -10,6 +10,17 @@ interface DashboardProps {
     onNavigate?: (page: string) => void;
 }
 
+interface Service {
+    id: string;
+    scheduledDate: string | number;
+    status: string;
+}
+
+interface Generator {
+    id: string;
+    status: string;
+}
+
 export default function Dashboard({ onNavigate }: DashboardProps) {
     const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
     const [metrics, setMetrics] = useState({
@@ -18,8 +29,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         underRepair: 0,
         unusableGenerators: 0,
     });
-    const [activities, setActivities] = useState<any[]>([]);
-    const [aiSummary, setAISummary] = useState<string>("");
 
     // Fetch data from Firebase
     useEffect(() => {
@@ -34,7 +43,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 const today = new Date(1759382940000); // Oct 01, 2025, 04:49 PM +0530
                 const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
                 const upcomingServices = servicesData
-                    ? Object.values(servicesData).filter((service: any) => {
+                    ? Object.values(servicesData as Record<string, Service>).filter((service: Service) => {
                         const scheduledDate = new Date(service.scheduledDate);
                         return (
                             scheduledDate >= today &&
@@ -48,10 +57,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 onValue(generatorsRef, (generatorsSnapshot) => {
                     const generatorsData = generatorsSnapshot.val();
                     const underRepair = generatorsData
-                        ? Object.values(generatorsData).filter((gen: any) => gen.status === "Under Repair").length
+                        ? Object.values(generatorsData as Record<string, Generator>).filter((gen: Generator) => gen.status === "Under Repair").length
                         : 0;
                     const unusableGenerators = generatorsData
-                        ? Object.values(generatorsData).filter((gen: any) => gen.status === "Unusable").length
+                        ? Object.values(generatorsData as Record<string, Generator>).filter((gen: Generator) => gen.status === "Unusable").length
                         : 0;
 
                     setMetrics({
@@ -70,22 +79,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             console.error("Shops fetch error:", error);
         });
 
-        const activitiesRef = ref(db, 'tasks');
-        onValue(activitiesRef, (snapshot) => {
-            const tasksData = snapshot.val();
-            const activitiesArray = tasksData
-                ? Object.values(tasksData).map((task: any) => ({
-                    id: task.id,
-                    description: task.description,
-                    status: task.status,
-                    dueDate: task.dueDate,
-                }))
-                : [];
-            setActivities(activitiesArray);
-        }, (error) => {
-            console.error("Activities fetch error:", error);
-        });
-
         return () => {
             // Cleanup listeners if needed (implementation depends on Firebase version)
         };
@@ -94,8 +87,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     const handleGenerateAISummary = async () => {
         try {
             const res = await fetch("/api/ai-summary", { method: "POST" });
-            const summary = await res.text();
-            setAISummary(summary);
+            await res.text();
             setIsAISummaryOpen(true);
         } catch (err) {
             console.error("AI Summary error:", err);
@@ -159,12 +151,11 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <QuickActions onNavigate={onNavigate} />
-                <RecentActivities activities={activities} />
+                <RecentActivities activities={[]} />
             </div>
 
             <AISummaryPopup
                 isOpen={isAISummaryOpen}
-                summary={aiSummary}
                 onClose={() => setIsAISummaryOpen(false)}
             />
         </div>

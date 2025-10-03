@@ -9,6 +9,14 @@ interface Activity {
     status: 'completed' | 'in-progress' | 'pending';
 }
 
+interface TaskData {
+    id: string;
+    description: string;
+    status: 'completed' | 'in-progress' | 'pending';
+    timeAgo?: string;
+    dueDate?: string;
+}
+
 const getStatusColor = (status: Activity['status']) => {
     switch (status) {
         case 'completed':
@@ -43,18 +51,18 @@ export default function RecentActivities({ activities: initialActivities }: { ac
         const unsubscribe = onValue(activitiesRef, (snapshot) => {
             const tasksData = snapshot.val();
             const fetchedActivities = tasksData
-                ? Object.values(tasksData).map((task: any) => ({
+                ? Object.values(tasksData as Record<string, TaskData>).map((task: TaskData) => ({
                     id: task.id,
                     description: task.description,
                     status: task.status,
-                    timeAgo: task.timeAgo || calculateTimeAgo(task.dueDate), // Fallback to calculated timeAgo
+                    timeAgo: task.timeAgo || calculateTimeAgo(task.dueDate || ''), // Fallback to calculated timeAgo
                 }))
                 : [];
-            // Limit to 5 most recent activities based on timeAgo or dueDate
+            // Limit to 5 most recent activities based on timeAgo
             const recentActivities = fetchedActivities
                 .sort((a, b) => {
-                    const timeA = a.timeAgo ? parseTimeAgo(a.timeAgo) : new Date(b.dueDate || 0).getTime();
-                    const timeB = b.timeAgo ? parseTimeAgo(b.timeAgo) : new Date(a.dueDate || 0).getTime();
+                    const timeA = parseTimeAgo(a.timeAgo);
+                    const timeB = parseTimeAgo(b.timeAgo);
                     return timeB - timeA; // Sort descending (most recent first)
                 })
                 .slice(0, 5); // Limit to 5

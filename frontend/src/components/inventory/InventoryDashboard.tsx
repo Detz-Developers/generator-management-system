@@ -7,6 +7,38 @@ interface DashboardProps {
     onNavigate?: (page: string) => void;
 }
 
+interface Battery {
+    issue_type: string;
+}
+
+interface Generator {
+    hasBatteryCharger: number;
+}
+
+interface ServiceLog {
+    generatorId: string;
+    serviceType: string;
+    overdue: boolean;
+}
+
+interface Task {
+    id: string;
+    status: string;
+    description: string;
+    priority: string;
+}
+
+interface Activity {
+    description: string;
+    status: string;
+}
+
+interface PendingAction {
+    id: string;
+    description: string;
+    priority: string;
+}
+
 export default function InventoryDashboard({ onNavigate }: DashboardProps) {
     const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
     const [metrics, setMetrics] = useState({
@@ -15,8 +47,8 @@ export default function InventoryDashboard({ onNavigate }: DashboardProps) {
         returnsDue: 0,
         chargersAvailable: 0,
     });
-    const [recentActivities, setRecentActivities] = useState<any[]>([]);
-    const [pendingActions, setPendingActions] = useState<any[]>([]);
+    const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
+    const [pendingActions, setPendingActions] = useState<PendingAction[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -39,11 +71,11 @@ export default function InventoryDashboard({ onNavigate }: DashboardProps) {
                 }
 
                 const batteriesInStock = Object.keys(batteriesData).length; // Count all batteries
-                const temporaryOut = Object.values(batteriesData).filter(
-                    (battery: any) => battery.issue_type === "Temporary"
+                const temporaryOut = Object.values(batteriesData as Record<string, Battery>).filter(
+                    (battery: Battery) => battery.issue_type === "Temporary"
                 ).length;
-                const returnsDue = Object.values(batteriesData).filter(
-                    (battery: any) => battery.issue_type === "Fix"
+                const returnsDue = Object.values(batteriesData as Record<string, Battery>).filter(
+                    (battery: Battery) => battery.issue_type === "Fix"
                 ).length;
 
                 // Fetch generators
@@ -58,8 +90,8 @@ export default function InventoryDashboard({ onNavigate }: DashboardProps) {
                             return;
                         }
 
-                        const chargersAvailable = Object.values(generatorsData).filter(
-                            (gen: any) => gen.hasBatteryCharger === 1
+                        const chargersAvailable = Object.values(generatorsData as Record<string, Generator>).filter(
+                            (gen: Generator) => gen.hasBatteryCharger === 1
                         ).length;
 
                         setMetrics({
@@ -82,7 +114,7 @@ export default function InventoryDashboard({ onNavigate }: DashboardProps) {
                     (serviceSnapshot) => {
                         const serviceData = serviceSnapshot.val();
                         const activities = serviceData
-                            ? Object.values(serviceData).map((log: any) => ({
+                            ? Object.values(serviceData as Record<string, ServiceLog>).map((log: ServiceLog) => ({
                                   description: `Service for generator ${log.generatorId}: ${log.serviceType}`,
                                   status: log.overdue ? "Overdue" : "Completed",
                               }))
@@ -102,9 +134,9 @@ export default function InventoryDashboard({ onNavigate }: DashboardProps) {
                     (tasksSnapshot) => {
                         const tasksData = tasksSnapshot.val();
                         const actions = tasksData
-                            ? Object.values(tasksData)
-                                  .filter((task: any) => task.status === "pending")
-                                  .map((task: any) => ({
+                            ? Object.values(tasksData as Record<string, Task>)
+                                  .filter((task: Task) => task.status === "pending")
+                                  .map((task: Task) => ({
                                       description: task.description,
                                       id: task.id,
                                       priority: task.priority || "Low",

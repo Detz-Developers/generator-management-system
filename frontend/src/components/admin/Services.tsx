@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { CheckCircle, Clock, AlertCircle, Calendar, X, Plus } from 'lucide-react';
 import { MdSearch } from 'react-icons/md';
 
@@ -99,10 +99,10 @@ export default function ServicesPage() {
 
   // ---- Utilities ----
   const parseDate = (d: string) => new Date(d);
-  const isSameMonthYear = (dateStr: string, ref: Date) => {
+  const isSameMonthYear = useCallback((dateStr: string, ref: Date) => {
     const d = parseDate(dateStr);
     return d.getMonth() === ref.getMonth() && d.getFullYear() === ref.getFullYear();
-  };
+  }, []);
 
   // ---- Metrics (computed) ----
   const now = useMemo(() => new Date(), []);
@@ -117,7 +117,7 @@ export default function ServicesPage() {
 
   const thisMonthServices = useMemo(
     () => services.filter(s => isSameMonthYear(s.serviceDate, now)).length,
-    [services, now]
+    [services, now, isSameMonthYear]
   );
 
   // ---- Filters ----

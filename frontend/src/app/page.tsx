@@ -6,14 +6,10 @@ import { ref, get } from 'firebase/database';
 import { auth, db } from '@/firebaseConfig';
 import Sidebar from '@/components/admin/Sidebar';
 import { OperatorMainDashboard } from '@/components/operator';
-import TechnicianSidebar from '@/components/technician/TechnicianSidebar';
 import { TechnicianMainDashboard } from '@/components/technician';
 import { InventoryMainDashboard } from '@/components/inventory';
 import NotificationCenter from '@/components/admin/NotificationCenter';
 import Dashboard from '@/components/admin/Dashboard';
-import OperatorDashboard from '@/components/operator/OperatorIssueReporting';
-import TechnicianDashboard from '@/components/technician/TechnicianTasks';
-import InventoryDashboard from '@/components/inventory/InventoryDashboard';
 import Generators from '@/components/admin/Generators';
 import Batteries from '@/components/admin/Batteries';
 import Tasks from '@/components/admin/Tasks';
@@ -29,7 +25,6 @@ import GeneratorDetails from '@/components/admin/GeneratorDetails';
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string>('admin');
-  const [userEmail, setUserEmail] = useState<string>('');
   const [currentPage, setCurrentPage] = useState('Dashboard');
 
   // Map server role to client shorthand used in UI
@@ -47,11 +42,10 @@ export default function Home() {
     }
   };
 
-  const handleLogin = (role: string, email: string) => {
+  const handleLogin = (role: string) => {
     // Optimistically update; auth listener will reconcile
     setIsLoggedIn(true);
     setUserRole(role);
-    setUserEmail(email);
   };
 
   const handleLogout = async () => {
@@ -75,12 +69,10 @@ export default function Home() {
         } catch {
           setUserRole('admin');
         }
-        setUserEmail(user.email ?? '');
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
         setUserRole('admin');
-        setUserEmail('');
       }
     });
     return () => unsubscribe();
@@ -172,53 +164,6 @@ export default function Home() {
             </main>
           </div>
         );
-    }
-  };
-
-  const renderOperatorContent = () => {
-    switch (currentPage) {
-      case 'Dashboard':
-        return <OperatorDashboard onNavigate={setCurrentPage} />;
-      case 'Generators':
-        return <Generators onNavigate={setCurrentPage}/>;
-      case 'Tasks':
-        return <Tasks />;
-      case 'Services':
-        return <Services />;
-      case 'Notifications':
-        return <NotificationCenter />;
-      default:
-        return <OperatorDashboard onNavigate={setCurrentPage} />;
-    }
-  };
-
-  const renderTechnicianContent = () => {
-    switch (currentPage) {
-      case 'Dashboard':
-        return <TechnicianDashboard onNavigate={setCurrentPage} />;
-      case 'Tasks':
-        return <Tasks />;
-      case 'Services':
-        return <Services />;
-      case 'Notifications':
-        return <NotificationCenter />;
-      default:
-        return <TechnicianDashboard onNavigate={setCurrentPage} />;
-    }
-  };
-
-  const renderInventoryContent = () => {
-    switch (currentPage) {
-      case 'Dashboard':
-        return <InventoryDashboard onNavigate={setCurrentPage} />;
-      case 'Batteries':
-        return <Batteries onNavigate={setCurrentPage} />;
-      case 'Generators':
-        return <Generators onNavigate={setCurrentPage}/>;
-      case 'Notifications':
-        return <NotificationCenter />;
-      default:
-        return <InventoryDashboard onNavigate={setCurrentPage} />;
     }
   };
 

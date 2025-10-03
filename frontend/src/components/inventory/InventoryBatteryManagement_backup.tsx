@@ -17,51 +17,8 @@ type RawBatteryRecord = {
   issued_date?: number | string | null;
   install_date?: number | string | null;
   generator_id?: string;
-  shop_i                    <div>
-                      <label htmlFor="editAssignedDate" className="font-semibold text-gray-700">Assigned Date:</label>
-                      <input
-                          type="date"
-                          id="editAssignedDate"
-                          className="border px-3 py-2 rounded w-full mt-1"
-                          value={editedBattery.assignedDate}
-                          onChange={(e) => setEditedBattery({...editedBattery, assignedDate: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="editIssueType" className="font-semibold text-gray-700">Issue Type:</label>
-                      <select
-                          id="editIssueType"
-                          className="border px-3 py-2 rounded w-full mt-1"
-                          value={editedBattery.brand}
-                          onChange={(e) => setEditedBattery({...editedBattery, brand: e.target.value})}
-                      >
-                        <option value="Fix">Fix</option>
-                        <option value="Temporary">Temporary</option>
-                      </select>
-                    </div>
-                  </div>
-                  {formError && (
-                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-                      {formError}
-                    </div>
-                  )}
-                  <div className="flex justify-end gap-2 mt-6">
-                    <button 
-                      type="button" 
-                      className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50" 
-                      onClick={closeModal}
-                      disabled={submitting}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                      disabled={submitting}
-                    >
-                      {submitting ? "Saving..." : "Save Changes"}
-                    </button>
-                  </div>issue_type?: string; // Fix | Temporary
+  shop_id?: string;
+  issue_type?: string; // Fix | Temporary
   gate_pass?: string;
   createdAt?: number;
   updatedAt?: number;

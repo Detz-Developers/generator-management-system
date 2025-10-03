@@ -476,7 +476,9 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
             <ChartArea timeframe={timeframe} hoverIndex={hoverIndex} setHoverIndex={setHoverIndex} selectedDate={selectedDate} />
           </div>
         </div>
-      </div>
+        </>
+      )}
+    </div>
     );
 }
 

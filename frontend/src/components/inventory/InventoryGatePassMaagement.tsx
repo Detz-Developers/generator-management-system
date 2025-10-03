@@ -14,6 +14,12 @@ interface GatePassRecord {
   status: Status;
 }
 
+interface GatePassData {
+  batteryId: string;
+  issueDate: string;
+  status: Status;
+}
+
 export default function InventoryGatePassManagement() {
   const [records, setRecords] = useState<GatePassRecord[]>([]);
   const [search, setSearch] = useState("");
@@ -29,7 +35,7 @@ export default function InventoryGatePassManagement() {
     return onValue(gatePassRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list: GatePassRecord[] = Object.entries(data).map(([key, value]: any) => ({
+        const list: GatePassRecord[] = Object.entries(data as Record<string, GatePassData>).map(([key, value]) => ({
           id: key,
           batteryId: value.batteryId,
           issueDate: value.issueDate,
