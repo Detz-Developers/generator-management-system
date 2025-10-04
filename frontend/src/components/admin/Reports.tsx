@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, FileText, Download, Calendar, BarChart3 } from 'lucide-react';
+import { FileText, Download, Calendar, BarChart3 } from 'lucide-react';
 
 export default function ReportsPage() {
   const [generatorStatus, setGeneratorStatus] = useState('all');
@@ -90,8 +90,9 @@ export default function ReportsPage() {
           <div className="space-y-6">
             {/* Generator Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Generator Status</label>
+              <label htmlFor="generatorStatus" className="block text-sm font-medium text-gray-700 mb-2">Generator Status</label>
               <select
+                id="generatorStatus"
                 value={generatorStatus}
                 onChange={(e) => setGeneratorStatus(e.target.value)}
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -105,8 +106,9 @@ export default function ReportsPage() {
 
             {/* Brand */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+              <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
               <select
+                id="brand"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -121,8 +123,9 @@ export default function ReportsPage() {
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">Location</label>
               <select
+                id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -139,8 +142,9 @@ export default function ReportsPage() {
             {/* Date Range */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+                <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 mb-2">Date From</label>
                 <input
+                  id="dateFrom"
                   type="text"
                   placeholder="mm/dd/yyyy"
                   value={dateFrom}
@@ -149,8 +153,9 @@ export default function ReportsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date To</label>
+                <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mb-2">Date To</label>
                 <input
+                  id="dateTo"
                   type="text"
                   placeholder="mm/dd/yyyy"
                   value={dateTo}
@@ -164,8 +169,9 @@ export default function ReportsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">Include in Report</label>
               <div className="space-y-3">
-                <label className="flex items-center">
+                <label htmlFor="includeServices" className="flex items-center">
                   <input
+                    id="includeServices"
                     type="checkbox"
                     checked={includeServices}
                     onChange={(e) => setIncludeServices(e.target.checked)}
@@ -173,8 +179,9 @@ export default function ReportsPage() {
                   />
                   <span className="ml-2 text-sm text-gray-700">Services</span>
                 </label>
-                <label className="flex items-center">
+                <label htmlFor="includeTasks" className="flex items-center">
                   <input
+                    id="includeTasks"
                     type="checkbox"
                     checked={includeTasks}
                     onChange={(e) => setIncludeTasks(e.target.checked)}
@@ -182,8 +189,9 @@ export default function ReportsPage() {
                   />
                   <span className="ml-2 text-sm text-gray-700">Tasks</span>
                 </label>
-                <label className="flex items-center">
+                <label htmlFor="includeBatteries" className="flex items-center">
                   <input
+                    id="includeBatteries"
                     type="checkbox"
                     checked={includeBatteries}
                     onChange={(e) => setIncludeBatteries(e.target.checked)}
@@ -191,8 +199,9 @@ export default function ReportsPage() {
                   />
                   <span className="ml-2 text-sm text-gray-700">Batteries</span>
                 </label>
-                <label className="flex items-center">
+                <label htmlFor="includeRepairs" className="flex items-center">
                   <input
+                    id="includeRepairs"
                     type="checkbox"
                     checked={includeRepairs}
                     onChange={(e) => setIncludeRepairs(e.target.checked)}

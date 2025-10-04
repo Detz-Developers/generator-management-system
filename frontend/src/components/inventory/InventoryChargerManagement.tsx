@@ -237,6 +237,7 @@ Condition: ${charger.conditionStatus}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="border rounded-lg p-2 bg-gray-100"
+            aria-label="Filter by status"
           >
             <option value="All Status">All Status</option>
             <option value="Assigned">Assigned</option>
@@ -247,6 +248,7 @@ Condition: ${charger.conditionStatus}
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
             className="border rounded-lg p-2 bg-gray-100"
+            aria-label="Filter by assignee"
           >
             <option value="All Assignees">All Assignees</option>
             <option value="Colombo">Colombo</option>
@@ -372,6 +374,7 @@ Condition: ${charger.conditionStatus}
                 value={lastMaintenance}
                 onChange={(e) => setLastMaintenance(e.target.value)}
                 className="w-full border rounded-lg px-3 py-2"
+                aria-label="Last maintenance date"
               />
               <input
                 type="text"
@@ -388,6 +391,7 @@ Condition: ${charger.conditionStatus}
                   )
                 }
                 className="w-full border rounded-lg px-3 py-2"
+                aria-label="Assignment status"
               >
                 <option value="Assigned">Assigned</option>
                 <option value="Available">Available</option>
@@ -401,6 +405,7 @@ Condition: ${charger.conditionStatus}
                   )
                 }
                 className="w-full border rounded-lg px-3 py-2"
+                aria-label="Condition status"
               >
                 <option value="Good">Good</option>
                 <option value="Excellent">Excellent</option>

@@ -14,10 +14,8 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
   const params = useParams() as { id?: string } | null;
   const effectiveId = generatorId ?? (params?.id ? String(params.id) : undefined);
 
-  // active tab state eka (default 1)
   const [activeTab, setActiveTab] = useState("1");
 
-  // service toggle form
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -39,7 +37,6 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
     setShowModal(false);
   };
 
-  // Loaded generator
   type RawGeneratorRecord = {
     id?: string;
     brand?: string;
@@ -60,7 +57,6 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
   };
 
   const [gen, setGen] = useState<RawGeneratorRecord | null>(null);
-  const [shopName, setShopName] = useState<string>("");
   const [serviceHistory, setServiceHistory] = useState<Record<string, unknown>[]>([]);
   const [repairLogs, setRepairLogs] = useState<Record<string, unknown>[]>([]);
 
@@ -105,7 +101,6 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
           unsub = onValue(byKeyRef, (s) => { if (!cancelled) setGen((s.val() ?? null) as RawGeneratorRecord | null); });
           return;
         }
-        // Fallback: query by child id equal to generatorId
         const q = query(ref(db, 'generators'), orderByChild('id'), equalTo(effectiveId));
         const snap2 = await get(q);
         if (cancelled) return;
@@ -130,16 +125,6 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
   }, [effectiveId]);
 
   useEffect(() => {
-    if (!gen?.shop_id) { setShopName(""); return; }
-    const unsub = onValue(ref(db, `shops/${gen.shop_id}`), (snap) => {
-      const v = snap.val() as { name?: string; code?: string } | null;
-      setShopName(v?.name || v?.code || gen.shop_id || "");
-    });
-    return () => unsub();
-  }, [gen?.shop_id]);
-
-  // Attempt to load logs if available under common patterns
-  useEffect(() => {
     if (!effectiveId) { setServiceHistory([]); setRepairLogs([]); return; }
     const norm = (obj: unknown) => obj && typeof obj === 'object' ? Object.values(obj as Record<string, unknown>) : Array.isArray(obj) ? obj : [];
     const u1 = onValue(ref(db, `generator_services/${effectiveId}`), (s) => setServiceHistory(norm(s.val())));
@@ -150,88 +135,6 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
 
   return (
     <div className="flex bg-white min-h-screen font-roboto">
-      {/* Sidebar 
-      <aside className="w-64 bg-white shadow-md flex flex-col p-4">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold">Generator</h2>
-          <span className="text-sm text-gray-500">iTeam project</span>
-        </div>
-
-        
-        <div className="flex items-center border rounded-md p-2 mb-8">
-          <span className="material-icons text-gray-500">search</span>
-          <input
-            type="text"
-            placeholder="File"
-            className="ml-2 w-full focus:outline-none"
-          />
-        </div>
-        
-
-       
-        <nav className="flex-grow">
-          <ul>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">dashboard</span>
-                <span className="ml-3">Dashboard</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-white bg-blue-500 rounded-md" href="#">
-                <span className="material-icons">bolt</span>
-                <span className="ml-3">Generators</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">assignment</span>
-                <span className="ml-3">Tasks</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">build</span>
-                <span className="ml-3">Services</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">receipt</span>
-                <span className="ml-3">Invoices</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">assessment</span>
-                <span className="ml-3">Reports</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">people</span>
-                <span className="ml-3">Users</span>
-              </a>
-            </li>
-            <li className="mb-4">
-              <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-                <span className="material-icons">notifications</span>
-                <span className="ml-3">Notifications</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-
-       
-        <div>
-          <a className="flex items-center p-2 text-gray-700 rounded-md hover:bg-gray-200" href="#">
-            <span className="material-icons">logout</span>
-            <span className="ml-3">Logout</span>
-          </a>
-        </div>
-      </aside>
-      */}
-
       {/* Main Content */}
       <main className="flex-1 p-8">
         {/* Header */}
@@ -360,8 +263,6 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
 
             {activeTab === "1" && (
               <div id="1">
-                {/*<div className="overflow-auto max-h-48" id="1">*/}
-
                 <table className="w-full text-left ">
                   <thead className="bg-gray-200 sticky top-0">
                     <tr className="bg-gray-100 text-gray-600 text-sm/7 border-gray-100">

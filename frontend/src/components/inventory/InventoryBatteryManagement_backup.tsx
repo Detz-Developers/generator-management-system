@@ -382,7 +382,7 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by status">
                 <option>All Status</option>
                 <option>Active</option>
                 <option>In Stock</option>
@@ -391,18 +391,18 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                 <option>Under Repair</option>
                 <option>Unusable</option>
               </select>
-              <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by brand">
                 <option>All Brands</option>
                 <option>Type-A</option>
                 <option>Type-B</option>
                 <option>Type-C</option>
               </select>
-              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by location">
                 <option>All Locations</option>
                 <option>Up</option>
                 <option>Down</option>
               </select>
-              <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by shop">
                 <option>All Shops</option>
                 <option>Colombo</option>
                 <option>Gampaha</option>
@@ -447,10 +447,10 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{battery.location}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{battery.shop}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                            <button onClick={() => handleViewBattery(battery)} className="text-blue-600 hover:text-blue-900 mr-2">
+                            <button onClick={() => handleViewBattery(battery)} className="text-blue-600 hover:text-blue-900 mr-2" aria-label="View battery details">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.575 3.01 9.963 7.172.01.037.01.074 0 .111a.75.75 0 01-1.35.639C19.577 16.49 15.64 19.5 12 19.5c-4.638 0-8.575-3.01-9.963-7.172zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
                             </button>
-                            <button onClick={() => handleEditBattery(battery)} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={() => handleEditBattery(battery)} className="text-gray-400 hover:text-gray-600" aria-label="Edit battery">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.498L18.42 6.056l-6.857 6.857-1.558 1.558-1.558-1.558L10.27 11.19a.75.75 0 011.06 1.06L11.558 13.5zM12 4.5l-6.857 6.857-1.558 1.558-1.558-1.558z" /></svg>
                             </button>
                           </td>

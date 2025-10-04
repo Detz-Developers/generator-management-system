@@ -161,6 +161,7 @@ export default function InventoryGatePassManagement() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full rounded-md bg-gray-100 border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              aria-label="Filter by status"
             >
               <option>All Status</option>
               <option>Active</option>

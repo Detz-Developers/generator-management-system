@@ -27,30 +27,30 @@ export default function InventoryReports({ onNavigate }: InventoryReportsProps) 
                     <p className="text-gray-600 text-sm mb-4">Configure filters to customize your report</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="flex flex-col">
-                            <label className="mb-1 text-gray-700">Status</label>
-                            <select className="border rounded-md p-2">
+                            <label htmlFor="status-select" className="mb-1 text-gray-700">Status</label>
+                            <select id="status-select" className="border rounded-md p-2" aria-label="Filter by status">
                                 <option>All Status</option>
                             </select>
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-gray-700">Brands</label>
-                            <select className="border rounded-md p-2">
+                            <label htmlFor="brands-select" className="mb-1 text-gray-700">Brands</label>
+                            <select id="brands-select" className="border rounded-md p-2" aria-label="Filter by brands">
                                 <option>All Brands</option>
                             </select>
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-gray-700">Locations</label>
-                            <select className="border rounded-md p-2">
+                            <label htmlFor="locations-select" className="mb-1 text-gray-700">Locations</label>
+                            <select id="locations-select" className="border rounded-md p-2" aria-label="Filter by locations">
                                 <option>All Locations</option>
                             </select>
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-gray-700">Date From</label>
-                            <input type="date" className="border rounded-md p-2" />
+                            <label htmlFor="date-from" className="mb-1 text-gray-700">Date From</label>
+                            <input id="date-from" type="date" className="border rounded-md p-2" />
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-gray-700">Date To</label>
-                            <input type="date" className="border rounded-md p-2" />
+                            <label htmlFor="date-to" className="mb-1 text-gray-700">Date To</label>
+                            <input id="date-to" type="date" className="border rounded-md p-2" />
                         </div>
                     </div>
                 </div>

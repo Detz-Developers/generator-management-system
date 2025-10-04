@@ -347,6 +347,7 @@ export default function ShopDetails({ shop, onBack }: ShopDetailsProps) {
             <button
               onClick={onBack}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Go back to shops list"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
@@ -370,7 +371,7 @@ export default function ShopDetails({ shop, onBack }: ShopDetailsProps) {
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Shop Information</h2>
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Edit shop information">
                 <Edit className="w-4 h-4 text-gray-400" />
               </button>
             </div>

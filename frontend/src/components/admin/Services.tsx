@@ -255,6 +255,7 @@ export default function ServicesPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'overdue' | 'upcoming')}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter by status"
           >
             <option value="all">All Status</option>
             <option value="overdue">Overdue</option>
@@ -264,6 +265,7 @@ export default function ServicesPage() {
             value={serviceTypeFilter}
             onChange={(e) => setServiceTypeFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter by service type"
           >
             <option value="all">All Types</option>
             {serviceTypeOptions.map(type => (
@@ -385,44 +387,56 @@ export default function ServicesPage() {
             <form onSubmit={handleSave} className="space-y-4">
               {/* Row 1 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <select
-                  value={formData.generatorId || ''}
-                  onChange={(e) => handleFormChange('generatorId', e.target.value)}
-                  className="border p-2 rounded-lg"
-                  required
-                >
-                  <option value="">Select generator</option>
-                  {generatorOptions.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
+                <div>
+                  <label htmlFor="serviceGeneratorId" className="block text-sm font-medium text-gray-700 mb-1">Generator</label>
+                  <select
+                    id="serviceGeneratorId"
+                    value={formData.generatorId || ''}
+                    onChange={(e) => handleFormChange('generatorId', e.target.value)}
+                    className="border p-2 rounded-lg"
+                    required
+                  >
+                    <option value="">Select generator</option>
+                    {generatorOptions.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
 
-                <select
-                  value={formData.serviceType || ''}
-                  onChange={(e) => handleFormChange('serviceType', e.target.value)}
-                  className="border p-2 rounded-lg"
-                  required
-                >
-                  <option value="">Select service type</option>
-                  {serviceTypeOptions.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
+                <div>
+                  <label htmlFor="serviceType" className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+                  <select
+                    id="serviceType"
+                    value={formData.serviceType || ''}
+                    onChange={(e) => handleFormChange('serviceType', e.target.value)}
+                    className="border p-2 rounded-lg"
+                    required
+                  >
+                    <option value="">Select service type</option>
+                    {serviceTypeOptions.map((type) => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Row 2 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <select
-                  value={formData.technician || ''}
-                  onChange={(e) => handleFormChange('technician', e.target.value)}
-                  className="border p-2 rounded-lg"
-                  required
-                >
-                  <option value="">Select technician</option>
-                  {technicianOptions.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                <div>
+                  <label htmlFor="serviceTechnician" className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
+                  <select
+                    id="serviceTechnician"
+                    value={formData.technician || ''}
+                    onChange={(e) => handleFormChange('technician', e.target.value)}
+                    className="border p-2 rounded-lg"
+                    required
+                  >
+                    <option value="">Select technician</option>
+                    {technicianOptions.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
 
                 <input
                   type="number"
@@ -436,20 +450,28 @@ export default function ServicesPage() {
 
               {/* Row 3 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="date"
-                  value={formData.serviceDate || ''}
-                  onChange={(e) => handleFormChange('serviceDate', e.target.value)}
-                  className="border p-2 rounded-lg"
-                  required
-                />
-                <input
-                  type="date"
-                  value={formData.nextDueDate || ''}
-                  onChange={(e) => handleFormChange('nextDueDate', e.target.value)}
-                  className="border p-2 rounded-lg"
-                  required
-                />
+                <div>
+                  <label htmlFor="serviceDate" className="block text-sm font-medium text-gray-700 mb-1">Service Date</label>
+                  <input
+                    id="serviceDate"
+                    type="date"
+                    value={formData.serviceDate || ''}
+                    onChange={(e) => handleFormChange('serviceDate', e.target.value)}
+                    className="border p-2 rounded-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="nextDueDate" className="block text-sm font-medium text-gray-700 mb-1">Next Due Date</label>
+                  <input
+                    id="nextDueDate"
+                    type="date"
+                    value={formData.nextDueDate || ''}
+                    onChange={(e) => handleFormChange('nextDueDate', e.target.value)}
+                    className="border p-2 rounded-lg"
+                    required
+                  />
+                </div>
               </div>
 
               {/* Notes */}

@@ -186,6 +186,7 @@ export default function TasksPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter by status"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -196,6 +197,7 @@ export default function TasksPage() {
             value={assigneeFilter}
             onChange={(e) => setAssigneeFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter by assignee"
           >
             <option value="all">All Assignees</option>
             <option value="Sahan P.">Sahan P.</option>
@@ -302,6 +304,7 @@ export default function TasksPage() {
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              aria-label="Close assign task modal"
             >
               <X className="w-5 h-5" />
             </button>
@@ -318,10 +321,10 @@ export default function TasksPage() {
             <form className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="taskGeneratorId" className="block text-sm font-medium text-gray-700">
                     Generator ID
                   </label>
-                  <select className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                  <select id="taskGeneratorId" className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     <option>Select generator</option>
                     <option value="G001">G001</option>
                     <option value="G002">G002</option>
@@ -329,10 +332,10 @@ export default function TasksPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="taskAssignTo" className="block text-sm font-medium text-gray-700">
                     Assign to
                   </label>
-                  <select className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                  <select id="taskAssignTo" className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     <option>Select operator</option>
                     <option value="Sahan P.">Sahan P.</option>
                     <option value="Nihal K.">Nihal K.</option>
@@ -352,19 +355,20 @@ export default function TasksPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="taskDueDate" className="block text-sm font-medium text-gray-700">
                     Due Date
                   </label>
                   <input
+                    id="taskDueDate"
                     type="date"
                     className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="taskStatus" className="block text-sm font-medium text-gray-700">
                     Status
                   </label>
-                  <select className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                  <select id="taskStatus" className="w-full mt-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     <option>Pending</option>
                     <option>Completed</option>
                     <option>Overdue</option>
@@ -406,6 +410,7 @@ export default function TasksPage() {
             <button
               onClick={() => setViewTask(null)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              aria-label="Close task details modal"
             >
               <X className="w-5 h-5" />
             </button>

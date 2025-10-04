@@ -645,8 +645,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-medium text-gray-700">Installed Date</label>
+                  <label htmlFor="formInstalledDate" className="mb-1 font-medium text-gray-700">Installed Date</label>
                   <input
+                    id="formInstalledDate"
                     type="date"
                     className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                     value={formInstalledDate}
@@ -655,8 +656,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-medium text-gray-700">Issued Date</label>
+                  <label htmlFor="formIssuedDate" className="mb-1 font-medium text-gray-700">Issued Date</label>
                   <input
+                    id="formIssuedDate"
                     type="date"
                     className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                     value={formIssuedDate}
@@ -665,8 +667,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="flex flex-col col-span-2">
-                  <label className="mb-1 font-medium text-gray-700">Assigned Shop</label>
+                  <label htmlFor="formShopId" className="mb-1 font-medium text-gray-700">Assigned Shop</label>
                   <select
+                    id="formShopId"
                     className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                     value={formShopId}
                     onChange={(e) => setFormShopId(e.target.value)}
@@ -707,8 +710,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="col-span-2 flex items-center justify-between">
-                  <span className="text-gray-700">Auto Start</span>
+                  <label htmlFor="formAutoStart" className="text-gray-700">Auto Start</label>
                   <input
+                    id="formAutoStart"
                     type="checkbox"
                     className="w-5 h-5"
                     checked={formAutoStart}
@@ -717,8 +721,9 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="col-span-2 flex items-center justify-between">
-                  <span className="text-gray-700">Battery Charger Installed?</span>
+                  <label htmlFor="formBatteryCharger" className="text-gray-700">Battery Charger Installed?</label>
                   <input
+                    id="formBatteryCharger"
                     type="checkbox"
                     className="w-5 h-5"
                     checked={formBatteryCharger}

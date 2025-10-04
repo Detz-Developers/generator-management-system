@@ -62,7 +62,7 @@ export default function OperatorIssueReporting({ onNavigate }: OperatorIssueRepo
             <h1 className="text-4xl font-bold text-blue-600">Issue Reporting</h1>
             <p className="text-gray-500">Report Your Breakdown</p>
           </div>
-          <button className="relative bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center">
+          <button className="relative bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center" aria-label="Notifications">
             <span className=" material-icons text-gray-600"> <FaBell className="text-white text-xl" /></span>
             <span className="absolute bottom-7 left-8 h-4 w-4 bg-blue-500 rounded-full border-2 border-white"></span>
           </button>
@@ -192,7 +192,7 @@ export default function OperatorIssueReporting({ onNavigate }: OperatorIssueRepo
                         )}
                       </td>
                       <td className="px-6 py-4 flex items-center space-x-2">
-                        <button onClick={() => onNavigate?.("Reports")} className="p-2 rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200">
+                        <button onClick={() => onNavigate?.("Reports")} className="p-2 rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200" aria-label="View issue details">
                           <span className="material-icons text-base"> <FaEye /> </span>
                         </button>
                         {issue.status === "Completed" ? (

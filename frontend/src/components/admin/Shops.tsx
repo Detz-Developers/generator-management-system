@@ -251,8 +251,9 @@ export default function ShopsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
+              id="statusFilter"
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as ShopStatus | 'all')}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"

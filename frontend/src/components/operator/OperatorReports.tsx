@@ -28,7 +28,7 @@ export default function OperatorReports({ onNavigate }: OperatorReportsProps) {
           <h1 className="text-4xl font-bold text-blue-600">Reports</h1>
           <p className="text-gray-500">Own by This Center</p>
         </div>
-        <button className="bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center">
+        <button className="bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center" aria-label="Notifications">
           <FaBell className="text-white text-xl" />
         </button>
       </header>
@@ -105,10 +105,10 @@ export default function OperatorReports({ onNavigate }: OperatorReportsProps) {
           <div className="mt-8 flex justify-between items-center">
             <div className="bg-white px-2 py-1 rounded-full shadow-lg">
             <div className="flex space-x-8">
-              <button className="bg-white p-3 rounded-full  hover:bg-gray-100">
+              <button className="bg-white p-3 rounded-full  hover:bg-gray-100" aria-label="Share">
                 <FaShareAlt className="text-gray-600" />
               </button>
-              <button className="bg-white p-3 rounded-full  hover:bg-gray-100">
+              <button className="bg-white p-3 rounded-full  hover:bg-gray-100" aria-label="Comment">
                 <FaCommentAlt className="text-gray-600" />
               </button>
             </div>

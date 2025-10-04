@@ -176,7 +176,7 @@ export default function OperatorGenerators({ onNavigate }: OperatorGeneratorsPro
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-4xl font-bold text-blue-600">Available Generators</h1>
-        <button className="bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center">
+        <button className="bg-blue-500 text-white rounded p-2 shadow flex items-center justify-center" aria-label="Notifications">
           <FaBell className="text-white text-xl" />
         </button>
       </div>

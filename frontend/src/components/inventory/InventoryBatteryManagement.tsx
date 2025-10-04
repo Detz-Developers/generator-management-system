@@ -386,7 +386,7 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by status">
                 <option>All Status</option>
                 <option>Active</option>
                 <option>In Stock</option>
@@ -395,19 +395,19 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                 <option>Under Repair</option>
                 <option>Unusable</option>
               </select>
-              <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by brand">
                 <option>All Brands</option>
                 <option>NS 40</option>
                 <option>100Ah</option>
                 <option>120Ah</option>
                 <option>150Ah</option>
               </select>
-              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by location">
                 <option>All Locations</option>
                 <option>With Gen</option>
                 <option>In Stock</option>
               </select>
-              <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select value={shopFilter} onChange={(e) => setShopFilter(e.target.value)} className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" aria-label="Filter by shop">
                 <option>All Shops</option>
                 {uniqueShops.map(shop => (
                   <option key={shop} value={shop}>{shop}</option>
@@ -451,13 +451,13 @@ export default function InventoryBatteryManagement({ onNavigate }: BatteryManage
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{battery.location}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{battery.shop}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                            <button onClick={() => handleViewBattery(battery)} className="text-blue-600 hover:text-blue-900 mr-2">
+                            <button onClick={() => handleViewBattery(battery)} className="text-blue-600 hover:text-blue-900 mr-2" aria-label="View battery details">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.575 3.01 9.963 7.172.01.037.01.074 0 .111a.75.75 0 01-1.35.639C19.577 16.49 15.64 19.5 12 19.5c-4.638 0-8.575-3.01-9.963-7.172zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
                             </button>
-                            <button onClick={() => handleEditBattery(battery)} className="text-gray-400 hover:text-gray-600 mr-2">
+                            <button onClick={() => handleEditBattery(battery)} className="text-gray-400 hover:text-gray-600 mr-2" aria-label="Edit battery">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.498L18.42 6.056l-6.857 6.857-1.558 1.558-1.558-1.558L10.27 11.19a.75.75 0 011.06 1.06L11.558 13.5zM12 4.5l-6.857 6.857-1.558 1.558-1.558-1.558z" /></svg>
                             </button>
-                            <button onClick={() => handleDeleteBattery(battery)} className="text-red-600 hover:text-red-900">
+                            <button onClick={() => handleDeleteBattery(battery)} className="text-red-600 hover:text-red-900" aria-label="Delete battery">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                             </button>
                           </td>
