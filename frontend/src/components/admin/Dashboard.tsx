@@ -32,55 +32,60 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
     // Fetch data from Firebase
     useEffect(() => {
+        const unsubscribers: (() => void)[] = [];
+
+        // Fetch shops
         const shopsRef = ref(db, 'shops');
-        onValue(shopsRef, (snapshot) => {
+        const shopsUnsubscribe = onValue(shopsRef, (snapshot) => {
             const shopsData = snapshot.val();
             const totalCenters = shopsData ? Object.keys(shopsData).length : 0;
-
-            const servicesRef = ref(db, 'services');
-            onValue(servicesRef, (servicesSnapshot) => {
-                const servicesData = servicesSnapshot.val();
-                const today = new Date(1759382940000); // Oct 01, 2025, 04:49 PM +0530
-                const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-                const upcomingServices = servicesData
-                    ? Object.values(servicesData as Record<string, Service>).filter((service: Service) => {
-                        const scheduledDate = new Date(service.scheduledDate);
-                        return (
-                            scheduledDate >= today &&
-                            scheduledDate <= oneWeekLater &&
-                            service.status === "scheduled"
-                        );
-                    }).length
-                    : 0;
-
-                const generatorsRef = ref(db, 'generators');
-                onValue(generatorsRef, (generatorsSnapshot) => {
-                    const generatorsData = generatorsSnapshot.val();
-                    const underRepair = generatorsData
-                        ? Object.values(generatorsData as Record<string, Generator>).filter((gen: Generator) => gen.status === "Under Repair").length
-                        : 0;
-                    const unusableGenerators = generatorsData
-                        ? Object.values(generatorsData as Record<string, Generator>).filter((gen: Generator) => gen.status === "Unusable").length
-                        : 0;
-
-                    setMetrics({
-                        totalCenters,
-                        upcomingServices,
-                        underRepair,
-                        unusableGenerators,
-                    });
-                }, (error) => {
-                    console.error("Generators fetch error:", error);
-                });
-            }, (error) => {
-                console.error("Services fetch error:", error);
-            });
-        }, (error) => {
-            console.error("Shops fetch error:", error);
+            
+            setMetrics(prev => ({ ...prev, totalCenters }));
         });
+        unsubscribers.push(shopsUnsubscribe);
+
+        // Fetch services
+        const servicesRef = ref(db, 'services');
+        const servicesUnsubscribe = onValue(servicesRef, (servicesSnapshot) => {
+            const servicesData = servicesSnapshot.val();
+            const today = new Date(1759382940000); // Oct 01, 2025, 04:49 PM +0530
+            const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+            const upcomingServices = servicesData
+                ? Object.values(servicesData as Record<string, Service>).filter((service: Service) => {
+                    const scheduledDate = new Date(service.scheduledDate);
+                    return (
+                        scheduledDate >= today &&
+                        scheduledDate <= oneWeekLater &&
+                        service.status === "scheduled"
+                    );
+                }).length
+                : 0;
+
+            setMetrics(prev => ({ ...prev, upcomingServices }));
+        });
+        unsubscribers.push(servicesUnsubscribe);
+
+        // Fetch generators
+        const generatorsRef = ref(db, 'generators');
+        const generatorsUnsubscribe = onValue(generatorsRef, (generatorsSnapshot) => {
+            const generatorsData = generatorsSnapshot.val();
+            const underRepair = generatorsData
+                ? Object.values(generatorsData as Record<string, Generator>).filter((gen: Generator) => gen.status === "Under Repair").length
+                : 0;
+            const unusableGenerators = generatorsData
+                ? Object.values(generatorsData as Record<string, Generator>).filter((gen: Generator) => gen.status === "Unusable").length
+                : 0;
+
+            setMetrics(prev => ({
+                ...prev,
+                underRepair,
+                unusableGenerators,
+            }));
+        });
+        unsubscribers.push(generatorsUnsubscribe);
 
         return () => {
-            // Cleanup listeners if needed (implementation depends on Firebase version)
+            unsubscribers.forEach(unsubscribe => unsubscribe());
         };
     }, []);
 

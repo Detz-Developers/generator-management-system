@@ -453,10 +453,13 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
               />
             </div>
 
+            <label htmlFor="status-filter" className="sr-only">Filter by status</label>
             <select
+              id="status-filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
+              aria-label="Filter generators by status"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -464,10 +467,13 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
               <option value="unusable">Unusable</option>
             </select>
 
+            <label htmlFor="brand-filter" className="sr-only">Filter by brand</label>
             <select
+              id="brand-filter"
               value={brandFilter}
               onChange={(e) => setBrandFilter(e.target.value)}
               className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
+              aria-label="Filter generators by brand"
             >
               <option value="all">All Brands</option>
               {uniqueBrands.map(brand => (
@@ -475,20 +481,26 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
               ))}
             </select>
 
+            <label htmlFor="location-filter" className="sr-only">Filter by location</label>
             <select
+              id="location-filter"
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
               className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
+              aria-label="Filter generators by location"
             >
               <option value="all">All Locations</option>
               <option value="Up">Up</option>
               <option value="Down">Down</option>
             </select>
 
+            <label htmlFor="shop-filter" className="sr-only">Filter by shop</label>
             <select
+              id="shop-filter"
               value={shopFilter}
               onChange={(e) => setShopFilter(e.target.value)}
               className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
+              aria-label="Filter generators by shop"
             >
               <option value="all">All Shops</option>
               {uniqueShops.map(shop => (
@@ -562,11 +574,13 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
               <form className="grid grid-cols-2 gap-4 text-sm">
                 {isEditing && (
                   <div className="flex flex-col">
-                    <label className="mb-1 font-medium text-gray-700">Update Status</label>
+                    <label htmlFor="form-status" className="mb-1 font-medium text-gray-700">Update Status</label>
                     <select
+                      id="form-status"
                       className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
                       value={formStatus}
                       onChange={(e) => setFormStatus(e.target.value as "Active" | "Under Repair" | "Unusable")}
+                      aria-label="Generator status"
                     >
                       <option value="Active">Active</option>
                       <option value="Under Repair">Under Repair</option>
@@ -576,11 +590,13 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 )}
                 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-medium text-gray-700">Generator Brand</label>
+                  <label htmlFor="form-brand" className="mb-1 font-medium text-gray-700">Generator Brand</label>
                   <select
+                    id="form-brand"
                     className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
                     value={formBrand}
                     onChange={(e) => setFormBrand(e.target.value)}
+                    aria-label="Generator brand"
                   >
                     <option value="">Select brand</option>
                     <option value="Caterpillar">Caterpillar</option>
@@ -590,11 +606,13 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-medium text-gray-700">Size</label>
+                  <label htmlFor="form-size" className="mb-1 font-medium text-gray-700">Size</label>
                   <select
+                    id="form-size"
                     className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
                     value={formSize}
                     onChange={(e) => setFormSize(e.target.value)}
+                    aria-label="Generator size"
                   >
                     <option value="">Select size</option>
                     <option value="15kW">15kW</option>
@@ -615,12 +633,14 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-medium text-gray-700">Warranty Expire Date</label>
+                  <label htmlFor="form-warranty-expire" className="mb-1 font-medium text-gray-700">Warranty Expire Date</label>
                   <input
+                    id="form-warranty-expire"
                     type="date"
                     className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                     value={formWarrantyExpire}
                     onChange={(e) => setFormWarrantyExpire(e.target.value)}
+                    aria-label="Warranty expiration date"
                   />
                 </div>
 

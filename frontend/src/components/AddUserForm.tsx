@@ -141,7 +141,12 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto p-7 bg-white rounded-2xl border shadow">
-      <button className="mb-4 text-gray-500 hover:text-blue-600" onClick={onCancel}>
+      <button
+        className="mb-4 text-gray-500 hover:text-blue-600"
+        onClick={onCancel}
+        title="Back"
+        aria-label="Back"
+      >
         <span className="w-9 h- rounded-lg border border-gray-200 flex items-center justify-center bg-gray-50">
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 20 20">
             <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
@@ -202,8 +207,9 @@ export default function AddUserForm({ onCancel, onSuccess }: AddUserFormProps) {
           </div>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+          <label htmlFor="role-select" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
           <select
+            id="role-select"
             className="w-full bg-gray-100 rounded-lg px-4 py-2"
             value={role}
             onChange={(e) => setRole(e.target.value as (typeof roles)[number]['value'])}

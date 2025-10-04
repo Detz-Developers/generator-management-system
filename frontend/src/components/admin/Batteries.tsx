@@ -402,20 +402,26 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
             />
           </div>
 
+          <label htmlFor="type-filter" className="sr-only">Filter by type</label>
           <select
+            id="type-filter"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
+            aria-label="Filter batteries by type"
           >
             <option value="all">All Types</option>
             <option value="fix">Fix</option>
             <option value="temporary">Temporary</option>
           </select>
 
+          <label htmlFor="status-filter" className="sr-only">Filter by shop</label>
           <select
+            id="status-filter"
             value={shopFilter}
             onChange={(e) => setShopFilter(e.target.value)}
             className="p-2 border bg-gray-100 rounded-lg w-full focus:outline-none focus:ring-2 border-blue-100 focus:ring-blue-500"
+            aria-label="Filter batteries by shop"
           >
             <option value="all">All Shops</option>
             {uniqueShops.map(shop => (
@@ -511,11 +517,13 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
 
             <form className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex flex-col">
-                <label className="mb-1 font-medium text-gray-700">Size</label>
+                <label htmlFor="form-size" className="mb-1 font-medium text-gray-700">Size</label>
                 <select
+                  id="form-size"
                   className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
                   value={formSize}
                   onChange={(e) => setFormSize(e.target.value)}
+                  aria-label="Battery size"
                 >
                   <option value="">Select size</option>
                   <option value="NS 40">NS 40</option>
@@ -537,11 +545,13 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-1 font-medium text-gray-700">Issue Type</label>
+                <label htmlFor="form-issue-type" className="mb-1 font-medium text-gray-700">Issue Type</label>
                 <select
+                  id="form-issue-type"
                   className="border rounded-md px-3 py-2 bg-gray-100 border border-blue-100 focus:ring focus:ring-blue-200"
                   value={formIssueType}
                   onChange={(e) => setFormIssueType(e.target.value as "Fix" | "Temporary")}
+                  aria-label="Battery issue type"
                 >
                   <option value="Fix">Fix</option>
                   <option value="Temporary">Temporary</option>
@@ -549,18 +559,21 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-1 font-medium text-gray-700">Issued Date</label>
+                <label htmlFor="form-issued-date" className="mb-1 font-medium text-gray-700">Issued Date</label>
                 <input
+                  id="form-issued-date"
                   type="date"
                   className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                   value={formIssuedDate}
                   onChange={(e) => setFormIssuedDate(e.target.value)}
+                  aria-label="Battery issue date"
                 />
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-1 font-medium text-gray-700">Install Date</label>
+                <label htmlFor="form-install-date" className="mb-1 font-medium text-gray-700">Install Date</label>
                 <input
+                  id="form-install-date"
                   type="date"
                   className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                   value={formInstallDate}
@@ -606,11 +619,13 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
 
               {formAssignmentType === "generator" && (
                 <div className="flex flex-col col-span-2">
-                  <label className="mb-1 font-medium text-gray-700">Generator</label>
+                  <label htmlFor="form-generator" className="mb-1 font-medium text-gray-700">Generator</label>
                   <select
+                    id="form-generator"
                     className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                     value={formGeneratorId}
                     onChange={(e) => setFormGeneratorId(e.target.value)}
+                    aria-label="Select generator"
                   >
                     <option value="">Select generator</option>
                     {Object.entries(generatorNameById).map(([id, name]) => (
@@ -624,11 +639,13 @@ export default function Batteries({ onNavigate, onSelectBattery }: Batteries) {
 
               {formAssignmentType === "shop" && (
                 <div className="flex flex-col col-span-2">
-                  <label className="mb-1 font-medium text-gray-700">Assigned Shop</label>
+                  <label htmlFor="form-shop" className="mb-1 font-medium text-gray-700">Assigned Shop</label>
                   <select
+                    id="form-shop"
                     className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
                     value={formShopId}
                     onChange={(e) => setFormShopId(e.target.value)}
+                    aria-label="Select shop"
                   >
                     <option value="">Select shop</option>
                     {Object.entries(shopNameById).map(([id, name]) => (

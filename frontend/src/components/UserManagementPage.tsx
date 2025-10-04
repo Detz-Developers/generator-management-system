@@ -131,6 +131,8 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
             disabled={saving}
+            aria-label="Close dialog"
+            title="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -188,12 +190,14 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
             <h4 className="font-medium text-gray-900 text-sm">Permissions & Access</h4>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              <label htmlFor="user-role" className="block text-sm font-medium text-gray-700 mb-2">Role</label>
               <select
+                id="user-role"
                 className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={role}
                 onChange={(e) => setRole(e.target.value as RawRole)}
                 disabled={saving}
+                aria-label="User role"
               >
                 {roleOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -496,11 +500,13 @@ export default function UserManagementPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <label htmlFor="role-filter" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <select
+              id="role-filter"
               value={role}
               onChange={(e) => setRole(e.target.value as RoleFilter)}
               className="bg-gray-100 rounded-lg px-4 py-2 w-full focus:outline-blue-600 focus:ring-2 focus:ring-blue-600"
+              aria-label="Filter by role"
             >
               <option>All Roles</option>
               <option>Admin</option>
@@ -510,11 +516,13 @@ export default function UserManagementPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
+              id="status-filter"
               value={status}
               onChange={(e) => setStatus(e.target.value as StatusFilter)}
               className="bg-gray-100 rounded-lg px-4 py-2 w-full focus:outline-blue-600 focus:ring-2 focus:ring-blue-600"
+              aria-label="Filter by status"
             >
               <option>All Status</option>
               <option>Active</option>

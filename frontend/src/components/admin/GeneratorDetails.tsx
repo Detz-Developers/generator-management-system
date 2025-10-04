@@ -238,7 +238,12 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
         <header className="flex justify-between items-center mb-2">
           <div className="flex mb-2 gap-x-4">
 
-            <button onClick={() => onNavigate("Generators")} className="box-border size-4 border h-8 w-8 p-2 mt-4 border-indigo-500 hover:bg-gray-200 justify-items-center...">
+            <button 
+              onClick={() => onNavigate("Generators")} 
+              className="box-border size-4 border h-8 w-8 p-2 mt-4 border-indigo-500 hover:bg-gray-200 justify-items-center..."
+              aria-label="Go back to generators list"
+              title="Back to Generators"
+            >
               <MdOutlineArrowBack className="font-bold ..." />
             </button>
 
@@ -535,14 +540,16 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
                 {/* Generator & Service Type */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                    <label htmlFor="generator-id" className="block mb-1 text-sm font-medium text-gray-700">
                       Generator ID
                     </label>
                     <select
+                      id="generator-id"
                       name="generatorId"
                       value={formData.generatorId}
                       onChange={handleChange}
                       className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                      aria-label="Select generator"
                     >
                       <option value="">Select generator</option>
                       <option value="gen1">Generator 1</option>
@@ -551,14 +558,16 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                    <label htmlFor="service-type" className="block mb-1 text-sm font-medium text-gray-700">
                       Service Type
                     </label>
                     <select
+                      id="service-type"
                       name="serviceType"
                       value={formData.serviceType}
                       onChange={handleChange}
                       className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                      aria-label="Select service type"
                     >
                       <option value="">Select service type</option>
                       <option value="repair">Repair</option>
@@ -585,28 +594,32 @@ export default function Dashboard({ onNavigate, generatorId }: IndividualProps) 
                 {/* Dates */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                    <label htmlFor="service-date" className="block mb-1 text-sm font-medium text-gray-700">
                       Service Date
                     </label>
                     <input
+                      id="service-date"
                       type="date"
                       name="serviceDate"
                       value={formData.serviceDate}
                       onChange={handleChange}
                       className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                      aria-label="Service date"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                    <label htmlFor="next-service-date" className="block mb-1 text-sm font-medium text-gray-700">
                       Next Service Date
                     </label>
                     <input
+                      id="next-service-date"
                       type="date"
                       name="nextServiceDate"
                       value={formData.nextServiceDate}
                       onChange={handleChange}
                       className="border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 bg-gray-100 border border-blue-100"
+                      aria-label="Next service date"
                     />
                   </div>
                 </div>

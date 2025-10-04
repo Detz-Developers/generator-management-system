@@ -21,7 +21,7 @@ interface InvoiceRow {
 
 interface Props { onNavigate?: (p: string) => void }
 
-export default function InvoiceManagement({ onNavigate }: Props) {
+export default function InvoiceManagement({ }: Props) {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -120,7 +120,14 @@ export default function InvoiceManagement({ onNavigate }: Props) {
           <div className="relative md:col-span-2"><MdSearch className="absolute left-3 top-3 text-gray-400" />
             <input type="text" placeholder="Search by ID or Company..." value={search} onChange={(e)=>setSearch(e.target.value)} className="w-full px-4 py-2 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
           </div>
-          <select value={status} onChange={(e)=>setStatus(e.target.value as "All" | InvoiceStatus)} className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <label htmlFor="status-filter" className="sr-only">Filter by status</label>
+          <select 
+            id="status-filter"
+            value={status} 
+            onChange={(e)=>setStatus(e.target.value as "All" | InvoiceStatus)} 
+            className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter invoices by status"
+          >
             <option value="All">All</option>
             <option value="Pending">Pending</option>
             <option value="Paid">Paid</option>

@@ -356,10 +356,11 @@ export default function CreateInvoice({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="invoice-date" className="block text-sm font-medium text-gray-700 mb-2">
                   Invoice Date
                 </label>
                 <input
+                  id="invoice-date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
@@ -368,10 +369,11 @@ export default function CreateInvoice({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="due-date" className="block text-sm font-medium text-gray-700 mb-2">
                   Due Date (optional)
                 </label>
                 <input
+                  id="due-date"
                   type="date"
                   value={dueDate}
                   min={date}
@@ -422,17 +424,20 @@ export default function CreateInvoice({
                     className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start md:items-center py-3"
                   >
                     {/* Mobile labels */}
-                    <label className="md:hidden text-xs text-gray-500">Description</label>
+                    <label htmlFor={`description-${row.id}`} className="md:hidden text-xs text-gray-500">Description</label>
                     <input
+                      id={`description-${row.id}`}
                       type="text"
                       value={row.description}
                       onChange={(e) => updateRow(row.id, "description", e.target.value)}
                       disabled={readOnly}
                       className="md:col-span-5 col-span-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
                       placeholder="Item description"
+                      aria-label="Item description"
                     />
-                    <label className="md:hidden text-xs text-gray-500">Qty</label>
+                    <label htmlFor={`qty-${row.id}`} className="md:hidden text-xs text-gray-500">Qty</label>
                     <input
+                      id={`qty-${row.id}`}
                       type="number"
                       min={0}
                       step={1}
@@ -441,9 +446,11 @@ export default function CreateInvoice({
                       onChange={(e) => updateRow(row.id, "qty", toOptionalNumber(e.target.value))}
                       disabled={readOnly || hasAmountValue(row.amount)}
                       className="md:col-span-2 col-span-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
+                      aria-label="Quantity"
                     />
-                    <label className="md:hidden text-xs text-gray-500">Unit Price</label>
+                    <label htmlFor={`unit-price-${row.id}`} className="md:hidden text-xs text-gray-500">Unit Price</label>
                     <input
+                      id={`unit-price-${row.id}`}
                       type="number"
                       min={0}
                       step="0.01"
@@ -452,11 +459,13 @@ export default function CreateInvoice({
                       onChange={(e) => updateRow(row.id, "unit_price", toOptionalNumber(e.target.value))}
                       disabled={readOnly || hasAmountValue(row.amount)}
                       className="md:col-span-2 col-span-1 w-full px-3 py-2 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
+                      aria-label="Unit price"
                     />
-                    <label className="md:hidden text-xs text-gray-500">Amount (override)</label>
+                    <label htmlFor={`amount-${row.id}`} className="md:hidden text-xs text-gray-500">Amount (override)</label>
                     <div className="md:col-span-2 col-span-1 relative">
                       <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500 text-sm">LKR</span>
                       <input
+                        id={`amount-${row.id}`}
                         type="number"
                         min={0}
                         step="0.01"
@@ -466,6 +475,7 @@ export default function CreateInvoice({
                         disabled={readOnly}
                         placeholder={formatPlain(live)}
                         className="w-full px-3 py-2 pl-12 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
+                        aria-label="Amount override"
                       />
                     </div>
                     <div className="md:col-span-1 col-span-1 flex items-center justify-end gap-2">
@@ -511,11 +521,13 @@ export default function CreateInvoice({
           <div className="bg-white rounded-lg shadow-sm border border-blue-200 p-6">
             {mode === "edit" && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Status</label>
+                <label htmlFor="invoice-status" className="block text-sm font-medium text-gray-700 mb-2">Invoice Status</label>
                 <select
+                  id="invoice-status"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as InvoiceStatus)}
                   className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Invoice Status"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Paid">Paid</option>
