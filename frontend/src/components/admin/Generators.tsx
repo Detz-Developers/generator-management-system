@@ -561,7 +561,7 @@ export default function Generators({ onNavigate, onSelectGenerator }: Generators
 
         {showForm && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-40">
-            <div data-cy="add-generator-modal" className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
               {/* Title */}
               <h2 className="text-lg font-semibold mb-4 text-gray-800">{isEditing ? "Edit Generator" : "Add Generator"}</h2>
               {formError && (
