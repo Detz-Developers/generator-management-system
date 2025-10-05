@@ -369,6 +369,7 @@ export default function TechnicianIssueReporting({ onNavigate }: TechnicianIssue
                   className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                   value={activeFilter}
                   onChange={(e) => setActiveFilter(e.target.value)}
+                  aria-label="Filter by status"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>

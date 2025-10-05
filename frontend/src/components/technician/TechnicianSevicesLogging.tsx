@@ -63,12 +63,12 @@ export default function TechnicianServicesLogging({ onNavigate }: TechnicianServ
           <p className="text-gray-600 text-lg">Log service activities and maintenance records.</p>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-gray-600 hover:text-gray-800">
+          <button className="p-2 text-gray-600 hover:text-gray-800" aria-label="Download report">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </button>
-          <button className="p-2 text-gray-600 hover:text-gray-800">
+          <button className="p-2 text-gray-600 hover:text-gray-800" aria-label="User profile">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
@@ -93,6 +93,7 @@ export default function TechnicianServicesLogging({ onNavigate }: TechnicianServ
                   value={formData.generator}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                  aria-label="Select generator or asset"
                 >
                   <option value="">Select Generator</option>
                   <option value="CAT-3516B-G101">CAT-3516B-G101</option>
@@ -107,6 +108,7 @@ export default function TechnicianServicesLogging({ onNavigate }: TechnicianServ
                   value={formData.serviceType}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                  aria-label="Select service type"
                 >
                   <option value="">Select service type</option>
                   <option value="Preventive Maintenance">Preventive Maintenance</option>

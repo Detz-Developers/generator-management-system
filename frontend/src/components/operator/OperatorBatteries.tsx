@@ -349,6 +349,7 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
                 className={`relative inline-flex w-11 h-6 items-center rounded-full transition-colors ${
                   withGen ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
+                aria-label="Toggle battery type filter"
               >
                 <span
                   className={`transform transition-transform duration-200 inline-block h-4 w-4 rounded-full bg-white ${
