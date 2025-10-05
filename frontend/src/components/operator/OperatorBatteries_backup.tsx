@@ -3,10 +3,6 @@ import { onValue, ref } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import { FaBell } from "react-icons/fa";
 
-interface OperatorBatteriesProps {
-  onNavigate?: (page: string) => void;
-}
-
 // Firebase battery record structure
 type RawBatteryRecord = {
   id?: string;
@@ -22,14 +18,7 @@ type RawBatteryRecord = {
   updatedAt?: number;
 };
 
-// UI battery object structure
-interface BatteryItem {
-  id: string;
-  status: string;
-  type: string;
-  color: string;
-  dot: string;
-}
+// UI battery object structure (used in getBatteryItems function)
 
 interface CustomDatePickerProps {
   selectedDate: string;
@@ -191,14 +180,13 @@ function CustomDatePicker({ selectedDate, onDateChange, onClose }: CustomDatePic
   );
 }
 
-export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps) {
+export default function OperatorBatteries() {
   // Firebase data state
   const [batteries, setBatteries] = useState<RawBatteryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // UI state
-  const [isAISummaryOpen, setIsAISummaryOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [withGen, setWithGen] = useState(true);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -351,19 +339,17 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
           />
           <div
             className="relative w-[360px] h-10 rounded-full bg-blue-400 p-1 shadow"
-            role="tablist"
             aria-label="Generator filter"
           >
             <div
-              className="absolute top-1 bottom-1 rounded-full bg-white shadow transition-all duration-300"
-              style={{ width: 'calc(50% - 0.25rem)', left: withGen ? '0.25rem' : 'calc(50% + 0.25rem)' }}
+              className={`absolute top-1 bottom-1 rounded-full bg-white shadow transition-all duration-300 ${
+                withGen ? 'left-1 w-[calc(50%-0.25rem)]' : 'left-[calc(50%+0.25rem)] w-[calc(50%-0.25rem)]'
+              }`}
               aria-hidden="true"
             />
             <div className="relative z-10 flex h-full select-none">
               <button
                 type="button"
-                role="tab"
-                aria-selected={withGen}
                 className="flex-1 rounded-full font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 onClick={() => setWithGen(true)}
               >
@@ -371,8 +357,6 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={!withGen}
                 className="flex-1 rounded-full font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 onClick={() => setWithGen(false)}
               >
@@ -410,7 +394,6 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
                 onClick={() => setShowDatePicker(v => !v)}
                 className="w-full flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-white hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200 px-3 py-2 transition"
                 aria-haspopup="dialog"
-                aria-expanded={showDatePicker}
               >
                 <div className="flex items-center gap-3">
                   {/* Calendar icon */}
@@ -452,7 +435,6 @@ export default function OperatorBatteries({ onNavigate }: OperatorBatteriesProps
                     key={key}
                     onClick={() => setTimeframe(key)}
                     className={`px-3 py-1 rounded-full text-sm ${timeframe===key ? 'bg-white text-blue-600 shadow' : 'text-gray-600 hover:text-gray-900'}`}
-                    aria-pressed={timeframe===key}
                   >{label}</button>
                 ))}
               </div>

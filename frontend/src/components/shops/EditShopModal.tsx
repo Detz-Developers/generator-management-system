@@ -130,6 +130,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
                 value={form.name}
                 onChange={handleChange('name')}
                 required
+                placeholder="Enter shop name"
+                aria-label="Shop Name"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
             </div>
@@ -140,6 +142,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
                 value={form.code}
                 onChange={handleChange('code')}
                 required
+                placeholder="Enter shop code"
+                aria-label="Shop Code"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
             </div>
@@ -151,6 +155,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
               value={form.address}
               onChange={handleChange('address')}
               rows={2}
+              placeholder="Enter shop address"
+              aria-label="Shop Address"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
@@ -162,6 +168,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
                 type="text"
                 value={form.city}
                 onChange={handleChange('city')}
+                placeholder="Enter city"
+                aria-label="City"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
             </div>
@@ -171,6 +179,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
                 type="text"
                 value={form.district}
                 onChange={handleChange('district')}
+                placeholder="Enter district"
+                aria-label="District"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
             </div>
@@ -182,6 +192,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
               type="tel"
               value={form.contactNumber}
               onChange={handleChange('contactNumber')}
+              placeholder="+94 xx xxx xxxx"
+              aria-label="Contact Number"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
@@ -192,6 +204,7 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
               value={form.operatorId}
               onChange={handleChange('operatorId')}
               required
+              aria-label="Assigned Operator"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             >
               <option value="">Select operator</option>
@@ -208,6 +221,7 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
             <select
               value={form.status}
               onChange={handleChange('status')}
+              aria-label="Shop Status"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             >
               <option value="active">Active</option>
@@ -222,6 +236,8 @@ export default function EditShopModal({ shop, operators, onCancel, onSave }: Edi
               value={form.notes}
               onChange={handleChange('notes')}
               rows={3}
+              placeholder="Enter additional notes"
+              aria-label="Notes"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>

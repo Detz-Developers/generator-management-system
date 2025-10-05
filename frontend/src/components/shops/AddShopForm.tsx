@@ -158,6 +158,7 @@ export default function AddShopForm({ operators, onCancel, onCreate, onSuccess }
               value={form.operatorId}
               onChange={handleChange('operatorId')}
               required
+              aria-label="Assigned Operator"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             >
               <option value="">Select operator</option>
@@ -177,6 +178,7 @@ export default function AddShopForm({ operators, onCancel, onCreate, onSuccess }
             <select
               value={form.status}
               onChange={handleChange('status')}
+              aria-label="Shop Status"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             >
               <option value="active">Active</option>
