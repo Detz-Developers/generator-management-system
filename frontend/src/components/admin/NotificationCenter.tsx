@@ -136,10 +136,13 @@ export default function NotificationCenter() {
           {/* Left Sidebar */}
           <div className="w-64 bg-white rounded-lg shadow-sm border border-blue-200 p-6 h-fit">
             <h3 className="text-sm font-medium text-blue-700 mb-3">Filters</h3>
+            <label htmlFor="notification-filter" className="sr-only">Notification Filter</label>
             <select
+              id="notification-filter"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="w-full p-3 border border-blue-300 rounded-lg text-sm bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 cursor-pointer pr-10"
+              aria-label="Notification Filter"
             >
               <option value="all">All Notifications</option>
               <option value="unread">Unread Only</option>
